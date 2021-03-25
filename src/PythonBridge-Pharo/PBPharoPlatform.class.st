@@ -48,10 +48,11 @@ PBPharoPlatform >> copyApplicationTo: appFolder application: application [
 	"Copy the runtime directory"
 	cpCommand := String streamContents: [ :stream |
 		stream
-			<< 'cp -a ';
+			<< 'cp -a "';
 			<< srcDir fullName;
-			<< ' ';
-			<< appFolder fullName ].
+			<< '" "';
+			<< appFolder fullName;
+			<< '"' ].
 	proc := OSSUnixSubprocess new 
 		shellCommand: cpCommand;
 		runAndWait.
