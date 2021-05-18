@@ -10,7 +10,7 @@ BaselineOfPythonBridge >> baseline: spec [
 	spec for: #'common' do: [
 		spec 
 			baseline: 'OSSubprocess' with: [
-				spec repository: 'github://feenkcom/OSSubprocess:v1.1.8/repository' ];
+				spec repository: 'github://feenkcom/OSSubprocess:v1.1.10/repository' ];
 			baseline: 'Python3Generator' with: [
 				spec repository: 'github://juliendelplanque/Python3Generator:v2.0.0/repository' ];
 			baseline: 'NeoJSON' with: [
