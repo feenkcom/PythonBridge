@@ -1,6 +1,9 @@
 Class {
 	#name : #PBPharoPlatform,
 	#superclass : #PBPlatform,
+	#classVars : [
+		'RuntimeSourceDirectory'
+	],
 	#category : #'PythonBridge-Pharo-Platform'
 }
 
@@ -17,6 +20,21 @@ PBPharoPlatform class >> pipenvProcessClass [
 { #category : #accessing }
 PBPharoPlatform class >> priority [
 	^ 10
+]
+
+{ #category : #accessing }
+PBPharoPlatform class >> runtimeSourceDirectory [
+	<return: #FileReference>
+
+	^ RuntimeSourceDirectory
+]
+
+{ #category : #accessing }
+PBPharoPlatform class >> runtimeSourceDirectory: aFileReference [
+	"Set the directory the contains the runtime files.
+	nil = not specified"
+
+	RuntimeSourceDirectory := aFileReference asFileReference
 ]
 
 { #category : #hooks }
@@ -37,17 +55,14 @@ PBPharoPlatform class >> weakRegistryClass [
 { #category : #private }
 PBPharoPlatform >> copyApplicationTo: appFolder application: application [
 	"Copy the PythonBridge runtime environment to the specified folder"
-	| srcDir cpCommand proc pbSymLink srcFilename dstFilename |
+	| srcDir cpCommand proc srcFilename dstFilename |
 
-	srcDir := FileLocator imageDirectory / 'PythonBridge'.
-	(srcDir exists and: [ srcDir ~= appFolder ]) ifFalse: 
-		[ srcDir := self folderForApplication: application ].
-	srcDir exists ifFalse: 
-		[ self error: 'Unable to locate PythonBridge runtime files' ].
+	srcDir := self runtimeSourceDirectoryFor: application.
+	srcDir resolve = appFolder resolve ifTrue: [ ^ self ].
 
 	"Copy the runtime directory"
-	srcFilename := srcDir fullName copyReplaceAll: '"' with: '\"'.
-	dstFilename := appFolder fullName copyReplaceAll: '"' with: '\"'.
+	srcFilename := srcDir resolve fullName copyReplaceAll: '"' with: '\"'.
+	dstFilename := appFolder resolve fullName copyReplaceAll: '"' with: '\"'.
 	cpCommand := String streamContents: [ :stream |
 		stream
 			<< 'cp -a "';
@@ -60,26 +75,7 @@ PBPharoPlatform >> copyApplicationTo: appFolder application: application [
 		runAndWait.
 	proc isSuccess ifFalse:
 		[ self error: 'Unable to install PythonBridge runtime' ].
-	"Remove the existing symlink, which probably points to the source folder.
-	FileReference>>delete doesn't handle symbolic links, so use the lower layer"
-	pbSymLink := (appFolder / 'PythonBridge') resolve.
-	pbSymLink exists ifTrue: 
-		[ pbSymLink isSymlink 
-			ifTrue: [ self removeFile: pbSymLink ]
-			ifFalse: [ self error: 'PythonBridge should be a symbolic link' ] ].
 
-]
-
-{ #category : #'private - symlinks' }
-PBPharoPlatform >> createSymlinkFor: originalFile on: targetFile [
-	OSSUnixSubprocess new
-				command: '/bin/ln';
-				arguments: (Array 
-									with: '-s' 
-									with: originalFile asFileReference fullName 
-									with: targetFile asFileReference fullName);
-				terminateOnShutdown;
-				runAndWaitOnExitDo: [ :command | ^ self ].
 ]
 
 { #category : #'message broker strategy' }
@@ -94,7 +90,7 @@ PBPharoPlatform >> ensureApplicationDirectory: application [
 	appFolder := application workingDirectory.
 	(appFolder / 'PythonBridge') exists ifTrue: [ ^ self ].
 	self copyApplicationTo: appFolder application: application.
-	self ensurePBridge: (self folderForApplication: application class baseApplication) symlinkIn: appFolder.
+
 ]
 
 { #category : #private }
@@ -102,32 +98,6 @@ PBPharoPlatform >> ensureEnvironmentForApp: anApplication [
 
 	self ensureApplicationDirectory: anApplication.
 	self installEnvironmentForApp: anApplication.
-]
-
-{ #category : #'private - symlinks' }
-PBPharoPlatform >> ensureFolderSymlinkFor: aFolder [
-	| symlinkRef |
-	symlinkRef := aFolder basename asFileReference.
-	symlinkRef exists ifFalse: [ 
-		self createSymlinkFor: aFolder on: symlinkRef ]
-]
-
-{ #category : #'private - symlinks' }
-PBPharoPlatform >> ensurePBridge: pbridgeFolder symlinkIn: aFolder [
-	| symlinkRef |
-	symlinkRef := aFolder / 'PythonBridge'.
-	symlinkRef exists ifFalse: [ 
-		self createSymlinkFor: aFolder on: symlinkRef ].
-]
-
-{ #category : #utils }
-PBPharoPlatform >> folderForApplication: application [
-	^ (IceRepository registry 
-			detect: [ :each | each includesPackageNamed: application class package name ] 
-			ifNone: [ 
-				self inform: 'Please add a clone of this project to Iceberg to access to the resources'.
-				"For travis!"
-				^ '.' asFileReference ]) location
 ]
 
 { #category : #utils }
@@ -173,25 +143,26 @@ PBPharoPlatform >> pipenvForApplication: application [
 		[ self class pipenvProcessClass pipenvPath ]
 ]
 
-{ #category : #'private - symlinks' }
-PBPharoPlatform >> removeFile: aFileReference [
-	"Use the OS rm command to remove the specified file.
-	Required since the file system primitive doesn't seem to handle symbolic links"
-	| proc |
+{ #category : #utils }
+PBPharoPlatform >> runtimeSourceDirectoryFor: aPBApplication [
+	"Answer the source directory containing the runtime files.
+	This is the first of:
+	1. RuntimeSourceDirectory (if specified)
+	2. The git repository copy.
+	3. An existing copy in the image directory"
+	| fileReference |
 
-	proc := OSSUnixSubprocess new
-		command: 'rm';
-		arguments: { aFileReference fullName };
-		runAndWait.
-	proc isSuccess ifFalse: 
-		[ self error: 'Unable to remove: ', aFileReference fullName ]
-]
-
-{ #category : #accessing }
-PBPharoPlatform >> runtimeFolder [
-	"Answer the directory where the PythonBridge runtime files are located"
-
-	^ FileLocator imageDirectory / 'PythonBridge'
+	(RuntimeSourceDirectory isNotNil and: [ RuntimeSourceDirectory exists ]) ifTrue: 
+		[ ^ RuntimeSourceDirectory ].
+	IceRepository registry 
+			detect: [ :each | each includesPackageNamed: aPBApplication class package name ] 
+			ifFound: [ :repository | 
+					fileReference := repository location / 'PythonBridgeRuntime'.
+					fileReference exists ifTrue: [ ^ fileReference ] ]
+			ifNone: [ ].
+	fileReference := FileLocator imageDirectory / 'PythonBridgeRuntime'.
+	fileReference exists ifTrue: [ ^ fileReference ].
+	self error: 'Unable to locate PythonBridge runtime source'.
 ]
 
 { #category : #private }
