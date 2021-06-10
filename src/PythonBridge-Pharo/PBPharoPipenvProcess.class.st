@@ -147,19 +147,25 @@ PBPharoPipenvProcess >> isRunning [
 PBPharoPipenvProcess >> newProcess [
 	| newProcess |
 
-	newProcess := OSSUnixSubprocess new
+	newProcess := GtUnixSubprocess new
 				command: (self settings pipenvPath ifNil:
 					[ self class pipenvPath ]) fullName;
 				arguments: self processArguments;
 				workingDirectory: self workingDirectory fullName;
 				addAllEnvVariablesFromParentWithoutOverride;
-				"redirectStdout;
-				redirectStderr;"
 				terminateOnShutdown;
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
 		newProcess environmentAt: assoc key put: assoc value ].
 	^ newProcess
+]
+
+{ #category : #accessing }
+PBPharoPipenvProcess >> pipenvPath [ 
+	"Answer the default pipenvPath.
+	This may be overridden by the application settings."
+
+	^ self class pipenvPath
 ]
 
 { #category : #accessing }
@@ -225,6 +231,20 @@ PBPharoPipenvProcess >> startServerDebugger [
 		when: DAPThreadStateChanged 
 		do: [ :announcement | self debuggerStateChangedAction: announcement ].
 
+]
+
+{ #category : #accessing }
+PBPharoPipenvProcess >> stderr [
+	"Answer the process stderr contents"
+
+	^ process stderr
+]
+
+{ #category : #accessing }
+PBPharoPipenvProcess >> stdout [ 
+	"Answer the process stdout contents"
+
+	^ process stdout
 ]
 
 { #category : #'start-stop' }

@@ -158,7 +158,8 @@ PBApplication >> communicationHandler [
 { #category : #accessing }
 PBApplication >> errorMessage [
 	"Fetch the error message from the stderr stream, from the processhander"
-	^ processHandler errorMessage
+
+	^ self pythonServerStatus
 ]
 
 { #category : #accessing }
@@ -241,6 +242,13 @@ PBApplication >> notifyDebuggerPaused: aDebugger [
 ]
 
 { #category : #accessing }
+PBApplication >> pipenvPath [ 
+	"Answer the pipenvPath to be used for this application"
+
+	^ settings pipenvPath ifNil: [ processHandler pipenvPath ]
+]
+
+{ #category : #accessing }
 PBApplication >> postInitialization [
 	
 ]
@@ -248,6 +256,35 @@ PBApplication >> postInitialization [
 { #category : #accessing }
 PBApplication >> processHandler [
 	^ processHandler
+]
+
+{ #category : #'start-stop' }
+PBApplication >> pythonServerStatus [
+	"Answer a string describing the environment and server status.
+	Mostly for problem solving."
+
+	^ String streamContents: [ :stream |
+		self pythonServerStatusOn: stream process: processHandler ]
+]
+
+{ #category : #'start-stop' }
+PBApplication >> pythonServerStatusOn: aStream process: process [
+	"Write the environment and server status on the supplied stream.
+	Mostly for problem solving."
+
+	aStream
+		<< 'pipenv:            ';
+			<< self pipenvPath fullName; cr;
+		<< 'working directory: ';
+			<< self workingDirectory fullName; cr;
+		<< 'server running:    ';
+			print: process isRunning; cr;
+		cr; cr;
+		<< 'Stdout:'; cr;
+			<< process stdout; cr;
+		cr; cr;
+		<< 'Stderr:'; cr;
+			<< process stderr.
 ]
 
 { #category : #utils }
@@ -294,11 +331,17 @@ PBApplication >> stop [
 { #category : #private }
 PBApplication >> waitInitialization [
 	"Timeout of 10 seconds and try every 0.5 seconds"
+	| error |
+
 	1 to: 10 by: 0.5 do: [ :t |
 		self isPythonReady 
 				ifTrue: [ ^ self ]
 				ifFalse: [ (Delay forMilliseconds: 500) wait ] ].
-	Error signal: 'Python application initialization failed! You should try to manually install the Pipenv environment. Have a look at the section "Manually creating Pipenv environment" in https://objectprofile.github.io/PythonBridge/pages/pharo-installation'.
+	"Store the error in a temporary variable since the debugger sometimes hides the parent stack frames."
+	error := PBPythonProcessError new
+		messageText: 'Python application initialization failed!';
+		application: self.
+	error signal.
 	"
 	Print the result of executing the following line:
 	
