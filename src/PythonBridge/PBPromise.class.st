@@ -19,6 +19,15 @@ PBPromise class >> id: id [
 ]
 
 { #category : #accessing }
+PBPromise >> exception [
+	"Answer the receiver's exception"
+
+	(value isKindOf: Exception) ifFalse:
+		[ self error: 'Promise isn''t broken' ].
+	^ value
+]
+
+{ #category : #accessing }
 PBPromise >> id [
 	^ id
 ]
@@ -81,7 +90,7 @@ PBPromise >> value [
 PBPromise >> waitForValue [
 	"Wait for the server to supply the result and answer it.
 	If the value is an exception, the issue may be resolved and the promise flagged to wait for the new value to come through (waitAgain)."
-	<dapDebuggerSignal>
+	<remoteDebuggerSignal>
 
 	[ waitAgain := false.
 	self isSignaled ifFalse: [ semaphore wait ].
