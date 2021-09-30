@@ -398,6 +398,18 @@ PBApplication >> start [
 	self newCommandFactory send.
 ]
 
+{ #category : #accessing }
+PBApplication >> stderr [
+
+	^ processHandler stderr
+]
+
+{ #category : #accessing }
+PBApplication >> stdout [
+
+	^ processHandler stdout
+]
+
 { #category : #'start-stop' }
 PBApplication >> stop [
 	self handlers select: #notNil thenDo: #stop

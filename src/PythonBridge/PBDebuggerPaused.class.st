@@ -24,6 +24,15 @@ PBDebuggerPaused >> defaultAction [
 	^ UnhandledError signalForException: self
 ]
 
+{ #category : #testing }
+PBDebuggerPaused >> isPaused [
+	"Answer a boolean indicating whether the receiver represents an exception that can be debugged / continued.
+	Only PBDebuggerPaused can be continued"
+
+	^ true
+
+]
+
 { #category : #initialization }
 PBDebuggerPaused >> setWaitAgain [
 	"Flag the receiver's promise that it should wait for another value"
