@@ -44,15 +44,17 @@ PBPharoPipenvProcess class >> reset [
 
 { #category : #initialization }
 PBPharoPipenvProcess class >> resolvePipenvPath [
-	| path |
+	| path process |
 
-	(OSSUnixSubprocess new
-				command: '/usr/bin/which';
-				arguments: (Array with: 'pipenv');
-				addAllEnvVariablesFromParentWithoutOverride;
-				redirectStdout;
-				terminateOnShutdown;
-				runAndWaitOnExitDo: [ :command :outString | path := outString trim ]).
+	process := GtSubprocessWithInMemoryOutput new
+		command: '/usr/bin/which';
+		arguments: #('pipenv');
+		addAllEnvVariablesFromParentWithoutOverride;
+		terminateOnShutdown;
+		runAndWait.
+	(#(0 1) includes: process exitCode) ifFalse:
+		[ self error: 'Unable to determine pipenv path' ].
+	path := process stdout trimBoth.
 	path ifEmpty: [ self signalPipenvNotFound ].
 	^ path asFileReference
 ]
@@ -113,34 +115,25 @@ PBPharoPipenvProcess >> initialize [
 	self setDefaultEnvironmentVariables
 ]
 
-{ #category : #utils }
+{ #category : #utilities }
 PBPharoPipenvProcess >> installModule: aString in: aPBApplication [
 	"Install the supplied module using `pipenv run pip install aString`"
-	| pipenvPath proc arguments stdoutStream stderrStream |
+	| pipenvPath proc arguments |
 
 	pipenvPath := aPBApplication settings pipenvPath ifNil: [ self class pipenvPath ].
 	arguments := { 'run'. 'pip'. 'install'. aString. }.
-	stdoutStream := String new writeStream.
-	stderrStream := String new writeStream.
-	proc := OSSUnixSubprocess new
+	proc := GtSubprocessWithInMemoryOutput new
 		command: pipenvPath fullName;
 		arguments: arguments;
 		workingDirectory: aPBApplication workingDirectory fullName;
 		addAllEnvVariablesFromParentWithoutOverride;
+		errorBlock: [ self error: 'Unable to install module: ', aString asString ];
 		terminateOnShutdown;
-		redirectStdout;
-		redirectStderr;
 		yourself.
 	environmentVariables associationsDo: [ :assoc |
 		proc environmentAt: assoc key put: assoc value ].
-	proc run.
-	proc
-		waitForExitPollingEvery: (Delay forMilliseconds: 500)
-		doing: [ :aProcess :outStream :errStream | 
-			stdoutStream nextPutAll: outStream upToEnd.
-			stderrStream nextPutAll: errStream upToEnd ].
-	proc isSuccess ifFalse:
-		[ self error: 'Unable to install module: ', aString asString ].
+	proc runAndWait.
+
 ]
 
 { #category : #testing }
@@ -154,13 +147,14 @@ PBPharoPipenvProcess >> isRunning [
 PBPharoPipenvProcess >> newProcess [
 	| newProcess |
 
-	newProcess := PBUnixSubprocess new
+	newProcess := GtSubprocessWithInMemoryOutput new
 				command: (self settings pipenvPath ifNil:
 					[ self class pipenvPath ]) fullName;
 				arguments: self processArguments;
 				workingDirectory: self workingDirectory fullName;
 				addAllEnvVariablesFromParentWithoutOverride;
 				terminateOnShutdown;
+				errorBlock: [ self error: 'Pharo server process failed unexpectedly' ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
 		newProcess environmentAt: assoc key put: assoc value ].
