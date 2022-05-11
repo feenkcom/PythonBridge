@@ -37,6 +37,15 @@ PBProxyObject >> applicationClass [
 	^ self application class
 ]
 
+{ #category : #converting }
+PBProxyObject >> asJsonDictionary [
+	"Answer the receiver as a Dictionary"
+
+	^ { 
+		#__pyclass__ -> pythonClass.
+		#__pyid__ -> pythonVariable name } asDictionary.
+]
+
 { #category : #hooks }
 PBProxyObject >> createObject [
 	self shouldNotImplement

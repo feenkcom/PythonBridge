@@ -61,6 +61,15 @@ class Registry():
         del self.idToObjMap[objId]
         del self.objToIdMap[id(obj)]
 
+    def isProxy(self, anObject):
+        is_proxy = False
+
+        if isinstance(anObject, dict):
+            if len(anObject.keys()) == 2 and ('__pyclass__' in anObject) and ('__pyid__' in anObject):
+                is_proxy = True
+
+        return is_proxy
+
 class RegistryError(Exception):
     pass
 
