@@ -13,7 +13,7 @@ def pbbreak():
 
 class EvalCommand:
 	statements = ""
-	binding = {}
+	bindings = {}
 	commandId = 0
 
 	def __init__(self, commandId, statements, bindings):
@@ -36,7 +36,10 @@ class EvalCommand:
 			bridge_globals.globalCommandList.drop_queue()
 		if actionSymbol == "REPLACE_COMMAND":
 			commandDict = actionDict["command"]
-			bridge_globals.globalCommandList.push_command_at_first(EvalCommand(commandDict["commandId"], commandDict["statements"], commandDict["bindings"]))
+			bridge_globals.globalCommandList.push_command_at_first(EvalCommand(
+				commandDict["commandId"], 
+				commandDict["statements"], 
+				commandDict["bindings"]))
 		 
 	def command_id(self):
 		return self.commandId
@@ -111,7 +114,11 @@ def clean_locals_env():
 	return locals()
 
 def deserialize(text):
-	return bridge_globals.msg_service.serializer.deserialize(text)
+	result = bridge_globals.msg_service.serializer.deserialize(text)
+	bridge_globals.logger.log("DESERIALISE (bridge): " + str(result))
+	if registry().isProxy(result):
+		result = registry().resolve(result['__pyid__'])
+	return result
 
 def enqueue_command(data):
 	bridge_globals.globalCommandList.push_command(EvalCommand(
@@ -159,6 +166,7 @@ def run_bridge():
 	while True:
 		command = globalCommandList.consume_command()
 		bridge_globals.logger.log("PYTHON: Executing command " + command.command_id())
+		bridge_globals.logger.log("PYTHON: bindings: " + str(command.bindings))
 		bridge_globals.logger.log("PYTHON: " + command.statements)
 		command.execute_using_env(env)
 		bridge_globals.logger.log("PYTHON: Finished command execution")
