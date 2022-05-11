@@ -154,7 +154,8 @@ PBPharoPipenvProcess >> newProcess [
 				workingDirectory: self workingDirectory fullName;
 				addAllEnvVariablesFromParentWithoutOverride;
 				terminateOnShutdown;
-				errorBlock: [ self error: 'Pharo server process failed unexpectedly' ];
+				errorBlock: [ :proc :timedOut | 
+					self error: 'Pharo server process failed unexpectedly' ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
 		newProcess environmentAt: assoc key put: assoc value ].

@@ -22,5 +22,7 @@ PBSerializer class >> serialize: anObject [
 
 { #category : #api }
 PBSerializer >> serialize: anObject [
-	^ serializerWrapper serialize: anObject
+	^ serializerWrapper serialize: ((anObject isKindOf: PBProxyObject) 
+		ifTrue: [ anObject asJsonDictionary ]
+		ifFalse: [ anObject ])
 ]
