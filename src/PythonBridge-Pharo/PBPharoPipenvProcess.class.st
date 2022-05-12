@@ -155,7 +155,10 @@ PBPharoPipenvProcess >> newProcess [
 				addAllEnvVariablesFromParentWithoutOverride;
 				terminateOnShutdown;
 				errorBlock: [ :proc :timedOut | 
-					self error: 'Pharo server process failed unexpectedly' ];
+					"Don't signal an error if the process was externally killed, e.g. 'kill <pid>', since this is a normal part of the tests.
+					If it was externally killed there isn't an exit code"
+					proc exitStatusInterpreter hasCode ifTrue:
+						[ self error: 'Pharo server process failed unexpectedly' ] ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
 		newProcess environmentAt: assoc key put: assoc value ].
