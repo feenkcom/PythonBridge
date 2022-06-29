@@ -19,7 +19,7 @@ BaselineOfPythonBridge >> baseline: spec [
 				spec repository: 'github://svenvc/NeoJSON:v17/repository' ].
 		spec
 			baseline: 'MessagePack' with: [
-				spec repository: 'github://feenkcom/msgpack-smalltalk:v1.3.3/repository' ].
+				spec repository: 'github://feenkcom/msgpack-smalltalk:v1.3.4/repository' ].
 
 		spec package: 'PythonBridge' with: [
 			spec requires: #('OSSubprocess' 'Python3Generator') ].
