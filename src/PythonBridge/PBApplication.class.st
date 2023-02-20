@@ -370,7 +370,7 @@ PBApplication >> serverStatusOn: aStream process: process [
 	process isRunning ifFalse: 
 		[ aStream
 			<< 'exit status:       ';
-				print: process exitStatusInterpreter exitStatus; cr ].
+				print: process exitCode; cr ].
 	aStream
 		cr; cr;
 		<< 'Stdout:'; cr;
