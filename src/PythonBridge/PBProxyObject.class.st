@@ -12,7 +12,7 @@ Class {
 PBProxyObject class >> pythonClass: pythonClass pythonVar: pyVar application: application [
 	| proxyClass |
 
-	proxyClass := self subclasses
+	proxyClass := self allSubclasses
 		detect: [ :each | each pythonClass = pythonClass ]
 		ifNone: [ self ].
 	^ proxyClass new
