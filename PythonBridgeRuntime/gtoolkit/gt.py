@@ -8,11 +8,8 @@ class GtViewedObject:
 	def getObject(self):
 		return self.object
 	
-	def getMethodNames(self):
-		return filter(lambda each: not callable(getattr(self.object, each)), dir(self.object))
-	
 	def getGtViewMethodNames(self):
-		return list(filter(lambda each: each.startswith("gtView"),self.getMethodNames())) + ["gtViewRaw", "gtViewPrint"]
+		return list(filter(lambda each: not callable(getattr(self.object, each)),filter(lambda each: each.startswith("gtView"),dir(self.object)))) + ["gtViewRaw", "gtViewPrint"]
 
 	def getView(self, viewName):
 		if (viewName in self.views):
@@ -33,7 +30,7 @@ class GtViewedObject:
 		return exportData
 
 	def attributesFor(self, anObject):
-		return list(map(lambda each: [each, getattr(anObject, each)], dir(anObject)))
+		return list(map(lambda each: [each, getattr(anObject, each, "")], dir(anObject)))
 
 	def gtViewRaw(self, aBuilder):
 		return aBuilder.columnedList()\
