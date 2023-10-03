@@ -24,7 +24,7 @@ class EvalCommand:
 	def execute_using_env(self, env):
 		try:
 			env.update(self.bindings)
-			exec(self.statements, globals(), env)
+			exec(self.statements, env)
 		except Exception as err:
 			self.perform_proceed_action(notify_error(err,self))
 
@@ -109,10 +109,6 @@ class PythonCommandList:
 		self.listLock.release()
 		return listCopy
 
-#### UTILS FUNCTIONS
-def clean_locals_env():
-	return locals()
-
 def deserialize(text):
 	result = bridge_globals.msg_service.serializer.deserialize(text)
 	bridge_globals.logger.log("DESERIALISE (bridge): " + str(result))
@@ -146,7 +142,7 @@ def run_bridge():
 	bridge_globals.pyPort = args["port"]
 	bridge_globals.globalCommandList = PythonCommandList()
 	globalCommandList = bridge_globals.globalCommandList
-	env = clean_locals_env()
+	env = dict(globals())
 	msg_service = None 
 	if args["port"] == None:
 		args["port"] = '0'
