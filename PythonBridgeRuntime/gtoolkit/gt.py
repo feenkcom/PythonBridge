@@ -9,7 +9,7 @@ class GtViewedObject:
 		return self.object
 	
 	def getGtViewMethodNames(self):
-		return list(filter(lambda each: not callable(getattr(self.object, each)),filter(lambda each: each.startswith("gtView"),dir(self.object)))) + ["gtViewRaw", "gtViewPrint"]
+		return list(filter(lambda each: callable(getattr(self.object, each)),filter(lambda each: each.startswith("gtView"),dir(self.object)))) + ["gtViewRaw", "gtViewPrint"]
 
 	def getView(self, viewName):
 		if (viewName in self.views):
