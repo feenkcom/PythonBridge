@@ -1,5 +1,6 @@
 from .view_list import ListView
 from .view_columnedlist import ColumnedListView
+from .view_columnedtree import ColumnedTreeView
 from .view_texteditor import TextEditorView
 
 class ViewBuilder:
@@ -11,3 +12,6 @@ class ViewBuilder:
 	
 	def columnedList(self):
 		return ColumnedListView()
+	
+	def columnedTree(self):
+		return ColumnedTreeView()

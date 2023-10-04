@@ -1,22 +1,10 @@
 from .view import View
 from .data_source import GtPhlowColumnedListDataSource
-
-class ListColumn:
-	def __init__(self, title, formatCallback, width):
-		self.title = title
-		self.formatCallback = formatCallback
-		self.width = width
-
-	def getTitle(self):
-		return self.title
-	
-	def formatItem(self, item):
-		return self.formatCallback(item)
-
+from .column import ListColumn
 
 class ColumnedListView(View):
 	def __init__(self):
-		View.__init__(self)
+		super().__init__()
 		self.itemsCallback = lambda : []
 		self.columns = []
 		self.accessor = None
