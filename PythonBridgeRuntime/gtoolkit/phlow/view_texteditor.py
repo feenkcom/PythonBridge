@@ -2,7 +2,7 @@ from .view import View
 
 class TextEditorView(View):
 	def __init__(self):
-		View.__init__(self)
+		super().__init__()
 		self.string = ""
 
 	def setString(self, aString):

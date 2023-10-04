@@ -58,7 +58,7 @@ class GtPhlowListingDataSource:
 			self.values = list(self.computation())
 		result = []
 		for i in range(startIndex - 1, min(len(self.values), startIndex + count)):
-			result.append({"nodeValue": self.rowValue(i).asDictionaryForExport()})
+			result.append({"nodeValue": self.rowValue(i).asDictionaryForExport(), "nodeId": i})
 		return result
 
 	def retriveSentItemAt(self, index):
@@ -94,4 +94,36 @@ class GtPhlowColumnedListDataSource(GtPhlowListingDataSource):
 			row = self.values[i]
 		except Exception as ex:
 			return GtPhlowRowValue(list(map(lambda each: GtPhlowItemErrorValue(str(ex)), self.columns)))
+		return self.rowValueOfRow(row)
+
+	def rowValueOfRow(self, row):
 		return GtPhlowRowValue(list(map(lambda each : self.getCellValue(row, each), self.columns)))
+
+class GtPhlowColumnedTreeDataSource(GtPhlowColumnedListDataSource):
+	def __init__(self, computation, columns, children, accessor):
+		super().__init__(computation, columns, accessor)
+		self.children = children
+
+	def nodeForPath(self, path):
+		current = self.values[path[0]]
+		index = 1
+		while (current != None and index < len(path)):
+			current = list(self.children(current))[path[index]]
+			index+=1
+		return current
+
+	def retriveSentItemAtPath(self, path):
+		node = self.nodeForPath(path)
+		if (self.accessor != None):
+			return self.accessor(node)
+		return node
+
+	def retrieveChildrenForNodeAtPath(self, path):
+		result = []
+		current = self.nodeForPath(path)
+		nodes = list(self.children(current))
+		for i in range(0, len(nodes)):
+			result.append({"nodeValue": self.rowValueOfRow(nodes[i]).asDictionaryForExport(), "nodeId": i})
+		return result
+
+

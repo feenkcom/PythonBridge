@@ -3,7 +3,7 @@ from .data_source import GtPhlowListDataSource
 
 class ListView(View):
 	def __init__(self):
-		View.__init__(self)
+		super().__init__()
 		self.itemsCallback = lambda : []
 		self.itemsFormatCallback = lambda item: str(item)
 		self.accessor = None
