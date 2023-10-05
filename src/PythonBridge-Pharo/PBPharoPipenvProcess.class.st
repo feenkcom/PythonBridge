@@ -45,16 +45,16 @@ PBPharoPipenvProcess class >> reset [
 { #category : #initialization }
 PBPharoPipenvProcess class >> resolvePipenvPath [
 	| path process |
-
 	process := GtSubprocessWithInMemoryOutput new
-		command: '/usr/bin/which';
-		arguments: #('pipenv');
-		addAllEnvVariablesFromParentWithoutOverride;
-		terminateOnShutdown;
-		runAndWait.
-	(#(0 1) includes: process exitCode) ifFalse:
-		[ self error: 'Unable to determine pipenv path' ].
+			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ '/usr/bin/which' ]);
+			arguments: #('pipenv');
+			addAllEnvVariablesFromParentWithoutOverride;
+			terminateOnShutdown;
+			runAndWait.
+	(#(0 1) includes: process exitCode)
+		ifFalse: [ self error: 'Unable to determine pipenv path' ].
 	path := process stdout trimBoth.
+	Smalltalk os isWindows ifTrue: [ path := path lines first trimBoth ].
 	path ifEmpty: [ self signalPipenvNotFound ].
 	^ path asFileReference
 ]
