@@ -66,6 +66,9 @@ class GtPhlowListingDataSource:
 			return self.accessor(index)
 		return self.values[index - 1]
 
+	def flushItemsIterator(self):
+		self.values = None
+
 class GtPhlowListDataSource(GtPhlowListingDataSource):
 	def __init__(self, computation, formatCallback, accessor):
 		super().__init__(computation, accessor)
