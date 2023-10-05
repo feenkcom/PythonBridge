@@ -55,31 +55,12 @@ PBPharoPlatform class >> weakRegistryClass [
 { #category : #private }
 PBPharoPlatform >> copyApplicationTo: appFolder application: application [
 	"Copy the PythonBridge runtime environment to the specified folder"
-	| srcDir cpCommand proc srcFilename dstFilename error |
 
+	| srcDir |
 	srcDir := self runtimeSourceDirectoryFor: application.
 	srcDir resolve = appFolder resolve ifTrue: [ ^ self ].
 
-	"Copy the runtime directory"
-	srcFilename := srcDir resolve fullName copyReplaceAll: '"' with: '\"'.
-	dstFilename := appFolder resolve fullName copyReplaceAll: '"' with: '\"'.
-	cpCommand := String streamContents: [ :stream |
-		stream
-			<< 'cp -a "';
-			<< srcFilename;
-			<< '" "';
-			<< dstFilename;
-			<< '"' ].
-	proc := GtSubprocessWithInMemoryOutput new 
-		shellCommand: cpCommand;
-		runAndWait.
-	proc isSuccess ifFalse:
-		[ error := PBPythonProcessError new
-			messageText: 'Unable to install PythonBridge runtime';
-			application: application;
-			process: proc.
-		error signal ].
-
+	srcDir resolve copyAllTo: appFolder resolve
 ]
 
 { #category : #'message broker strategy' }
@@ -111,23 +92,34 @@ PBPharoPlatform >> ensureEnvironmentForApp: anApplication [
 { #category : #utils }
 PBPharoPlatform >> forceInstallEnvironmentForApp: application [
 	| proc pipenvPath |
-
 	pipenvPath := application pipenvPath.
-	self assert: pipenvPath exists description: 'pipenv is apparently not accessible at a standard location. Please, have a look at the Troubleshooting section of https://objectprofile.github.io/PythonBridge/pages/pharo-installation'.
-	proc := GtSubprocessWithInMemoryOutput new
-				command: '/bin/bash';
-				workingDirectory: application workingDirectory fullName;
-				addAllEnvVariablesFromParentWithoutOverride.
-	proc
-		environmentAt: 'PATH'
-		put: pipenvPath parent fullName,
-				':', (proc envVariables at: 'PATH').
-	proc
-		arguments: (Array 
-			with: (application workingDirectory / 'install_env.sh') fullName);
-		terminateOnShutdown;
-		runAndWait.
-	proc isSuccess ifFalse: [ self signalPipenvCreateEnvFailed: application process: proc ].
+	self
+		assert: pipenvPath exists
+		description: 'pipenv is apparently not accessible at a standard location. Please, have a look at the Troubleshooting section of https://objectprofile.github.io/PythonBridge/pages/pharo-installation'.
+	Smalltalk os isWindows
+		ifTrue: [ proc := GtSubprocessWithInMemoryOutput new
+					command: 'cmd';
+					workingDirectory: application workingDirectory fullName;
+					addAllEnvVariablesFromParentWithoutOverride.
+			proc
+				environmentAt: 'Path'
+					put: pipenvPath parent fullName , ';' , (proc envVariables at: 'Path');
+				arguments: {'/c'.
+						(application workingDirectory / 'windows_install_env.bat') fullName};
+				terminateOnShutdown;
+				runAndWait ]
+		ifFalse: [ proc := GtSubprocessWithInMemoryOutput new
+					command: '/bin/bash';
+					workingDirectory: application workingDirectory fullName;
+					addAllEnvVariablesFromParentWithoutOverride.
+			proc
+				environmentAt: 'PATH'
+					put: pipenvPath parent fullName , ':' , (proc envVariables at: 'PATH');
+				arguments: (Array with: (application workingDirectory / 'install_env.sh') fullName);
+				terminateOnShutdown;
+				runAndWait ].
+	proc isSuccess
+		ifFalse: [ self signalPipenvCreateEnvFailed: application process: proc ]
 ]
 
 { #category : #utils }
@@ -168,24 +160,25 @@ PBPharoPlatform >> runtimeSourceDirectoryFor: aPBApplication [
 { #category : #private }
 PBPharoPlatform >> setExecutableIn: appFolder application: application [
 	"Copy the PythonBridge runtime environment to the specified folder"
+
 	| chmodCommand proc error appFolderString |
-
+	Smalltalk os isWindows ifTrue: [ ^ self ].
 	appFolderString := appFolder resolve fullName copyReplaceAll: '"' with: '\"'.
-	chmodCommand := String streamContents: [ :stream |
-		stream
-			<< 'chmod +x "';
-			<< appFolderString;
-			<< '"/*.sh' ].
-	proc := GtSubprocessWithInMemoryOutput new 
-		shellCommand: chmodCommand;
-		runAndWait.
-	proc isSuccess ifFalse:
-		[ error := PBPythonProcessError new
-			messageText: 'Unable to set PythonBridge runtime executable bits';
-			application: application;
-			process: proc.
-		error signal ].
-
+	chmodCommand := String
+			streamContents: [ :stream | 
+				stream
+					<< 'chmod +x "';
+					<< appFolderString;
+					<< '"/*.sh' ].
+	proc := GtSubprocessWithInMemoryOutput new
+			shellCommand: chmodCommand;
+			runAndWait.
+	proc isSuccess
+		ifFalse: [ error := PBPythonProcessError new
+					messageText: 'Unable to set PythonBridge runtime executable bits';
+					application: application;
+					process: proc.
+			error signal ]
 ]
 
 { #category : #private }
