@@ -215,8 +215,8 @@ PBApplication >> gtStatusFor: aView [
 PBApplication >> handlers [
 	^ Array
 		with: loggingHandler
-		with: communicationHandler
 		with: processHandler
+		with: communicationHandler
 		with: executionHandler
 ]
 
