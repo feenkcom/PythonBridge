@@ -92,12 +92,12 @@ PBObject >> isCreated [
 ]
 
 { #category : #p3generator }
-PBObject >> isPythonGenerable [
+PBObject >> isLanguageLinkValue [
 	^ true
 ]
 
 { #category : #p3generator }
-PBObject >> isPythonValue [
+PBObject >> isPythonGenerable [
 	^ true
 ]
 

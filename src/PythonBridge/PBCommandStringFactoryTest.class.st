@@ -17,7 +17,7 @@ PBCommandStringFactoryTest >> testBuildEmptyCommand [
 	| command |
 	command := factory buildCommand.
 	self assert: command class equals: PBCommandString.
-	self assert: (command pythonCode trimLeft beginsWith: 'notify(None,').
+	self assert: (command codeForRemote trimLeft beginsWith: 'notify(None,').
 	self assert: command bindings isEmpty
 ]
 
@@ -28,7 +28,7 @@ PBCommandStringFactoryTest >> testBuildFullCommand [
 	factory script: 'foo'.
 	factory bindingAt: #myVar put: 3.
 	command := factory buildCommand.
-	self assert: command pythonCode lines first equals: 'foo'.
+	self assert: command codeForRemote lines first equals: 'foo'.
 	self assert: (command bindingsDictionary at: #myVar) equals: 3
 ]
 

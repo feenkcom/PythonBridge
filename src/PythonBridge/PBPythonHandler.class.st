@@ -1,6 +1,6 @@
 Class {
 	#name : #PBPythonHandler,
-	#superclass : #PBHandler,
+	#superclass : #LanguageLinkHandler,
 	#instVars : [
 		'process'
 	],

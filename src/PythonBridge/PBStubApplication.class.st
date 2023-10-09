@@ -11,5 +11,5 @@ PBStubApplication >> handlers [
 
 { #category : #initialization }
 PBStubApplication >> initializeHandlers [
-	loggingHandler := PBLoggingHandler application: self.
+	loggingHandler := LanguageLinkLoggingHandler application: self.
 ]

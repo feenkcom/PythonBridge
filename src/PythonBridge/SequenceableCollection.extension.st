@@ -4,8 +4,3 @@ Extension { #name : #SequenceableCollection }
 SequenceableCollection >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-SequenceableCollection >> isPythonValue [
-	^ true
-]

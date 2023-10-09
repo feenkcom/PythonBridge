@@ -1,6 +1,6 @@
 Extension { #name : #P3GStatement }
 
 { #category : #'*PythonBridge' }
-P3GStatement >> isPythonValue [
+P3GStatement >> isLanguageLinkValue [
 	^ false
 ]

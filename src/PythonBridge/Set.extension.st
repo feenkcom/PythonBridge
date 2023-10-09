@@ -4,8 +4,3 @@ Extension { #name : #Set }
 Set >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-Set >> isPythonValue [
-	^ true
-]
