@@ -42,7 +42,7 @@ PBApplication class >> killAll [
 	proc := GtSubprocessWithInMemoryOutput new command: (wd / 'killpbservers.sh') fullName.
 	proc runAndWait.
 	proc isSuccess ifFalse: 
-		[ error:= PBPythonProcessError new
+		[ error:= LanguageLinkProcessError new
 		application: firstApplication;
 		process: proc.
 		error signal ].

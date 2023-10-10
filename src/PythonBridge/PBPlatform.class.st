@@ -98,7 +98,8 @@ PBPlatform >> defaultSettings [
 	^ PBSettings new
 		pharoSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber);
 		pythonSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber+1);
-		debugSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber+2)
+		debugSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber+2);
+		workingDirectory:  FileLocator imageDirectory / PBApplication runtimeDirectory 
 ]
 
 { #category : #hooks }
