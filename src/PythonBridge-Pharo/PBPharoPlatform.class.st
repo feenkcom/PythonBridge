@@ -174,7 +174,7 @@ PBPharoPlatform >> setExecutableIn: appFolder application: application [
 			shellCommand: chmodCommand;
 			runAndWait.
 	proc isSuccess
-		ifFalse: [ error := PBPythonProcessError new
+		ifFalse: [ error := LanguageLinkProcessError new
 					messageText: 'Unable to set PythonBridge runtime executable bits';
 					application: application;
 					process: proc.
@@ -193,7 +193,7 @@ PBPharoPlatform >> signalPipenvCreateEnvFailed: application process: proc [
 	| error |
 
 	"Save the error in a temporary variable for access while debugging since the debugger hides the signal stack entries"
-	error := PBPythonProcessError new
+	error := LanguageLinkProcessError new
 		application: application;
 		process: proc.
 	error signal

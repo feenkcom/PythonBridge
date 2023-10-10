@@ -9,9 +9,9 @@ PBExecutionHandler >> initialize [
 	super initialize.
 	commandQueue := PBCommandQueue new.
 	mapperFactory := PBMapperFactory forExecutionHandler: self.
-	promiseRegistry := PBPromiseRegistry new.
+	promiseRegistry := LanguageLinkPromiseRegistry new.
 	weakRegistry := PBPlatform current weakRegistry.
-	objectRegistry := PBObjectRegistry new
+	objectRegistry := LanguageLinkObjectRegistry new
 ]
 
 { #category : #initialization }
@@ -39,7 +39,7 @@ PBExecutionHandler >> newCommandStringFactory [
 { #category : #handlers }
 PBExecutionHandler >> notifyErrorHandler: errorMsg [
 	| error |
-	error := PBPythonError new
+	error := PharoLinkRemoteError new
 					application: self application;
 					command: (commandQueue getCommand: errorMsg commandId);
 					errorMessage: errorMsg errorMessage;
@@ -68,13 +68,13 @@ PBExecutionHandler >> primitiveSendCommand: command [
 	^ self communicationHandler sendMessage: (self buildMessageFromCommand: command)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 PBExecutionHandler >> registerObject: aPythonObject [
 	objectRegistry registerObject: aPythonObject.
 	weakRegistry 
 		registerObject: aPythonObject 
-		finalizer: (PBRegistryFinalizer 
-							pythonVariable: aPythonObject pythonVariable 
+		finalizer: (LanguageLinkRegistryFinalizer 
+							variable: aPythonObject pythonVariable 
 							executionHandler: self)
 ]
 
@@ -90,11 +90,14 @@ PBExecutionHandler >> registerPromiseForCommand: aCommand [
 	^ promise
 ]
 
-{ #category : #'as yet unclassified' }
-PBExecutionHandler >> safeTriggerDebugger: error [
+{ #category : #accessing }
+PBExecutionHandler >> registryExpression [
+	^ #registry callWith: #()
+]
 
-	[ promiseRegistry signalPromiseId: error command id with: error ] fork.
-
+{ #category : #accessing }
+PBExecutionHandler >> removeId: aRemoteProxyId [
+	^ self registryExpression => #clean callWith: (Array with: aRemoteProxyId)
 ]
 
 { #category : #'private protocol' }
@@ -105,40 +108,4 @@ PBExecutionHandler >> sendCommand: command [
 	promise := self registerPromiseForCommand: command.
 	self primitiveSendCommand: command.
 	^ promise
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> serialize: anObject [
-	^ mapperFactory serializer serialize: anObject
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> signalObserver: observer withValue: object [
-	^ observer pharoNotify: object
-]
-
-{ #category : #accessing }
-PBExecutionHandler >> stop [
-	super stop.
-	weakRegistry destroy
-]
-
-{ #category : #'as yet unclassified' }
-PBExecutionHandler >> triggerDebugger: pythonError [
-	"This method is called when an error rised on Python execution."
-	"Inspect error to review the Command that caused the error.
-	For ignoring error:
-		pythonError proceedAction: PBIgnore new
-	For aborting:
-		pythonError proceedAction: PBDropQueue new
-	For replacing the command that caused the error:
-		pythonError proceedAction: P3ReplaceCommandAction new newCommand: **Your crafted command**
-	To execute your action you just need to 'Proceed' in the debugger."
-	pythonError signal.
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> updatePromiseId: id with: anObject [
-	commandQueue finishCommandId: id.
-	promiseRegistry removeAndSignalPromiseId: id with: anObject
 ]

@@ -9,7 +9,7 @@ Class {
 
 { #category : #initialization }
 PBPromiseRegistryTest >> setUp [
-	registry := PBPromiseRegistry new
+	registry := LanguageLinkPromiseRegistry new
 ]
 
 { #category : #initialization }

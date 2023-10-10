@@ -1,31 +1,8 @@
 Class {
 	#name : #PBCommand,
-	#superclass : #Object,
-	#instVars : [
-		'id',
-		'instructions',
-		'bindings',
-		'observers',
-		'promise',
-		'transformBlock'
-	],
+	#superclass : #LanguageLinkCommand,
 	#category : #'PythonBridge-Execution'
 }
-
-{ #category : #accessing }
-PBCommand >> bindings [
-	^ bindings
-]
-
-{ #category : #accessing }
-PBCommand >> bindings: bindingCol [
-	bindings := bindingCol
-]
-
-{ #category : #accessing }
-PBCommand >> bindingsDictionary [
-	^ self bindings asDictionary
-]
 
 { #category : #accessing }
 PBCommand >> codeForRemote [
@@ -37,21 +14,6 @@ PBCommand >> codeForRemote [
 	^ py3CodeStream contents
 ]
 
-{ #category : #accessing }
-PBCommand >> getObserver: observerId [
-	^ observers detect: [ :obs | obs id = observerId ]
-]
-
-{ #category : #accessing }
-PBCommand >> id [
-	^ id
-]
-
-{ #category : #accessing }
-PBCommand >> id: anObject [
-	id := anObject
-]
-
 { #category : #initialization }
 PBCommand >> initialize [
 	super initialize.
@@ -60,51 +22,4 @@ PBCommand >> initialize [
 	observers := #().
 	instructions := OrderedCollection new.
 	transformBlock := #yourself
-]
-
-{ #category : #accessing }
-PBCommand >> instructions [
-	^ instructions
-]
-
-{ #category : #accessing }
-PBCommand >> instructions: anObject [
-	instructions := anObject
-]
-
-{ #category : #testing }
-PBCommand >> isValid [
-	^ [ self id isString and: [ 
-			(self bindings associations allSatisfy: [ :assoc | assoc key isString ]) and: [ 
-				self observers allSatisfy: [ :obs | obs callback isBlock ] ] ] ] on: Error do: [ false ]
-]
-
-{ #category : #accessing }
-PBCommand >> observers [
-	^ observers
-]
-
-{ #category : #accessing }
-PBCommand >> observers: anObject [
-	observers := anObject
-]
-
-{ #category : #accessing }
-PBCommand >> promise [
-	^ promise
-]
-
-{ #category : #accessing }
-PBCommand >> promise: anObject [
-	promise := anObject
-]
-
-{ #category : #accessing }
-PBCommand >> transformBlock [
-	^ transformBlock
-]
-
-{ #category : #accessing }
-PBCommand >> transformBlock: anObject [
-	transformBlock := anObject
 ]
