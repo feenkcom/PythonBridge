@@ -14,19 +14,19 @@ PBLoggingHandlerTest >> logs [
 
 { #category : #initialization }
 PBLoggingHandlerTest >> setUp [
-	logger := PBLoggingHandler new
+	logger := LanguageLinkLoggingHandler new
 ]
 
 { #category : #tests }
 PBLoggingHandlerTest >> testAddLog [
-	logger log: (PBLog message: 'Foo').
+	logger log: (LanguageLinkLog message: 'Foo').
 	self assert: logger logs first message equals: 'Foo'
 ]
 
 { #category : #tests }
 PBLoggingHandlerTest >> testErrorLog [
-	logger log: (PBLog message: 'Foo').
+	logger log: (LanguageLinkLog message: 'Foo').
 	self assert: logger errorLogs isEmpty.
-	logger log: (PBErrorLog message: 'Bar').
+	logger log: (LanguageLinkErrorLog message: 'Bar').
 	self assert: logger errorLogs first message equals: 'Bar'.
 ]

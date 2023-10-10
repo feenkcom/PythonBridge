@@ -4,8 +4,3 @@ Extension { #name : #False }
 False >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-False >> isPythonValue [
-	^ true
-]

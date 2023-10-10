@@ -28,6 +28,16 @@ PBCommand >> bindingsDictionary [
 ]
 
 { #category : #accessing }
+PBCommand >> codeForRemote [
+	| py3CodeStream |
+	py3CodeStream := String new writeStream.
+	self instructions do: [ :instr | 
+			instr writePython3On: py3CodeStream.
+			py3CodeStream << String lf ].
+	^ py3CodeStream contents
+]
+
+{ #category : #accessing }
 PBCommand >> getObserver: observerId [
 	^ observers detect: [ :obs | obs id = observerId ]
 ]
@@ -46,7 +56,7 @@ PBCommand >> id: anObject [
 PBCommand >> initialize [
 	super initialize.
 	id := PBPlatform current newRandomName.
-	bindings := #().
+	bindings := Dictionary new.
 	observers := #().
 	instructions := OrderedCollection new.
 	transformBlock := #yourself
@@ -65,7 +75,7 @@ PBCommand >> instructions: anObject [
 { #category : #testing }
 PBCommand >> isValid [
 	^ [ self id isString and: [ 
-			(self bindings allSatisfy: [ :assoc | assoc key isString ]) and: [ 
+			(self bindings associations allSatisfy: [ :assoc | assoc key isString ]) and: [ 
 				self observers allSatisfy: [ :obs | obs callback isBlock ] ] ] ] on: Error do: [ false ]
 ]
 
@@ -87,16 +97,6 @@ PBCommand >> promise [
 { #category : #accessing }
 PBCommand >> promise: anObject [
 	promise := anObject
-]
-
-{ #category : #accessing }
-PBCommand >> pythonCode [
-	| py3CodeStream |
-	py3CodeStream := String new writeStream.
-	self instructions do: [ :instr | 
-			instr writePython3On: py3CodeStream.
-			py3CodeStream << String lf ].
-	^ py3CodeStream contents
 ]
 
 { #category : #accessing }

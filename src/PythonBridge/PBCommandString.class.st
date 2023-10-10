@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #accessing }
-PBCommandString >> pythonCode [
+PBCommandString >> codeForRemote [
 
 	^ instructions
 

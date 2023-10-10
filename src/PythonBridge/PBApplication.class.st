@@ -1,18 +1,8 @@
 Class {
 	#name : #PBApplication,
-	#superclass : #Object,
-	#instVars : [
-		'communicationHandler',
-		'processHandler',
-		'loggingHandler',
-		'executionHandler',
-		'settings'
-	],
+	#superclass : #LanguageLinkApplication,
 	#classVars : [
 		'DebugMode'
-	],
-	#classInstVars : [
-		'uniqueInstance'
 	],
 	#category : #'PythonBridge-Global'
 }
@@ -32,26 +22,9 @@ PBApplication class >> debugMode: bool [
 	^ DebugMode := bool
 ]
 
-{ #category : #'start-stop' }
-PBApplication class >> do: aBlockClosure [ 
-	| retVal |
-	self isRunning ifTrue: [ ^ aBlockClosure value ].
-	[
-		self start.
-		retVal := aBlockClosure cull: self uniqueInstance.
-		self uniqueInstance commandFactory << nil.
-		self uniqueInstance commandFactory send waitForValue. ] ensure: [ self stop ].
-	^ retVal
-]
-
 { #category : #initialization }
 PBApplication class >> initialize [
 	SessionManager default registerToolClassNamed: self name
-]
-
-{ #category : #testing }
-PBApplication class >> isRunning [
-	^ uniqueInstance notNil and: [ uniqueInstance isRunning ]
 ]
 
 { #category : #'start-stop' }
@@ -75,11 +48,6 @@ PBApplication class >> killAll [
 		error signal ].
 	self assert: proc stderr trimBoth isEmpty.
 	^ proc stdout
-]
-
-{ #category : #testing }
-PBApplication class >> module [
-	^ self uniqueInstance module
 ]
 
 { #category : #'pipenv setup' }
@@ -131,13 +99,6 @@ PBApplication class >> start [
 	uniqueInstance start
 ]
 
-{ #category : #'start-stop' }
-PBApplication class >> stop [
-	uniqueInstance ifNotNil: [ 
-		uniqueInstance stop. ].
-	uniqueInstance := nil
-]
-
 { #category : #testing }
 PBApplication class >> test [ 
 	self assert: (self do: [ :app |
@@ -156,11 +117,6 @@ PBApplication class >> uniqueInstance [
 	^ uniqueInstance
 ]
 
-{ #category : #accessing }
-PBApplication class >> uniqueInstance: anObject [
-	uniqueInstance := anObject
-]
-
 { #category : #utils }
 PBApplication >> addMapping: pythonType to: pythonFunction [
 	self commandFactory 
@@ -174,8 +130,10 @@ PBApplication >> commandFactory [
 ]
 
 { #category : #accessing }
-PBApplication >> communicationHandler [
-	^ communicationHandler
+PBApplication >> debuggerClientFor: anException [
+	"Answer the debugger client to be used by the Gt Post Mortem debugger"
+
+	^ GtPythonPostMortemDebugger new exception: self
 ]
 
 { #category : #accessing }
@@ -183,41 +141,6 @@ PBApplication >> errorMessage [
 	"Fetch the error message from the stderr stream, from the processhander"
 
 	^ self serverStatus
-]
-
-{ #category : #accessing }
-PBApplication >> executionHandler [
-	^ executionHandler
-]
-
-{ #category : #ui }
-PBApplication >> gtSettingsFor: aView [
-	<gtView>
-
-	^ aView forward 
-		title: 'Settings';
-		priority: 60;
-		object: [ settings ];
-		view: #gtSettingsFor:
-]
-
-{ #category : #ui }
-PBApplication >> gtStatusFor: aView [
-	<gtView>
-
-	^ aView textEditor 
-		title: 'Status';
-		priority: 50;
-		text: [ self serverStatus asRopedText glamorousCodeFont ]
-]
-
-{ #category : #handlers }
-PBApplication >> handlers [
-	^ Array
-		with: loggingHandler
-		with: processHandler
-		with: communicationHandler
-		with: executionHandler
 ]
 
 { #category : #initialization }
@@ -229,7 +152,7 @@ PBApplication >> initialize [
 
 { #category : #initialization }
 PBApplication >> initializeHandlers [
-	loggingHandler := PBLoggingHandler application: self.
+	loggingHandler := LanguageLinkLoggingHandler application: self.
 	communicationHandler := PBCommunicationHandler application: self.
 	processHandler := PBPythonHandler application: self.
 	executionHandler := PBExecutionHandler application: self
@@ -242,32 +165,6 @@ PBApplication >> installModule: aString [
 	PBPharoPipenvProcess new installModule: aString in: self
 ]
 
-{ #category : #testing }
-PBApplication >> isPythonReady [
-	"Ensures python webserver is ready for receiving commands"
-	^ self communicationHandler isPythonReady
-]
-
-{ #category : #testing }
-PBApplication >> isRunning [
-	^ self handlers allSatisfy: #isRunning
-]
-
-{ #category : #logging }
-PBApplication >> log: aLog [
-	self loggingHandler log: aLog
-]
-
-{ #category : #accessing }
-PBApplication >> loggingHandler [
-	^ loggingHandler
-]
-
-{ #category : #accessing }
-PBApplication >> module [
-	self subclassResponsibility
-]
-
 { #category : #'instance creation' }
 PBApplication >> newCommandFactory [
 	^ self executionHandler newCommandFactory
@@ -278,23 +175,11 @@ PBApplication >> newCommandStringFactory [
 	^ self executionHandler newCommandStringFactory
 ]
 
-{ #category : #instructions }
-PBApplication >> notifyDebuggerPaused: aDebugger [
-	"Notify all promises that the server debugger has paused in case the Bloc UI process is waiting on one of the promises."
-
-	self executionHandler notifyDebuggerPaused: aDebugger.
-]
-
 { #category : #accessing }
 PBApplication >> pipenvPath [ 
 	"Answer the pipenvPath to be used for this application"
 
 	^ settings pipenvPath ifNil: [ processHandler pipenvPath ]
-]
-
-{ #category : #accessing }
-PBApplication >> postInitialization [
-	
 ]
 
 { #category : #printing }
@@ -314,126 +199,15 @@ PBApplication >> printOn: aStream [
 ]
 
 { #category : #accessing }
-PBApplication >> processHandler [
-	^ processHandler
-]
-
-{ #category : #utils }
-PBApplication >> registerObject: aPythonObject [
-	self executionHandler registerObject: aPythonObject
-]
-
-{ #category : #accessing }
 PBApplication >> runtimeDirectory [
 	"This is the directory basename where the runtime files are located"
 
 	^ self class runtimeDirectory
 ]
 
-{ #category : #instructions }
-PBApplication >> send: aCommand [
-	self isRunning ifFalse: [ Error signal: 'Bridge not running.' ].
-	^ executionHandler sendCommand: aCommand
-]
-
-{ #category : #'start-stop' }
-PBApplication >> serverStatus [
-	"Answer a string describing the environment and server status.
-	Mostly for problem solving."
-
-	^ String streamContents: [ :stream |
-		self serverStatusOn: stream process: processHandler ]
-]
-
-{ #category : #'start-stop' }
-PBApplication >> serverStatusOn: aStream process: process [
-	"Write the environment and server status on the supplied stream.
-	Mostly for problem solving."
-	| serverPathString |
-
-	serverPathString := [ self pipenvPath isExecutable
-		ifTrue: [ self pipenvPath fullName ]
-		ifFalse: [ self pipenvPath fullName, ': doesn''t exist or isn''t executable, it should be in the PATH' ] ]
-			on: Error
-			do: [ '<Unable to determine server path.  It should be in the PATH>' ].
-
-	aStream
-		<< 'Running:           ';
-			print: self isRunning; cr;
-		<< 'pipenv:            ';
-			<< serverPathString; cr;
-		<< 'Working directory: ';
-			<< self workingDirectory fullName; cr;
-		<< 'Server running:    ';
-			print: process isRunning; cr.
-	process hasProcess ifFalse: [ ^ self ].
-	process isRunning ifFalse: 
-		[ aStream
-			<< 'exit status:       ';
-				print: process exitCode; cr ].
-	aStream
-		cr; cr;
-		<< 'Stdout:'; cr;
-			<< process stdout; cr;
-		cr; cr;
-		<< 'Stderr:'; cr;
-			<< process stderr.
-]
-
 { #category : #accessing }
-PBApplication >> settings [
-	^ settings
-]
-
-{ #category : #accessing }
-PBApplication >> settings: anObject [
-	settings := anObject
-]
-
-{ #category : #'start-stop' }
-PBApplication >> start [
-	self handlers do: #start.
-	self waitInitialization.
-	self postInitialization.
-	self newCommandFactory send.
-]
-
-{ #category : #accessing }
-PBApplication >> stderr [
-
-	^ processHandler stderr
-]
-
-{ #category : #accessing }
-PBApplication >> stdout [
-
-	^ processHandler stdout
-]
-
-{ #category : #'start-stop' }
-PBApplication >> stop [
-	self handlers select: #notNil thenDo: #stop
-]
-
-{ #category : #private }
-PBApplication >> waitInitialization [
-	"Timeout of 10 seconds and try every 0.5 seconds"
-	| error |
-
-	1 to: 10 by: 0.5 do: [ :t |
-		self isPythonReady 
-				ifTrue: [ ^ self ]
-				ifFalse: [ (Delay forMilliseconds: 500) wait ] ].
-	"Store the error in a temporary variable since the debugger sometimes hides the parent stack frames."
-	error := PBPythonProcessError new
-		messageText: 'Python application initialization failed!';
-		application: self.
-	error signal.
-	"
-	Print the result of executing the following line:
-	
-	self errorMessage
-	"
+PBApplication >> serverPath [
+	^ self pipenvPath
 ]
 
 { #category : #accessing }

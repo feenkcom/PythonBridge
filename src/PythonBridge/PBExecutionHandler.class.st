@@ -1,41 +1,8 @@
 Class {
 	#name : #PBExecutionHandler,
-	#superclass : #PBHandler,
-	#instVars : [
-		'commandQueue',
-		'weakRegistry',
-		'objectRegistry',
-		'promiseRegistry',
-		'mapperFactory'
-	],
+	#superclass : #LanguageLinkExecutionHandler,
 	#category : #'PythonBridge-Execution'
 }
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> buildMessageFromCommand: command [
-	| message |
-	message := PBEnqueueCommandMessage 
-					commandId: command id 
-					statements: command pythonCode 
-					bindings: (command bindings asDictionary collect: [ :obj | self serialize: obj ]).
-	message addBinding: #pharoCommandId -> (self serialize: command id).
-	^ message
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> communicationHandler [
-	^ self application communicationHandler
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> deserialize: anObject [
-	^ mapperFactory deserializer deserialize: anObject
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> getObserverAtCommandId: commandId id: observerId [
-	^ (commandQueue getCommand: commandId) getObserver: observerId
-]
 
 { #category : #initialization }
 PBExecutionHandler >> initialize [
@@ -55,11 +22,6 @@ PBExecutionHandler >> initializeHandler [
 		addHandler: [ :msg | self notifyCallbackHandler: msg ] forMessageClass: PBCallbackMessage
 ]
 
-{ #category : #'private protocol' }
-PBExecutionHandler >> mapperFactory [
-	^ mapperFactory
-]
-
 { #category : #'as yet unclassified' }
 PBExecutionHandler >> newCommandFactory [
 	^ PBCommandFactory new
@@ -72,27 +34,6 @@ PBExecutionHandler >> newCommandStringFactory [
 	^ PBCommandStringFactory new
 		application: self application;
 		yourself
-]
-
-{ #category : #handlers }
-PBExecutionHandler >> notifyCallbackHandler: msg [
-	| val serialization |
-	val := self 
-		signalObserver: (self getObserverAtCommandId: msg commandId id: msg observerId) 
-		withValue: (self deserialize: msg value).
-	serialization := [ self serialize: val ] on: Error do: [ :err | 
-		self application log: err printString.
-		self serialize: nil ].
-	^ msg createAnswer 
-		value: serialization;
-		yourself
-]
-
-{ #category : #instructions }
-PBExecutionHandler >> notifyDebuggerPaused: aDebugger [
-	"Notify all promises that the server debugger has paused in case the Bloc UI process is waiting on one of the promises."
-
-	promiseRegistry notifyDebuggerPaused: aDebugger.
 ]
 
 { #category : #handlers }

@@ -6,6 +6,6 @@ Trait {
 }
 
 { #category : #testing }
-PBPythonValueTrait >> isPythonValue [
+PBPythonValueTrait >> isLanguageLinkValue [
 	^ true
 ]

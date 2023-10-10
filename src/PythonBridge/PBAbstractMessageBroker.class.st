@@ -39,7 +39,7 @@ PBAbstractMessageBroker >> addCallback: aBlock messageClass: messageClass [
 { #category : #private }
 PBAbstractMessageBroker >> handle: dict reverseMessageClass: msgClass [
 	| handler |
-	(messageCallbacks includesKey: msgClass) ifFalse: [ PBCommunicationError signal ].
+	(messageCallbacks includesKey: msgClass) ifFalse: [ LanguageLinkCommunicationError signal ].
 	handler := PBMessageHandler 
 						forMessage: (msgClass decodeFrom: dict) 
 						callback: (messageCallbacks at: msgClass).

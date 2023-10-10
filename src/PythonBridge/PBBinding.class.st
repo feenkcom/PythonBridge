@@ -30,12 +30,12 @@ PBBinding >> initialize [
 ]
 
 { #category : #testing }
-PBBinding >> isPythonGenerable [
+PBBinding >> isLanguageLinkValue [
 	^ true
 ]
 
 { #category : #testing }
-PBBinding >> isPythonValue [
+PBBinding >> isPythonGenerable [
 	^ true
 ]
 

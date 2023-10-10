@@ -22,7 +22,7 @@ PBMessageBrokerTest >> answer: aDictionary [
 
 { #category : #utils }
 PBMessageBrokerTest >> assertCommunicationError: aBlock [
-	self should: aBlock raise: PBCommunicationError
+	self should: aBlock raise: LanguageLinkCommunicationError
 ]
 
 { #category : #accessing }
@@ -124,14 +124,14 @@ PBMessageBrokerTest >> tearDown [
 PBMessageBrokerTest >> testEnqueueCommandMessage [
 	| flag msg |
 	flag := false.
-	msg := PBEnqueueCommandMessage 
+	msg := LanguageLinkEnqueueCommandMessage 
 				commandId: '7365'
 				statements: 'foo().cat()'
 				bindings: { #foo -> 42 . #bar -> 'zork' } asDictionary.
 	self setHandler: [ :assoc | | bindings |
-		self assert: assoc key equals: PBEnqueueCommandMessage type.
+		self assert: assoc key equals: LanguageLinkEnqueueCommandMessage type.
 		self assert: assoc value size equals: 4.
-		self assert: (assoc value at: 'type') equals: PBEnqueueCommandMessage type.
+		self assert: (assoc value at: 'type') equals: LanguageLinkEnqueueCommandMessage type.
 		self assert: (assoc value at: 'commandId') equals: '7365'.
 		self assert: (assoc value at: 'statements') equals: 'foo().cat()'.
 		bindings := assoc value at: 'bindings'.

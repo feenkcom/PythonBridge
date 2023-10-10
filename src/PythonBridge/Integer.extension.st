@@ -4,8 +4,3 @@ Extension { #name : #Integer }
 Integer >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-Integer >> isPythonValue [
-	^ true
-]

@@ -4,8 +4,3 @@ Extension { #name : #UndefinedObject }
 UndefinedObject >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-UndefinedObject >> isPythonValue [
-	^ true
-]

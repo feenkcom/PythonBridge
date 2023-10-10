@@ -1,11 +1,11 @@
 Extension { #name : #P3GGenerable }
 
 { #category : #'*PythonBridge' }
-P3GGenerable >> isPythonGenerable [
+P3GGenerable >> isLanguageLinkValue [
 	^ true
 ]
 
 { #category : #'*PythonBridge' }
-P3GGenerable >> isPythonValue [
+P3GGenerable >> isPythonGenerable [
 	^ true
 ]

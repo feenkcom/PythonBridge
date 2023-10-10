@@ -58,8 +58,8 @@ PBHttpMessageBroker >> primSendMessage: dict [
 	| ans |
 	ans := [ ZnEasy 
 					post: self pythonUri , '/' , (dict at: #type)
-					data: (ZnEntity text: (self serializer serialize: dict)) ] on: Error do: [ :err | PBCommunicationError signal: 'Request fail' ].
-	ans status = 200 ifFalse: [ PBCommunicationError signal: 'Request fail' ].
+					data: (ZnEntity text: (self serializer serialize: dict)) ] on: Error do: [ :err | LanguageLinkCommunicationError signal: 'Request fail' ].
+	ans status = 200 ifFalse: [ LanguageLinkCommunicationError signal: 'Request fail' ].
 	^ self serializer deserialize: ans contents
 ]
 

@@ -4,8 +4,3 @@ Extension { #name : #Fraction }
 Fraction >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-Fraction >> isPythonValue [
-	^ true
-]

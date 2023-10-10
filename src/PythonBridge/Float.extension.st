@@ -4,8 +4,3 @@ Extension { #name : #Float }
 Float >> isPythonGenerable [
 	^ true
 ]
-
-{ #category : #'*PythonBridge' }
-Float >> isPythonValue [
-	^ true
-]

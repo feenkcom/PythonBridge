@@ -40,7 +40,7 @@ PBPythonError >> defaultAction [
 
 { #category : #private }
 PBPythonError >> defaultProceedAction [
-	^ PBDropQueue new
+	^ LanguageLinkDropQueue new
 ]
 
 { #category : #accessing }

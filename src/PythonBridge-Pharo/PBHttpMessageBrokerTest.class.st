@@ -59,7 +59,7 @@ PBHttpMessageBrokerTest >> sendMessageToBroker: dict answerBlock: aBlock [
 	ans := ZnEasy 
 				post: self brokerUri , '/' , (dict at: #type)
 				data: (ZnEntity json: (NeoJSONWriter toString: dict)).
-	ans status = 200 ifFalse: [ PBCommunicationError signal: ans status asString ].
+	ans status = 200 ifFalse: [ LanguageLinkCommunicationError signal: ans status asString ].
 	aBlock value: (self decodeAnswer: ans contents)
 ]
 

@@ -71,7 +71,7 @@ PBMsgPackPharoBroker >> primHandle: dict [
 
 { #category : #private }
 PBMsgPackPharoBroker >> primSendMessage: dict [
-	msgStream ifNil: [ PBCommunicationError signal ].
+	msgStream ifNil: [ LanguageLinkCommunicationError signal ].
 	msgStream nextPut: dict
 ]
 
