@@ -77,7 +77,7 @@ PBApplication >> commandFactory [
 PBApplication >> debuggerClientFor: anException [
 	"Answer the debugger client to be used by the Gt Post Mortem debugger"
 
-	^ GtPythonPostMortemDebugger new exception: self
+	^ GtPythonPostMortemDebugger new exception: anException
 ]
 
 { #category : #accessing }
