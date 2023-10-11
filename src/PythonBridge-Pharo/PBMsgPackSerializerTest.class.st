@@ -20,7 +20,7 @@ PBMsgPackSerializerTest >> assertSerialize: anObject equals: aString [
 { #category : #tests }
 PBMsgPackSerializerTest >> setUp [
 	super setUp.
-	serializer := PBMsgPackSerializer new
+	serializer := LanguageLinkMsgPackSerializer new
 ]
 
 { #category : #tests }

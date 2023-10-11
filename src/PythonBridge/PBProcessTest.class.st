@@ -16,8 +16,8 @@ PBProcessTest class >> isAbstract [
 { #category : #running }
 PBProcessTest >> defaultSettings [
 	^ PBSettings 
-		pharoSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: 6538)
-		pythonSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: 6539)
+		pharoSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: 6538)
+		pythonSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: 6539)
 ]
 
 { #category : #running }

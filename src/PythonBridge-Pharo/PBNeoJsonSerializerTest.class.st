@@ -6,5 +6,5 @@ Class {
 
 { #category : #hooks }
 PBNeoJsonSerializerTest >> jsonSerializerClass [
-	^ PBNeoJsonSerializer
+	^ LanguageLinkNeoJsonSerializer
 ]

@@ -14,7 +14,8 @@ class MsgPackSocketPlatform:
 
     def __init__(self, port):
         self.port = port
-        self.client = None
+        self.server = None
+        self.connection = None
         self.serializer = msgpack_serializer.MsgPackSerializer()
         self.unpacker = msgpack.Unpacker(raw=False)
         self.packer = msgpack.Packer(use_bin_type=True)
@@ -30,7 +31,7 @@ class MsgPackSocketPlatform:
     def prim_handle(self):
         try:
             bridge_globals.logger.log("loop func")
-            data = self.client.recv(2048)
+            data = self.getConnection().recv(2048)
             if len(data) == 0:
                 time.sleep(0.005)
             else:
@@ -47,15 +48,21 @@ class MsgPackSocketPlatform:
             bridge_globals.logger.log("ERROR message: " + str(err))
 
     def setup_func(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.connect(('localhost', self.port))
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind(('localhost', self.port))
+        self.server.listen()
+        
+    def getConnection(self):
+        if (self.connection == None):
+            self.connection, addr = self.server.accept()
+        return self.connection
 
     def stop(self):
         if self.thread is not None:
             self.thread.stop()
-        if self.client is not None:
-            self.client.close()
-            self.client = None
+        if self.server is not None:
+            self.server.close()
+            self.server = None
 
     def send_answer(self, msg, answer):
         if answer['type'] != msg['type']:
@@ -64,7 +71,7 @@ class MsgPackSocketPlatform:
         self.send_async_message(answer)
     
     def is_running(self):
-        return self.client != None
+        return self.server != None
     
     def prim_handle_msg(self, raw_msg):
         msg = raw_msg
@@ -89,7 +96,7 @@ class MsgPackSocketPlatform:
         time.sleep(.1)
 
     def send_async_message(self, msg):
-        self.client.send(self.packer.pack(msg))
+        self.getConnection().send(self.packer.pack(msg))
     
     def send_sync_message(self, msg):
         sync_id = mark_message_as_sync(msg)
@@ -113,7 +120,7 @@ def mark_message_as_sync(msg):
     return sync_id
 
 def build_service(port, pharo_port, feed_callback):
-    service = MsgPackSocketPlatform(pharo_port)
+    service = MsgPackSocketPlatform(port)
     service.set_handler('ENQUEUE',feed_callback)
     service.set_handler('IS_ALIVE', lambda msg: service.send_answer(msg, {'type': 'IS_ALIVE'}))
     return service

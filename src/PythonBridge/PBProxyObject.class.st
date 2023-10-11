@@ -51,6 +51,11 @@ PBProxyObject >> createObject [
 	self shouldNotImplement
 ]
 
+{ #category : #accessing }
+PBProxyObject >> languageLinkSerializable [
+	^ self asJsonDictionary
+]
+
 { #category : #printing }
 PBProxyObject >> printOn: str [
 	str 

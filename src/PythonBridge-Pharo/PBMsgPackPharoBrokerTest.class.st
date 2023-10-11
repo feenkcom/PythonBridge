@@ -3,7 +3,9 @@ Class {
 	#superclass : #PBMessageBrokerTest,
 	#instVars : [
 		'stubStream',
-		'stubThread'
+		'stubThread',
+		'serverSocket',
+		'bindSocket'
 	],
 	#category : #'PythonBridge-Pharo-MessageBroker'
 }
@@ -25,12 +27,14 @@ PBMsgPackPharoBrokerTest >> assertCommunicationError: aBlock [
 
 { #category : #running }
 PBMsgPackPharoBrokerTest >> buildAndStartStubServer [
-	stubStream := PBMsgPackUtils openConnectionToHost: #[ 127 0 0 1 ] port: broker port.
-	stubStream := PBMsgPackSocketStream on: stubStream.
-	stubThread := [	
-		[ true ] whileTrue: [ 
-			self stubPrimHandle: stubStream next ] ] forkAt: Processor lowIOPriority.
-	
+	serverSocket := LanguageLinkMsgPackUtils serverSocketOn: broker port.
+	stubThread := [ bindSocket := serverSocket
+				waitForAcceptFor: 10000
+				ifTimedOut: [ nil ].
+		stubStream := SocketStream on: bindSocket.
+		stubStream := LanguageLinkMsgPackSocketStream on: stubStream.
+		[ true ] whileTrue: [ self stubPrimHandle: stubStream next ] ]
+			forkAt: Processor lowIOPriority
 ]
 
 { #category : #utils }
@@ -40,7 +44,7 @@ PBMsgPackPharoBrokerTest >> errorResponse [
 
 { #category : #hooks }
 PBMsgPackPharoBrokerTest >> messageBrokerClass [
-	^ PBMsgPackPharoBroker
+	^ LanguageLinkMsgPackPharoBroker
 ]
 
 { #category : #private }
@@ -79,7 +83,9 @@ PBMsgPackPharoBrokerTest >> sleepAWhile [
 { #category : #running }
 PBMsgPackPharoBrokerTest >> stopStubServer [
 	stubThread ifNotNil: [ stubThread terminate ].
-	stubStream ifNotNil: [ stubStream close ]
+	stubStream ifNotNil: [ stubStream close ].
+	bindSocket ifNotNil: [ bindSocket closeAndDestroy ].
+	serverSocket ifNotNil: [ serverSocket closeAndDestroy ]
 ]
 
 { #category : #private }

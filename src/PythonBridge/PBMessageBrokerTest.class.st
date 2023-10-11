@@ -27,7 +27,7 @@ PBMessageBrokerTest >> assertCommunicationError: aBlock [
 
 { #category : #accessing }
 PBMessageBrokerTest >> brokerUri [
-	^ 'http://' , settings pharoSocketAddress printAddress
+	^ 'http://' , settings clientSocketAddress printAddress
 ]
 
 { #category : #initialization }
@@ -37,9 +37,11 @@ PBMessageBrokerTest >> buildAndStartStubServer [
 
 { #category : #running }
 PBMessageBrokerTest >> defaultSettings [
-	^ PBSettings 
-		pharoSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: 6538)
-		pythonSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: 6539)
+	^ PBSettings new
+		clientSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: 6538);
+		serverSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: 6539);
+		connectionExceptionHandler: PharoLinkConnectionExceptionHandler new
+		yourself
 ]
 
 { #category : #utils }
@@ -64,7 +66,7 @@ PBMessageBrokerTest >> messageBrokerClass [
 
 { #category : #accessing }
 PBMessageBrokerTest >> pythonUri [
-	^ 'http://' , settings pythonSocketAddress printAddress
+	^ 'http://' , settings serverSocketAddress printAddress
 ]
 
 { #category : #utils }
@@ -98,8 +100,8 @@ PBMessageBrokerTest >> setUp [
 	super setUp.
 	settings := self defaultSettings.
 	broker := self messageBrokerClass settings: settings.
-	broker start.
 	self buildAndStartStubServer.
+	broker start.
 	self sleepAWhile
 ]
 
@@ -148,13 +150,13 @@ PBMessageBrokerTest >> testEnqueueCommandMessage [
 PBMessageBrokerTest >> testErrorOnCallback [
 	| flag |
 	flag := false.
-	self for: PBRSyncMessage setCallback: [ :msg |
+	self for: LanguageLinkRSyncMessage setCallback: [ :msg |
 		Error signal.
 		flag := true ].
 	self assertCommunicationError: [ 
 			self 
 				sendMessageToBroker: { 
-					#type -> PBRSyncMessage type.
+					#type -> LanguageLinkRSyncMessage type.
 					#__sync -> 'foobar' } asDictionary
 				answerBlock: [  ] ].
 	self deny: flag
@@ -164,13 +166,13 @@ PBMessageBrokerTest >> testErrorOnCallback [
 PBMessageBrokerTest >> testEvalAnswer [
 	| flag |
 	flag := false.
-	self for: PBUpdatePromiseMessage setCallback: [ :msg |
-		self assert: msg type equals: PBUpdatePromiseMessage type.
+	self for: LanguageLinkUpdatePromiseMessage setCallback: [ :msg |
+		self assert: msg type equals: LanguageLinkUpdatePromiseMessage type.
 		self assert: msg value equals: 'foobar'.
 		self assert: msg promiseId equals: '4fcb36d'.
 		flag := true ].
 	self sendMessageToBroker: { 
-				#type -> PBUpdatePromiseMessage type.
+				#type -> LanguageLinkUpdatePromiseMessage type.
 				#id -> '4fcb36d'.
 				#value -> 'foobar' } asDictionary.
 	self assert: flag
@@ -181,13 +183,13 @@ PBMessageBrokerTest >> testIsAliveMessage [
 	| flag msg |
 	flag := false.
 	self setHandler: [ :assoc |
-		self assert: assoc key equals: PBIsAliveMessage type.
+		self assert: assoc key equals: LanguageLinkIsAliveMessage type.
 		self assert: assoc value associations size equals: 2.
-		self assert: (assoc value at: #type) equals: PBIsAliveMessage type.
+		self assert: (assoc value at: #type) equals: LanguageLinkIsAliveMessage type.
 		self assert: (assoc value at: #__sync) equals: msg syncId.
 		flag := true.
-		self answer: { #type -> PBIsAliveMessage type. #__sync -> msg syncId } asDictionary ].
-	msg := PBIsAliveMessage new.
+		self answer: { #type -> LanguageLinkIsAliveMessage type. #__sync -> msg syncId } asDictionary ].
+	msg := LanguageLinkIsAliveMessage new.
 	broker sendMessage: msg.
 	self assert: flag
 ]
@@ -201,9 +203,9 @@ PBMessageBrokerTest >> testIsRunning [
 PBMessageBrokerTest >> testRMessageWithParams [
 	| flag |
 	flag := false.
-	self for: PBCallbackMessage setCallback: [ :msg |
+	self for: LanguageLinkCallbackMessage setCallback: [ :msg |
 		flag := true.
-		self assert: msg type equals: PBCallbackMessage type.
+		self assert: msg type equals: LanguageLinkCallbackMessage type.
 		self assert: msg commandId equals: 10.
 		self assert: msg observerId equals: 'foo'.
 		self assert: msg value equals: 'lalala'.
@@ -213,13 +215,13 @@ PBMessageBrokerTest >> testRMessageWithParams [
 			yourself ].
 	self 
 		sendMessageToBroker: { 
-			#type -> PBCallbackMessage type.
+			#type -> LanguageLinkCallbackMessage type.
 			#commandId -> 10.
 			#observerId -> 'foo'.
 			#value -> 'lalala'.
 			#__sync -> 'zork' } asDictionary
 		answerEquals: { 
-			#type -> PBCallbackMessage type.
+			#type -> LanguageLinkCallbackMessage type.
 			#value -> 13.
 			#__sync -> 'zork' } asDictionary.
 	self assert: flag.
@@ -229,15 +231,15 @@ PBMessageBrokerTest >> testRMessageWithParams [
 PBMessageBrokerTest >> testRSyncMessage [
 	| flag |
 	flag := false.
-	self for: PBRSyncMessage setCallback: [ :msg |
+	self for: LanguageLinkRSyncMessage setCallback: [ :msg |
 		flag := true.
 		msg createAnswer ].
 	self 
 		sendMessageToBroker: { 
-			#type -> PBRSyncMessage type.
+			#type -> LanguageLinkRSyncMessage type.
 			#__sync -> 'foobar' } asDictionary
 		answerEquals: { 
-			#type -> PBRSyncMessage type.
+			#type -> LanguageLinkRSyncMessage type.
 			#__sync -> 'foobar' } asDictionary.
 	self assert: flag.
 ]
@@ -247,13 +249,13 @@ PBMessageBrokerTest >> testSyncMessage [
 	| flag msg ans |
 	flag := false.
 	self setHandler: [ :assoc |
-		self assert: assoc key equals: PBSyncMessage type.
+		self assert: assoc key equals: LanguageLinkSyncMessage type.
 		self assert: assoc value associations size equals: 2.
-		self assert: (assoc value at: #type) equals: PBSyncMessage type.
+		self assert: (assoc value at: #type) equals: LanguageLinkSyncMessage type.
 		self assert: (assoc value at: #__sync) equals: msg syncId.
 		flag := true.
-		self answer: { #type -> PBSyncMessage type . #__sync -> msg syncId } asDictionary ].
-	msg := PBSyncMessage new.
+		self answer: { #type -> LanguageLinkSyncMessage type . #__sync -> msg syncId } asDictionary ].
+	msg := LanguageLinkSyncMessage new.
 	ans := broker sendMessage: msg.
 	self assert: ans message equals: msg.
 	self assert: flag
@@ -263,10 +265,10 @@ PBMessageBrokerTest >> testSyncMessage [
 PBMessageBrokerTest >> testWrongRouteAnswer [
 	| flag |
 	flag := false.
-	self for: PBCallbackMessage setCallback: [ :dict |
+	self for: LanguageLinkCallbackMessage setCallback: [ :dict |
 		flag := true ].
 	self assertCommunicationError:  [ self sendMessageToBroker: { 
-								#type -> PBRSyncMessage type.
+								#type -> LanguageLinkRSyncMessage type.
 								#__sync -> 'foobar' } asDictionary ].
 	self deny: flag
 ]

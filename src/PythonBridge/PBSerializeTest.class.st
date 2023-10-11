@@ -7,6 +7,11 @@ Class {
 	#category : #'PythonBridge-Tests'
 }
 
+{ #category : #accessing }
+PBSerializeTest >> application [
+	^ PBApplication uniqueInstance
+]
+
 { #category : #tests }
 PBSerializeTest >> serializer [
 	^ mapper serializer
@@ -16,8 +21,18 @@ PBSerializeTest >> serializer [
 
 { #category : #tests }
 PBSerializeTest >> setUp [
+	| execHandler app |
 	super setUp.
-	mapper := PBMapperFactory forExecutionHandler: self
+	app := PBStubApplication new.
+	execHandler := PBExecutionHandler basicNew
+			application: app;
+			yourself.
+	mapper := LanguageLinkMapperFactory forExecutionHandler: execHandler
+]
+
+{ #category : #accessing }
+PBSerializeTest >> settings [
+	^ PBPlatform current defaultSettings
 ]
 
 { #category : #tests }

@@ -17,15 +17,15 @@ PBRMessageTest >> stubDict [
 { #category : #tests }
 PBRMessageTest >> testDecodeRMessage [
 	| msg |
-	msg := PBRMessage decodeFrom: { #type -> #RMSG } asDictionary.
-	self assert: msg class equals: PBRMessage.
+	msg := LanguageLinkRMessage decodeFrom: { #type -> #RMSG } asDictionary.
+	self assert: msg class equals: LanguageLinkRMessage.
 	self assert: msg type equals: #RMSG
 ]
 
 { #category : #tests }
 PBRMessageTest >> testDecodeRStubMessage [
 	| msg |
-	msg := PBRStubMessage decodeFrom: self stubDict.
+	msg := LanguageLinkRStubMessage decodeFrom: self stubDict.
 	self assert: msg ivar1 equals: #foo.
 	self assert: msg ivar2 equals: #(3 #bar).
 	self assert: msg syncId equals: 'ab45d3'
@@ -34,7 +34,7 @@ PBRMessageTest >> testDecodeRStubMessage [
 { #category : #tests }
 PBRMessageTest >> testEncodeRAnswer [
 	| msg ans |
-	msg := PBRSyncMessage decodeFrom: { #type -> #RSYNC . #__sync -> 'abcde1234' } asDictionary.
+	msg := LanguageLinkRSyncMessage decodeFrom: { #type -> #RSYNC . #__sync -> 'abcde1234' } asDictionary.
 	ans := msg createAnswer.
 	self assert: ans syncId equals: 'abcde1234'.
 	self assert: ans encode equals: { #type -> #RSYNC . #__sync -> 'abcde1234' } asDictionary
@@ -43,7 +43,7 @@ PBRMessageTest >> testEncodeRAnswer [
 { #category : #tests }
 PBRMessageTest >> testEncodeRStubAnswer [
 	| msg ans |
-	msg := PBRStubMessage decodeFrom: self stubDict.
+	msg := LanguageLinkRStubMessage decodeFrom: self stubDict.
 	ans := msg createAnswer.
 	ans ivar1: #foo.
 	ans ivar2: #(3 #bar).
