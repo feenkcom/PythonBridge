@@ -1,10 +1,11 @@
 Class {
 	#name : #PBPharoPipenvProcess,
-	#superclass : #PBAbstractProcess,
+	#superclass : #LanguageLinkAbstractProcess,
 	#instVars : [
 		'process',
 		'environmentVariables',
-		'serverDebugger'
+		'serverDebugger',
+		'pythonMainFile'
 	],
 	#classVars : [
 		'PipenvPath'
@@ -181,28 +182,37 @@ PBPharoPipenvProcess >> process [
 { #category : #private }
 PBPharoPipenvProcess >> processArguments [
 	| args |
-
 	args := OrderedCollection new.
 	args
 		add: 'run';
 		add: 'python'.
-	self settings serverDebugMode ifTrue:
-		[ args addAll: { 
-			'-m'. 
-			'debugpy'. 
-			'--listen'. 
-			self settings debugSocketAddress printAddress. 
-			'--wait-for-client'. } ].
+	self settings serverDebugMode
+		ifTrue: [ args
+				addAll: {'-m'.
+						'debugpy'.
+						'--listen'.
+						self settings debugSocketAddress printAddress.
+						'--wait-for-client'} ].
 	args
 		add: self pythonMainFile fullName;
 		add: '--port';
-		add: self settings pythonSocketAddress port asString;
+		add: self settings serverSocketAddress port asString;
 		add: '--pharo';
-		add: self settings pharoSocketAddress port asString;
+		add: self settings clientSocketAddress port asString;
 		add: '--method';
-		add: PBPlatform current messageBrokerStrategy pythonMethodArg.
+		add: PBPlatform current messageBrokerStrategy methodArg.
 	self debugMode ifTrue: [ args add: '--log' ].
 	^ args
+]
+
+{ #category : #accessing }
+PBPharoPipenvProcess >> pythonMainFile [
+	^ pythonMainFile ifNil: [ self workingDirectory / 'start_bridge.py' ]
+]
+
+{ #category : #accessing }
+PBPharoPipenvProcess >> pythonMainFile: anObject [
+	pythonMainFile := anObject
 ]
 
 { #category : #initialization }

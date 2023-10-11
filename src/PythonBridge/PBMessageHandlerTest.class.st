@@ -8,8 +8,8 @@ Class {
 PBMessageHandlerTest >> testAsyncMessage [
 	| flag msg handler |
 	flag := false.
-	msg := PBAsyncMessage new.
-	handler := PBMessageHandler 
+	msg := LanguageLinkAsyncMessage new.
+	handler := LanguageLinkMessageHandler 
 						forMessage: msg 
 						callback: [ :aMsg |
 							self assert: msg equals: aMsg.
@@ -25,8 +25,8 @@ PBMessageHandlerTest >> testAsyncMessage [
 PBMessageHandlerTest >> testRAsyncMessage [
 	| flag msg handler |
 	flag := false.
-	msg := PBRAsyncMessage new.
-	handler := PBMessageHandler 
+	msg := LanguageLinkRAsyncMessage new.
+	handler := LanguageLinkMessageHandler 
 						forMessage: msg 
 						callback: [ :aMsg |
 							self assert: msg equals: aMsg.
@@ -43,8 +43,8 @@ PBMessageHandlerTest >> testRSyncMessage [
 	| flag msg handler ans |
 	flag := false.
 	ans := nil.
-	msg := PBRSyncMessage new.
-	handler := PBMessageHandler 
+	msg := LanguageLinkRSyncMessage new.
+	handler := LanguageLinkMessageHandler 
 						forMessage: msg 
 						callback: [ :aMsg |
 							self assert: msg equals: aMsg.
@@ -62,8 +62,8 @@ PBMessageHandlerTest >> testSyncMessage [
 	| flag msg handler ans |
 	flag := false.
 	ans := nil.
-	msg := PBSyncMessage new.
-	handler := PBMessageHandler 
+	msg := LanguageLinkSyncMessage new.
+	handler := LanguageLinkMessageHandler 
 						forMessage: msg 
 						callback: [ :aMsg |
 							self assert: msg equals: aMsg.

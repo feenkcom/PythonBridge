@@ -2,14 +2,15 @@ Class {
 	#name : #PBDeserializeTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'mapper'
+		'mapper',
+		'application'
 	],
 	#category : #'PythonBridge-Tests'
 }
 
 { #category : #running }
 PBDeserializeTest >> application [
-	^ 'FOO'
+	^ application ifNil: [ application := PBStubApplication new ]
 ]
 
 { #category : #running }
@@ -27,14 +28,12 @@ PBDeserializeTest >> deserializer [
 { #category : #running }
 PBDeserializeTest >> setUp [
 	super setUp.
-	mapper := PBMapperFactory forExecutionHandler: self stubExecutionHandler
+	mapper := LanguageLinkMapperFactory forExecutionHandler: self stubExecutionHandler
 ]
 
 { #category : #running }
 PBDeserializeTest >> stubExecutionHandler [
-	^ PBExecutionHandler new
-			application: self application;
-			yourself
+	^ PBExecutionHandler application: self application
 ]
 
 { #category : #tests }
@@ -53,7 +52,7 @@ PBDeserializeTest >> testDeserializeProxy [
 	proxy := self deserialize: '{"__pyclass__":"MyClass","__pyid__":"abcde12345"}'.
 	self assert: proxy pythonClass equals: #MyClass.
 	self assert: proxy application equals: self deserializer application.
-	self assert: proxy application equals: 'FOO'.
+	self assert: proxy application equals: self application.
 	self assert: proxy pythonVariable equals: 'abcde12345' asP3GI
 ]
 
@@ -65,6 +64,6 @@ PBDeserializeTest >> testDeserializeProxyInArray [
 	proxy := arr first.
 	self assert: proxy pythonClass equals: #MyClass.
 	self assert: proxy application equals: self deserializer application.
-	self assert: proxy application equals: 'FOO'.
+	self assert: proxy application equals: self application.
 	self assert: proxy pythonVariable equals: 'abcde12345' asP3GI
 ]

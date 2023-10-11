@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 PBMessageTest >> stubMessage [
-	^ PBStubMessage new
+	^ LanguageLinkStubMessage new
 		ivar1: #foo;
 		ivar2: #(3 #bar);
 		yourself
@@ -30,14 +30,14 @@ PBMessageTest >> testDecodeAnswer [
 { #category : #tests }
 PBMessageTest >> testDecodeBaseMessage [
 	self 
-		assert: (PBSyncMessage new createAnswer decode: { #type -> #MSG } asDictionary) class
-		equals: PBAnswer
+		assert: (LanguageLinkSyncMessage new createAnswer decode: { #type -> #MSG } asDictionary) class
+		equals: LanguageLinkAnswer
 ]
 
 { #category : #tests }
 PBMessageTest >> testEncodeBaseMessage [
 	self 
-		assert: PBMessage new encode 
+		assert: LanguageLinkMessage new encode 
 		equals: { #type -> #MSG } asDictionary
 ]
 

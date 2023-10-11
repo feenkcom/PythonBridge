@@ -9,7 +9,7 @@ Class {
 
 { #category : #hooks }
 PBPharoPlatform class >> httpMessageBrokerClass [
-	^ PBHttpMessageBroker
+	^ LanguageLinkHttpMessageBroker
 ]
 
 { #category : #hooks }
@@ -39,7 +39,7 @@ PBPharoPlatform class >> runtimeSourceDirectory: anAbstractFileReference [
 
 { #category : #hooks }
 PBPharoPlatform class >> socketMessageBrokerClass [
-	^ PBMsgPackPharoBroker
+	^ LanguageLinkMsgPackPharoBroker
 ]
 
 { #category : #private }
@@ -49,7 +49,7 @@ PBPharoPlatform class >> uiManagerClass [
 
 { #category : #hooks }
 PBPharoPlatform class >> weakRegistryClass [
-	^ PBPharoWeakRegistry
+	^ LanguageLinkPharoWeakRegistry
 ]
 
 { #category : #private }
@@ -128,11 +128,6 @@ PBPharoPlatform >> installEnvironmentForApp: application [
 	folder := application workingDirectory.
 	(folder / '.venv') exists ifFalse: [ 
 		self forceInstallEnvironmentForApp: application ]
-]
-
-{ #category : #hooks }
-PBPharoPlatform >> newRandomName [
-	^ 'pb' , UUID new asString36
 ]
 
 { #category : #utils }

@@ -14,7 +14,7 @@ PBHttpMessageBrokerTest >> answer: aDictionary [
 
 { #category : #utils }
 PBHttpMessageBrokerTest >> buildAndStartStubServer [
-	stubServer := ZnServer on: settings pythonSocketAddress port.
+	stubServer := ZnServer on: settings serverSocketAddress port.
 	stubServer start.
 	stubServer onRequestRespond: [ :req | self primHandle: req ]
 ]
@@ -31,7 +31,7 @@ PBHttpMessageBrokerTest >> errorResponse [
 
 { #category : #hooks }
 PBHttpMessageBrokerTest >> messageBrokerClass [
-	^ PBHttpMessageBroker
+	^ LanguageLinkHttpMessageBroker
 ]
 
 { #category : #private }
@@ -44,7 +44,7 @@ PBHttpMessageBrokerTest >> primHandle: aRequest [
 		] on: Error do: [ :e | 
 			handlerException := e.
 			^ self errorResponse ].
-	answer := [ PBNeoJsonSerializer new serialize: answer ] on: Error do: [ '{}' ].
+	answer := [ LanguageLinkNeoJsonSerializer new serialize: answer ] on: Error do: [ '{}' ].
 	^ ZnResponse ok: (ZnEntity json: answer)
 ]
 

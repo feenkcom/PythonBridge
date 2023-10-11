@@ -1,18 +1,13 @@
 Class {
 	#name : #PBDeserializer,
-	#superclass : #PBMapper,
+	#superclass : #LanguageLinkDeserializer,
 	#category : #'PythonBridge-Serialization'
 }
 
-{ #category : #'private protocol' }
+{ #category : #'instance creation' }
 PBDeserializer class >> deserialize: anObject [
 	^ self new
 		deserialize: anObject
-]
-
-{ #category : #'private protocol' }
-PBDeserializer >> application [
-	^ self executionHandler application
 ]
 
 { #category : #'private protocol' }
@@ -24,16 +19,6 @@ PBDeserializer >> buildProxyFor: rawObject [
 					application: self application.
 	self executionHandler registerObject: proxy.
 	^ proxy
-]
-
-{ #category : #'private protocol' }
-PBDeserializer >> deserialize: str [
-	^ self privateDeserialize: (serializerWrapper deserialize: str).
-]
-
-{ #category : #'private protocol' }
-PBDeserializer >> objectRegistry [
-	^ self executionHandler objectRegistry
 ]
 
 { #category : #'private protocol' }

@@ -13,5 +13,5 @@ PBPharoWeakFinalizerTest >> triggerGC [
 
 { #category : #running }
 PBPharoWeakFinalizerTest >> weakRegistryClass [
-	^ PBPharoWeakRegistry
+	^ LanguageLinkPharoWeakRegistry
 ]

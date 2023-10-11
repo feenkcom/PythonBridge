@@ -20,7 +20,7 @@ PBWeakFinalizerTest >> assertCount: anInteger [
 
 { #category : #running }
 PBWeakFinalizerTest >> countFinalizer [
-	^ PBBlockFinalizer block: [ assertCounter := assertCounter + 1 ]
+	^ LanguageLinkBlockFinalizer block: [ assertCounter := assertCounter + 1 ]
 ]
 
 { #category : #running }

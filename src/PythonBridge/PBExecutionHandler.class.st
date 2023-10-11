@@ -5,21 +5,16 @@ Class {
 }
 
 { #category : #initialization }
-PBExecutionHandler >> initialize [
-	super initialize.
+PBExecutionHandler >> initializeHandler [
 	commandQueue := PBCommandQueue new.
-	mapperFactory := PBMapperFactory forExecutionHandler: self.
+	mapperFactory := LanguageLinkMapperFactory forExecutionHandler: self.
 	promiseRegistry := LanguageLinkPromiseRegistry new.
 	weakRegistry := PBPlatform current weakRegistry.
-	objectRegistry := LanguageLinkObjectRegistry new
-]
-
-{ #category : #initialization }
-PBExecutionHandler >> initializeHandler [
+	objectRegistry := LanguageLinkObjectRegistry new.
 	self communicationHandler
-		addHandler: [ :msg | self notifyHandler: msg ] forMessageClass: PBUpdatePromiseMessage;
-		addHandler: [ :msg | self notifyErrorHandler: msg ] forMessageClass: PBErrorMessage;
-		addHandler: [ :msg | self notifyCallbackHandler: msg ] forMessageClass: PBCallbackMessage
+		addHandler: [ :msg | self notifyHandler: msg ] forMessageClass: LanguageLinkUpdatePromiseMessage;
+		addHandler: [ :msg | self notifyErrorHandler: msg ] forMessageClass: LanguageLinkErrorMessage;
+		addHandler: [ :msg | self notifyCallbackHandler: msg ] forMessageClass: LanguageLinkCallbackMessage
 ]
 
 { #category : #'as yet unclassified' }
@@ -51,13 +46,6 @@ PBExecutionHandler >> notifyErrorHandler: errorMsg [
 			yourself
 ]
 
-{ #category : #handlers }
-PBExecutionHandler >> notifyHandler: updatePromiseMsg [
-	self 
-		updatePromiseId: updatePromiseMsg promiseId 
-		with: (self deserialize: updatePromiseMsg value)
-]
-
 { #category : #initialization }
 PBExecutionHandler >> objectRegistry [
 	^ objectRegistry
@@ -66,16 +54,6 @@ PBExecutionHandler >> objectRegistry [
 { #category : #'private protocol' }
 PBExecutionHandler >> primitiveSendCommand: command [
 	^ self communicationHandler sendMessage: (self buildMessageFromCommand: command)
-]
-
-{ #category : #accessing }
-PBExecutionHandler >> registerObject: aPythonObject [
-	objectRegistry registerObject: aPythonObject.
-	weakRegistry 
-		registerObject: aPythonObject 
-		finalizer: (LanguageLinkRegistryFinalizer 
-							variable: aPythonObject pythonVariable 
-							executionHandler: self)
 ]
 
 { #category : #'private protocol' }

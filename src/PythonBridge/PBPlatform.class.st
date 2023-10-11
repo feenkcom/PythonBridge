@@ -1,10 +1,6 @@
 Class {
 	#name : #PBPlatform,
-	#superclass : #Object,
-	#instVars : [
-		'msgBrokerStrategy',
-		'processStrategy'
-	],
+	#superclass : #LanguageLinkPlatform,
 	#classVars : [
 		'Current'
 	],
@@ -74,16 +70,6 @@ PBPlatform class >> socketMessageBrokerClass [
 	self subclassResponsibility
 ]
 
-{ #category : #hooks }
-PBPlatform class >> uiManagerClass [
-	self subclassResponsibility
-]
-
-{ #category : #hooks }
-PBPlatform class >> weakRegistryClass [
-	self subclassResponsibility
-]
-
 { #category : #'message broker strategy' }
 PBPlatform >> defaultMessageBrokerClass [
 	^ self class httpMessageBrokerClass
@@ -92,19 +78,26 @@ PBPlatform >> defaultMessageBrokerClass [
 { #category : #utils }
 PBPlatform >> defaultSettings [
 	| basePortNumber |
-
 	"Use 3 consecutive port numbers, makes it easier to listen using a port range in wireshark"
 	basePortNumber := 7000 + 99 atRandom.
 	^ PBSettings new
-		pharoSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber);
-		pythonSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber+1);
-		debugSocketAddress: (PBSocketAddress ipOrName: 'localhost' port: basePortNumber+2);
-		workingDirectory:  FileLocator imageDirectory / PBApplication runtimeDirectory 
+		clientSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber);
+		serverSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 1);
+		debugSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 2);
+		messageBrokerStrategy: LanguageLinkMsgPackPharoBroker;
+		platform: PBPharoPlatform new;
+		commandFactoryClass: PBCommandFactory;
+		commandClass: PBCommand;
+		serializerClass: LanguageLinkSerializer;
+		deserializerClass: PBDeserializer;
+		parserClass: PythonParser;
+		connectionExceptionHandler: PharoLinkConnectionExceptionHandler new;
+		workingDirectory: FileLocator imageDirectory / PBApplication runtimeDirectory
 ]
 
-{ #category : #hooks }
-PBPlatform >> ensureEnvironmentForApp: anApplication [
-	self subclassResponsibility
+{ #category : #accessing }
+PBPlatform >> folderForApplication [
+	^ FileLocator imageDirectory / PBApplication runtimeDirectory
 ]
 
 { #category : #'module creation' }
@@ -122,9 +115,9 @@ PBPlatform >> messageBrokerStrategy: msgBrokerCls [
 	msgBrokerStrategy := msgBrokerCls
 ]
 
-{ #category : #utils }
+{ #category : #accessing }
 PBPlatform >> newRandomName [
-	self subclassResponsibility
+	^ 'pb' , UUID new asString36
 ]
 
 { #category : #'module creation' }
@@ -142,11 +135,6 @@ PBPlatform >> processStrategy: processCls [
 	processStrategy := processCls
 ]
 
-{ #category : #'accessing modules' }
-PBPlatform >> serializer [
-	^ self messageBrokerStrategy serializer
-]
-
 { #category : #'message broker strategy' }
 PBPlatform >> setHttpMessageBroker [
 	self messageBrokerStrategy: self class httpMessageBrokerClass
@@ -160,14 +148,4 @@ PBPlatform >> setPipenvProcess [
 { #category : #'message broker strategy' }
 PBPlatform >> setSocketMessageBroker [
 	self messageBrokerStrategy: self class socketMessageBrokerClass
-]
-
-{ #category : #'module creation' }
-PBPlatform >> uiManager [
-	^ self class uiManagerClass new
-]
-
-{ #category : #'module creation' }
-PBPlatform >> weakRegistry [
-	^ self class weakRegistryClass new
 ]

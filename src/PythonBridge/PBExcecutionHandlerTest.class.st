@@ -12,10 +12,8 @@ Class {
 PBExcecutionHandlerTest >> setUp [
 	| app |
 	app := PBStubApplication new.
-	execHandler := PBExecutionHandler new 
-							application: app;
-							yourself.
-	commandFactory := PBCommandFactory new.
+	execHandler := PBExecutionHandler application: app.
+	commandFactory := PBCommandFactory new
 ]
 
 { #category : #accessing }

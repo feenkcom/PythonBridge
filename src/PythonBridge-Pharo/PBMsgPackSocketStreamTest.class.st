@@ -19,12 +19,12 @@ PBMsgPackSocketStreamTest >> connectStreams: aBlock [
 		semaphore := Semaphore new.
 		[ 	clientSocket := serverSocket waitForAcceptFor: 10.
 			semaphore signal. ] forkAt: self serverPriority.
-		[	clientStream := PBMsgPackUtils openConnectionToHost: #[ 127 0 0 1 ] port: self port.
+		[	clientStream := LanguageLinkMsgPackUtils openConnectionToHost: #[ 127 0 0 1 ] port: self port.
 			semaphore wait.
-			[	serverStream := PBMsgPackUtils primStreamFromSocket: clientSocket.
+			[	serverStream := LanguageLinkMsgPackUtils primStreamFromSocket: clientSocket.
 				aBlock 
-					value: (PBMsgPackSocketStream on: serverStream) 
-					value: (PBMsgPackSocketStream on: clientStream)
+					value: (LanguageLinkMsgPackSocketStream on: serverStream) 
+					value: (LanguageLinkMsgPackSocketStream on: clientStream)
 				 ]
 			ensure: [ serverStream close ] ]
 		ensure: [ clientStream close ]. ]
@@ -63,9 +63,9 @@ PBMsgPackSocketStreamTest >> serverSocketOn: port [
 	| socket |
 	(socket := Socket newTCP)
 		setOption: 'TCP_NODELAY' value: 1;
-		setOption: 'SO_SNDBUF' value: PBMsgPackUtils socketBufferSize;
-		setOption: 'SO_RCVBUF' value: PBMsgPackUtils socketBufferSize .
-	socket listenOn: port backlogSize: PBMsgPackUtils listenBacklogSize.
+		setOption: 'SO_SNDBUF' value: LanguageLinkMsgPackUtils socketBufferSize;
+		setOption: 'SO_RCVBUF' value: LanguageLinkMsgPackUtils socketBufferSize .
+	socket listenOn: port backlogSize: LanguageLinkMsgPackUtils listenBacklogSize.
 	socket isValid
 		ifFalse: [ self error: 'Cannot create socket on port ', port printString ].
 	^ socket

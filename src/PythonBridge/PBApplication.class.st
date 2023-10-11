@@ -27,61 +27,11 @@ PBApplication class >> initialize [
 	SessionManager default registerToolClassNamed: self name
 ]
 
-{ #category : #'start-stop' }
-PBApplication class >> killAll [
-	"Stop ALL PBApplication instances and kill any server processes that may still be running."
-	| allInstances firstApplication wd proc error |
-
-	allInstances := self allInstances.
-	allInstances ifEmpty: [ ^ self ].
-	firstApplication := allInstances
-		detect: #isRunning 
-		ifNone: [ allInstances first ].
-	allInstances do: #stop.
-	wd := firstApplication workingDirectory.
-	proc := GtSubprocessWithInMemoryOutput new command: (wd / 'killpbservers.sh') fullName.
-	proc runAndWait.
-	proc isSuccess ifFalse: 
-		[ error:= LanguageLinkProcessError new
-		application: firstApplication;
-		process: proc.
-		error signal ].
-	self assert: proc stderr trimBoth isEmpty.
-	^ proc stdout
-]
-
-{ #category : #'pipenv setup' }
-PBApplication class >> platform [
-	^ PBPlatform current
-]
-
-{ #category : #'python hooks file' }
-PBApplication class >> repositoryFileReference [
-
-	self deprecated: 'This should be run against a PBApplication instance that knows its runtime directory'.
-	"^ self platform runtimeFolderForApplication: self"
-]
-
-{ #category : #instructions }
-PBApplication class >> resetUniqueInstance [
-	uniqueInstance ifNotNil: [ 
-		[ uniqueInstance stop ] 
-			on: Error 
-			do: [ PBPlatform current uiManager inform: 'Error on reseting unique instance.' ]. ].
-	uniqueInstance := nil
-]
-
 { #category : #accessing }
 PBApplication class >> runtimeDirectory [
 	"This is the directory basename where the runtime files are located"
 
 	^ 'PythonBridgeRuntime'
-]
-
-{ #category : #instructions }
-PBApplication class >> send: obj [
-	self assert: self isRunning.
-	^ self uniqueInstance send: obj
 ]
 
 { #category : #accessing }
@@ -109,12 +59,6 @@ PBApplication class >> test [
                      yourself).
 		app commandFactory send waitForValue
 	  ]) = 3
-]
-
-{ #category : #instructions }
-PBApplication class >> uniqueInstance [
-	uniqueInstance ifNil: [ self start ].
-	^ uniqueInstance
 ]
 
 { #category : #utils }
@@ -184,17 +128,16 @@ PBApplication >> pipenvPath [
 
 { #category : #printing }
 PBApplication >> printOn: aStream [
-
 	aStream
 		<< self class name;
 		<< '('.
-	self isRunning ifFalse:
-		[ aStream << 'not running)'.
-		^ self ].
+	self isRunning
+		ifFalse: [ aStream << 'not running)'.
+			^ self ].
 	aStream
-		print: settings pharoSocketAddress;
+		print: settings clientSocketAddress;
 		<< ', ';
-		print: settings pythonSocketAddress;
+		print: settings serverSocketAddress;
 		<< ')'
 ]
 
