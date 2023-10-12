@@ -6,7 +6,7 @@ Class {
 
 { #category : #initialization }
 PBExecutionHandler >> initializeHandler [
-	commandQueue := PBCommandQueue new.
+	commandQueue := LanguageLinkCommandRegistry new.
 	mapperFactory := LanguageLinkMapperFactory forExecutionHandler: self.
 	promiseRegistry := LanguageLinkPromiseRegistry new.
 	weakRegistry := PBPlatform current weakRegistry.
@@ -29,21 +29,6 @@ PBExecutionHandler >> newCommandStringFactory [
 	^ PBCommandStringFactory new
 		application: self application;
 		yourself
-]
-
-{ #category : #handlers }
-PBExecutionHandler >> notifyErrorHandler: errorMsg [
-	| error |
-	error := PharoLinkRemoteError new
-					application: self application;
-					command: (commandQueue getCommand: errorMsg commandId);
-					errorMessage: errorMsg errorMessage;
-					trace: errorMsg trace;
-					yourself.
-	self safeTriggerDebugger: error.
-	^ errorMsg createAnswer 
-			handlingAction: error proceedAction;
-			yourself
 ]
 
 { #category : #initialization }
@@ -76,14 +61,4 @@ PBExecutionHandler >> registryExpression [
 { #category : #accessing }
 PBExecutionHandler >> removeId: aRemoteProxyId [
 	^ self registryExpression => #clean callWith: (Array with: aRemoteProxyId)
-]
-
-{ #category : #'private protocol' }
-PBExecutionHandler >> sendCommand: command [
-	| promise |
-	self assert: command isValid.
-	commandQueue enqueueCommand: command.
-	promise := self registerPromiseForCommand: command.
-	self primitiveSendCommand: command.
-	^ promise
 ]
