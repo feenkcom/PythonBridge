@@ -8,11 +8,6 @@ def ensure_global_registry():
 def registry():
     return PythonBridge.bridge_globals.ObjectRegistry
 
-primitive = (int, str, bool)
-
-def is_primitive(obj):
-    return isinstance(obj, primitive)
-
 class Registry():
 
     def __init__(self):
@@ -26,7 +21,7 @@ class Registry():
         return uuid1().hex
     
     def register(self, obj):
-        if obj is None or is_primitive(obj):
+        if obj is None:
             return 0
         if id(obj) in self.objToIdMap:
             return self.objToIdMap[id(obj)]
@@ -34,7 +29,7 @@ class Registry():
             return self._register(obj, self.createNewObjId())
     
     def register_with_id(self, obj, newObjId):
-        if obj is None or is_primitive(obj):
+        if obj is None:
             return RegisterForbiddenObject(obj)
         if id(obj) in self.objToIdMap:
             objId = self.objToIdMap[id(obj)]
@@ -69,6 +64,14 @@ class Registry():
                 is_proxy = True
 
         return is_proxy
+
+    def proxy(self, obj):
+        if obj == None:
+            return obj
+        return {
+            '__pyclass__': type(obj).__name__,
+            '__pyid__': self.register(obj)
+            }
 
 class RegistryError(Exception):
     pass

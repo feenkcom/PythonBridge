@@ -1,3 +1,5 @@
+from PythonBridge import bridge_globals
+
 class GtPhlowItemValue:
 	def __init__(self, text = ""):
 		self.itemText = text
@@ -62,9 +64,7 @@ class GtPhlowListingDataSource:
 		return result
 
 	def retriveSentItemAt(self, index):
-		if (self.accessor != None):
-			return self.accessor(index)
-		return self.values[index - 1]
+		return bridge_globals.ObjectRegistry.proxy(self.values[index - 1] if self.accessor == None else self.accessor(index))
 
 	def flushItemsIterator(self):
 		self.values = None
@@ -117,9 +117,7 @@ class GtPhlowColumnedTreeDataSource(GtPhlowColumnedListDataSource):
 
 	def retriveSentItemAtPath(self, path):
 		node = self.nodeForPath(path)
-		if (self.accessor != None):
-			return self.accessor(node)
-		return node
+		return bridge_globals.ObjectRegistry.proxy(node if self.accessor == None else self.accessor(node))
 
 	def retrieveChildrenForNodeAtPath(self, path):
 		result = []
