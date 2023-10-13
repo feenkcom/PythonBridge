@@ -14,6 +14,9 @@ def deserialize(text):
 def observer(commandId, observerId):
 	return lambda obj: notify_observer(obj, commandId, observerId)
 
+def registry():
+	return bridge_globals.ObjectRegistry
+
 #### NOTIFICATION FUNCTIONS
 def notify(obj, notificationId):
 	bridge_globals.logger.log("PYTHON: Notify " + str(notificationId))

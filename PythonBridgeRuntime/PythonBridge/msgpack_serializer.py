@@ -29,10 +29,7 @@ class MsgPackSerializer:
             return obj
         if type(obj) in self.mapper():
             return self.mapper()[type(obj)](obj)
-        return {
-            '__pyclass__': type(obj).__name__,
-            '__pyid__': registry().register(obj)
-            }
+        return registry().proxy(obj)
 
     def serialize(self, obj):
         return msgpack.packb(obj, default=self.default, use_bin_type=True)

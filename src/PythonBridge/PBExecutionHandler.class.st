@@ -37,11 +37,6 @@ PBExecutionHandler >> objectRegistry [
 ]
 
 { #category : #'private protocol' }
-PBExecutionHandler >> primitiveSendCommand: command [
-	^ self communicationHandler sendMessage: (self buildMessageFromCommand: command)
-]
-
-{ #category : #'private protocol' }
 PBExecutionHandler >> registerPromiseForCommand: aCommand [
 	| promise |
 	promise := PBPromise new
