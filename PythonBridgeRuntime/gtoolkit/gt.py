@@ -34,7 +34,7 @@ class GtViewedObject:
 
 	def gtViewRaw(self, aBuilder):
 		return aBuilder.columnedList()\
-			.title("Raw (Python)")\
+			.title("Raw")\
 			.priority(9998)\
 			.items(lambda: self.attributesFor(self.object))\
 			.column("Item", lambda each: each[0])\
@@ -43,7 +43,7 @@ class GtViewedObject:
 	
 	def gtViewPrint(self, aBuilder):
 		return aBuilder.textEditor()\
-			.title("Print (Python)")\
+			.title("Print")\
 			.priority(9999)\
 			.setString(str(self.object))
 
