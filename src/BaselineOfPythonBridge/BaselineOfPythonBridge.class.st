@@ -16,7 +16,7 @@ BaselineOfPythonBridge >> baseline: spec [
 				spec repository: 'github://juliendelplanque/Python3Generator:v2.0.0/repository' ].
 		spec
 			baseline: 'NeoJSON' with: [
-				spec repository: 'github://svenvc/NeoJSON:d70b6df718339c2aef88ac70f8c5577f755ba667/repository' ].
+				spec repository: 'github://svenvc/NeoJSON:2415f508808bc0d29ed74e3e816f59bfc8aac895/repository' ].
 		spec
 			baseline: 'MessagePack' with: [
 				spec repository: 'github://feenkcom/msgpack-smalltalk:v1.3.5/repository' ].
