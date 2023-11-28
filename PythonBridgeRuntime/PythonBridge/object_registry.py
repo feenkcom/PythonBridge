@@ -66,7 +66,7 @@ class Registry():
         return is_proxy
 
     def proxy(self, obj):
-        if obj == None:
+        if obj is None:
             return obj
         return {
             '__pyclass__': type(obj).__name__,
