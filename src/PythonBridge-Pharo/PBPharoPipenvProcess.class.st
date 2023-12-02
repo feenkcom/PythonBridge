@@ -47,7 +47,7 @@ PBPharoPipenvProcess class >> reset [
 PBPharoPipenvProcess class >> resolvePipenvPath [
 	| path process |
 	process := GtSubprocessWithInMemoryOutput new
-			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ '/usr/bin/which' ]);
+			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
 			arguments: #('pipenv');
 			addAllEnvVariablesFromParentWithoutOverride;
 			terminateOnShutdown;
