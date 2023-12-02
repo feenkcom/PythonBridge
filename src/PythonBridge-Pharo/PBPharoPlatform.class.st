@@ -92,6 +92,7 @@ PBPharoPlatform >> ensureEnvironmentForApp: anApplication [
 { #category : #utils }
 PBPharoPlatform >> forceInstallEnvironmentForApp: application [
 	| proc pipenvPath |
+
 	pipenvPath := application pipenvPath.
 	self
 		assert: pipenvPath exists
@@ -109,7 +110,7 @@ PBPharoPlatform >> forceInstallEnvironmentForApp: application [
 				terminateOnShutdown;
 				runAndWait ]
 		ifFalse: [ proc := GtSubprocessWithInMemoryOutput new
-					command: '/bin/bash';
+					command: 'bash';
 					workingDirectory: application workingDirectory fullName;
 					addAllEnvVariablesFromParentWithoutOverride.
 			proc
