@@ -23,6 +23,9 @@ class Beacon:
         self.start = 0
         self.end = 0
 
+    def duration(self):
+        return self.end-self.start
+
 
 class BeaconGroup:
     def __init__(self) -> None:
