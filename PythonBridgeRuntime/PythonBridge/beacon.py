@@ -1,28 +1,39 @@
 import functools
 import time
+import inspect
 from typing import Any
 
 def beacon(message):
     def decorator_beacon(func):
         @functools.wraps(func)
         def wrapper_beacon(*args, **kwargs):
-            beacon = Beacon()
-            beacon.message = message
-            beacon.start = time.perf_counter_ns()
+            beacon = Beacon(message)
+            frame = inspect.stack()[3]
+            beacon.file = frame.filename
+            beacon.line = frame.lineno
+            beacon.set_start()
             value = func(*args, **kwargs)
-            beacon.end  = time.perf_counter_ns()
-            global beacons
-            beacons.add_beacon(beacon)
+            beacon.set_end()
             return value
         return wrapper_beacon
     return decorator_beacon 
 
 class Beacon:
-    def __init__(self) -> None:
-        self.message = 'Foobar'
+    def __init__(self, message) -> None:
+        self.message = message
+        self.file = ''
+        self.line = 0
         self.start = 0
         self.end = 0
 
+    def set_start(self):
+        self.start = time.perf_counter_ns()
+
+    def set_end(self):
+        self.end = time.perf_counter_ns()
+        global beacons
+        beacons.add_beacon(self)
+        
     def duration(self):
         return self.end-self.start
 
