@@ -1,9 +1,10 @@
 import argparse
 import threading
 import time
-
+from .beacon import beacon
 
 # Calculate the factorial
+@beacon("Factorial function")
 def factorial(n, t):
     time.sleep(n*t/4)
     print("Start: " + str(t) + ": " + str(n))
@@ -17,6 +18,7 @@ def factorial(n, t):
 
 
 # Calculate the factorial and print the result
+@beacon("Factorial thread")
 def factorial_thread(n, t):
     time.sleep(2)
     result = factorial(n, t)
