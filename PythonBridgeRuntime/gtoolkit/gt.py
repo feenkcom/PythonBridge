@@ -28,6 +28,9 @@ class GtViewedObject:
 		exportData = view.asDictionaryForExport()
 		exportData["methodSelector"] = viewName
 		return exportData
+		
+	def getViewsDeclarations(self):
+		return list(filter(lambda each: each["viewName"] != "empty", map(lambda each: self.getViewDeclaration(each), self.getGtViewMethodNames())))
 
 	def attributesFor(self, anObject):
 		return list(map(lambda each: [each, getattr(anObject, each, "")], dir(anObject)))
@@ -39,7 +42,7 @@ class GtViewedObject:
 			.items(lambda: self.attributesFor(self.object))\
 			.column("Item", lambda each: each[0])\
 			.column("Value", lambda each: each[1])\
-			.set_accessor(lambda selection: self.attributesFor(self.object)[selection-1][1])
+			.set_accessor(lambda selection: self.attributesFor(self.object)[selection][1])
 	
 	def gtViewPrint(self, aBuilder):
 		return aBuilder.textEditor()\
