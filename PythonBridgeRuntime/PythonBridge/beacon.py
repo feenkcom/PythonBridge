@@ -24,6 +24,7 @@ class Beacon:
         self.line = 0
         self.start = 0
         self.end = 0
+        self.children = [] # not computed until requested
 
     def set_start(self):
         self.start = time.perf_counter_ns()
@@ -58,12 +59,12 @@ class BeaconGroup:
             return [index, []]
         root = list[index]
         index = index + 1
-        children = []
+        root.children = []
         while index < len(list) and list[index].start < root.end:
             [newindex, kids] = self.compute_tree(index, list)
-            children.append(kids)
+            root.children.append(kids)
             index = newindex
-        return [index, [ root, children ]]
+        return [index, root]
 
     def add_beacon(self, beacon):
         self.beacons.append(beacon)
@@ -82,9 +83,9 @@ class BeaconGroup:
             .title("Tree")\
             .priority(2)\
             .items(lambda: self.get_beacon_tree())\
-            .children(lambda each: each[1])\
-            .column("Message", lambda each: each[0].message)\
-            .column("Duration", lambda each: each[0].end - each[0].start)
+            .children(lambda each: each.children)\
+            .column("Message", lambda each: each.message)\
+            .column("Duration", lambda each: each.end - each.start)
 
 def reset_beacons():
     global beacons
