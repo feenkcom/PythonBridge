@@ -64,7 +64,7 @@ class GtPhlowListingDataSource:
 		return result
 
 	def retriveSentItemAt(self, index):
-		return bridge_globals.ObjectRegistry.proxy(self.values[index - 1] if self.accessor == None else self.accessor(index))
+		return bridge_globals.ObjectRegistry.proxy(self.values[index - 1] if self.accessor == None else self.accessor(index - 1))
 
 	def flushItemsIterator(self):
 		self.values = None

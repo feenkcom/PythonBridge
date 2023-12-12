@@ -42,7 +42,7 @@ class GtViewedObject:
 			.items(lambda: self.attributesFor(self.object))\
 			.column("Item", lambda each: each[0])\
 			.column("Value", lambda each: each[1])\
-			.set_accessor(lambda selection: self.attributesFor(self.object)[selection-1][1])
+			.set_accessor(lambda selection: self.attributesFor(self.object)[selection][1])
 	
 	def gtViewPrint(self, aBuilder):
 		return aBuilder.textEditor()\
