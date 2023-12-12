@@ -8,9 +8,8 @@ def beacon(message):
         @functools.wraps(func)
         def wrapper_beacon(*args, **kwargs):
             beacon = Beacon(message)
-            frame = inspect.stack()[3]
-            beacon.file = frame.filename
-            beacon.line = frame.lineno
+            beacon.file = inspect.getsourcefile(func)
+            [_, beacon.line] = inspect.getsourcelines(func)
             beacon.set_start()
             value = func(*args, **kwargs)
             beacon.set_end()
