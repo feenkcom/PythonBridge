@@ -28,6 +28,9 @@ class GtViewedObject:
 		exportData = view.asDictionaryForExport()
 		exportData["methodSelector"] = viewName
 		return exportData
+		
+	def getViewsDeclarations(self):
+		return list(filter(lambda each: each["viewName"] != "empty", map(lambda each: self.getViewDeclaration(each), self.getGtViewMethodNames())))
 
 	def attributesFor(self, anObject):
 		return list(map(lambda each: [each, getattr(anObject, each, "")], dir(anObject)))
