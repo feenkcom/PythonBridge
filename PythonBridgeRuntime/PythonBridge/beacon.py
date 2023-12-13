@@ -8,9 +8,9 @@ def beacon(message):
         @functools.wraps(func)
         def wrapper_beacon(*args, **kwargs):
             signal = BeaconSignal(message)
+            signal.set_start()
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
-            signal.set_start()
             value = func(*args, **kwargs)
             signal.set_end()
             return value
@@ -28,11 +28,15 @@ class BeaconSignal:
 
     def set_start(self):
         self.start = time.perf_counter_ns()
+        cf = inspect.stack()[1]
+        self.file = cf.filename
+        self.line = cf.lineno
+        return self
 
     def set_end(self):
         self.end = time.perf_counter_ns()
-        global beacons
-        beacons.add_beacon(self)
+        global signals
+        signals.add_signal(self)
         
     def duration(self):
         return self.end-self.start
@@ -91,6 +95,6 @@ def reset_signals():
     global signals
     signals = BeaconSignalGroup()
 
-def get_signal():
+def get_signals():
     global signals
     return signals
