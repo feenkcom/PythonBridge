@@ -5,6 +5,7 @@ class ForwardView(View):
 		super().__init__()
 		self.objectComputation = lambda : None
 		self.forwardView = None
+		self.computedView = None
 
 	def object(self, objectComputation):
 		self.objectComputation = objectComputation
@@ -23,9 +24,13 @@ class ForwardView(View):
 	def dataSource(self):
 		return self
 
+	def getDataSource(self, viewName):
+		return self.computedView.dataSource()
+
 	def getViewSpecificationForForwarding(self):
-		forwardView = getattr(self.getForwardObject(), self.getForwardView())(ViewBuilder())
-		exportData = view.asDictionaryForExport()
+		from .view_builder import ViewBuilder
+		self.computedView = getattr(self.getForwardObject(), self.getForwardView())(ViewBuilder())
+		exportData = self.computedView.asDictionaryForExport()
 		exportData["methodSelector"] = self.getForwardView()
 		return exportData
 
