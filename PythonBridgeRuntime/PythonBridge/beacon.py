@@ -7,17 +7,17 @@ def beacon(message):
     def decorator_beacon(func):
         @functools.wraps(func)
         def wrapper_beacon(*args, **kwargs):
-            beacon = Beacon(message)
-            beacon.file = inspect.getsourcefile(func)
-            [_, beacon.line] = inspect.getsourcelines(func)
-            beacon.set_start()
+            signal = BeaconSignal(message)
+            signal.file = inspect.getsourcefile(func)
+            [_, signal.line] = inspect.getsourcelines(func)
+            signal.set_start()
             value = func(*args, **kwargs)
-            beacon.set_end()
+            signal.set_end()
             return value
         return wrapper_beacon
     return decorator_beacon 
 
-class Beacon:
+class BeaconSignal:
     def __init__(self, message) -> None:
         self.message = message
         self.file = ''
@@ -38,15 +38,15 @@ class Beacon:
         return self.end-self.start
 
 
-class BeaconGroup:
+class BeaconSignalGroup:
     def __init__(self) -> None:
-        self.beacons = []
+        self.signals = []
 
-    def get_beacons(self):
-        return sorted(self.beacons, key=lambda each: each.start)
+    def get_signals(self):
+        return sorted(self.signals, key=lambda each: each.start)
     
-    def get_beacon_tree(self):
-        b = self.get_beacons()
+    def get_signal_tree(self):
+        b = self.get_signals()
         value = []
         index = 0
         while index < len(b):
@@ -66,31 +66,31 @@ class BeaconGroup:
             index = newindex
         return [index, root]
 
-    def add_beacon(self, beacon):
-        self.beacons.append(beacon)
+    def add_signal(self, signal):
+        self.signals.append(signal)
 
-    def gtViewBeacons(self, aBuilder):
+    def gtViewSignals(self, aBuilder):
         return aBuilder.columnedList()\
-            .title("Beacons")\
+            .title("Signals")\
             .priority(1)\
-            .items(lambda: self.get_beacons())\
+            .items(lambda: self.get_signals())\
             .column("Message", lambda each: each.message)\
             .column("Start", lambda each: each.start)\
             .column("End", lambda each: each.end)
     
-    def gtViewBeaconsTree(self, aBuilder):
+    def gtViewSignalTree(self, aBuilder):
         return aBuilder.columnedTree()\
             .title("Tree")\
             .priority(2)\
-            .items(lambda: self.get_beacon_tree())\
+            .items(lambda: self.get_signal_tree())\
             .children(lambda each: each.children)\
             .column("Message", lambda each: each.message)\
-            .column("Duration", lambda each: each.end - each.start)
+            .column("Duration", lambda each: each.duration())
 
-def reset_beacons():
-    global beacons
-    beacons = BeaconGroup()
+def reset_signals():
+    global signals
+    signals = BeaconSignalGroup()
 
-def get_beacons():
-    global beacons
-    return beacons
+def get_signal():
+    global signals
+    return signals
