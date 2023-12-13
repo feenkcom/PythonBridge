@@ -31,8 +31,8 @@ class BeaconSignal:
 
     def set_end(self):
         self.end = time.perf_counter_ns()
-        global beacons
-        beacons.add_beacon(self)
+        global signals
+        signals.add_signal(self)
         
     def duration(self):
         return self.end-self.start
@@ -91,6 +91,6 @@ def reset_signals():
     global signals
     signals = BeaconSignalGroup()
 
-def get_signal():
+def get_signals():
     global signals
     return signals
