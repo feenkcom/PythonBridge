@@ -41,6 +41,15 @@ class BeaconSignal:
     def duration(self):
         return self.end-self.start
 
+    def gtViewSignalTree(self, aBuilder):
+        return aBuilder.columnedTree()\
+            .title("Tree")\
+            .priority(2)\
+            .items(lambda: [self])\
+            .children(lambda each: each.children)\
+            .column("Message", lambda each: each.message)\
+            .column("Duration", lambda each: each.duration())
+
 
 class BeaconSignalGroup:
     def __init__(self) -> None:
