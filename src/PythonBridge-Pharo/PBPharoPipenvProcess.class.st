@@ -48,12 +48,20 @@ PBPharoPipenvProcess class >> resolvePipenvPath [
 	| path process |
 	process := GtSubprocessWithInMemoryOutput new
 			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
-			arguments: #('pipenv');
-			addAllEnvVariablesFromParentWithoutOverride;
-			terminateOnShutdown;
-			runAndWait.
+			arguments: #('pipenv').
+	Smalltalk os isWindows
+		ifFalse: [ | originalPath extraPath extendedPath |
+			originalPath := $: split: (Smalltalk os environment at: 'PATH').
+			"Search in some extra places that might not be in PATH"
+			extraPath := #('/usr/local/bin').
+			extendedPath := $: join: extraPath , originalPath.
+			process environmentAt: 'PATH' put: extendedPath ].
+	process
+		addAllEnvVariablesFromParentWithoutOverride;
+		terminateOnShutdown;
+		runAndWait.
 	(#(0 1) includes: process exitCode)
-		ifFalse: [ self error: 'Unable to determine pipenv path' ].
+		ifFalse: [ self signalPipenvNotFound ].
 	path := process stdout trimBoth.
 	Smalltalk os isWindows
 		ifTrue: [ path := (path lines
@@ -71,13 +79,13 @@ PBPharoPipenvProcess class >> resolvePipenvPath [
 { #category : #initialization }
 PBPharoPipenvProcess class >> signalPipenvNotFound [
 	"
-	PythonBridge use the unix command `which` to find the route of the `pipenv` command. From Pharo
-	we could not find the route, therefore you have to set it mannualy.
+	PythonBridge use the unix command `which` to find the route of the `pipenv` command. 
+	From Pharo we could not find the route, therefore you have to set it mannualy.
 		
 	To find the path of Pipenv in your system run the command `which pipenv` in the terminal.
 	To set the path in PythonBridge send the following message:
 	
-	PBProcessHandler pipEnvPath: '/PATH/TO/PIPENV/BINARY'
+	PBPharoPipenvProcess pipenvPath: '/usr/local/bin/pipenv' asFileReference
 	
 	"
 	Error signal: 'Error: Pipenv command could not be found.'
