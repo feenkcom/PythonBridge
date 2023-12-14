@@ -57,11 +57,11 @@ PBPharoPipenvProcess class >> resolvePipenvPath [
 	path := process stdout trimBoth.
 	Smalltalk os isWindows
 		ifTrue: [ path := (path lines
-					reject: [ :aString | 
+					select: [ :aString | 
 						"We want to remove HOME\.pyenv\pyenv-win\shims\pipenv,
 						because it is a BASH script that is supposed to be executed
 						in cygwin or in git-bash."
-						aString asFileReference extension isEmpty ])
+						#(bat exe) includes: aString asFileReference extension asLowercase ])
 					ifEmpty: [ self signalPipenvNotFound ]
 					ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
 	path ifEmpty: [ self signalPipenvNotFound ].
