@@ -15,7 +15,36 @@ def beacon(message):
             signal.set_end()
             return value
         return wrapper_beacon
-    return decorator_beacon 
+    return decorator_beacon
+
+def argbeacon(message):
+    def decorator_beacon(func):
+        @functools.wraps(func)
+        def wrapper_beacon(*args, **kwargs):
+            signal = ArgumentBeaconSignal(message, kwargs)
+            signal.set_start()
+            signal.file = inspect.getsourcefile(func)
+            [_, signal.line] = inspect.getsourcelines(func)
+            value = func(*args, **kwargs)
+            signal.set_end()
+            return value
+        return wrapper_beacon
+    return decorator_beacon
+
+def pushumlbeacon(message):
+    def decorator_beacon(func):
+        @functools.wraps(func)
+        def wrapper_beacon(*args, **kwargs):
+            signal = PushUmlBeaconSignal(message, kwargs)
+            signal.set_start()
+            signal.file = inspect.getsourcefile(func)
+            [_, signal.line] = inspect.getsourcelines(func)
+            value = func(*args, **kwargs)
+            signal.return_queue = kwargs['queue'].copy()
+            signal.set_end()
+            return value
+        return wrapper_beacon
+    return decorator_beacon
 
 class BeaconSignal:
     def __init__(self, message) -> None:
@@ -40,7 +69,29 @@ class BeaconSignal:
         
     def duration(self):
         return self.end-self.start
+    
+    def gtViewSignalTree(self, aBuilder):
+        return aBuilder.columnedTree()\
+            .title("Tree")\
+            .priority(2)\
+            .items(lambda: [self])\
+            .children(lambda each: each.children)\
+            .column("Message", lambda each: each.message)\
+            .column("Duration", lambda each: each.duration())
 
+class ArgumentBeaconSignal(BeaconSignal):
+    def __init__(self, message, args):
+        super().__init__(message)
+        self.args = args.copy()
+
+class PushUmlBeaconSignal(ArgumentBeaconSignal):
+    def __init__(self, message, args):
+        super().__init__(message, args)
+        self.args['additional_ignore_edges'] = self.args['additional_ignore_edges'].copy()
+        self.args['queue'] = self.args['queue'].copy()
+
+    def entlastungsroute(self):
+        return self.args['entlastungsroute']
 
 class BeaconSignalGroup:
     def __init__(self) -> None:
