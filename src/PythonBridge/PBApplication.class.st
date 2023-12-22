@@ -55,12 +55,13 @@ PBApplication class >> shutdown: isImageQuitting [
 
 { #category : #'start-stop' }
 PBApplication class >> start [
-	self isRunning ifTrue: [ Error signal: 'Keras already running.' ].
+	self isRunning ifTrue: [ Error signal: 'Python bridge already running.' ].
 	self stop.
 	uniqueInstance := self new.
 	PBCF reset.
 	uniqueInstance commandFactory reset.
-	uniqueInstance start
+	uniqueInstance start.
+	^ uniqueInstance
 ]
 
 { #category : #testing }
