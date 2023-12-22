@@ -57,6 +57,6 @@ PBMessageTest >> testEncodeMessage [
 { #category : #tests }
 PBMessageTest >> testNoDuplicatedTypes [
 	| messageClasses |
-	messageClasses := PBAbstractMessage allSubclasses.
+	messageClasses := LanguageLinkAbstractMessage allSubclasses.
 	self assert: (messageClasses collect: #type) asSet size equals: messageClasses size
 ]
