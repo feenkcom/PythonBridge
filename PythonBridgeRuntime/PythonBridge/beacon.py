@@ -93,6 +93,21 @@ class PushUmlBeaconSignal(ArgumentBeaconSignal):
     def entlastungsroute(self):
         return self.args['entlastungsroute']
 
+    def schienennetz(self):
+        return self.args['schienen_netz']
+    
+    def node_geo_list(self):
+        geo_dict = self.schienennetz().get_geo_data_dict()
+        list =  [ { 'node' : n.ds_100_von, 
+                   'lat' : geo_dict[n.ds_100_von][1].item(),
+                   'lon' : geo_dict[n.ds_100_von][0].item() }
+                 for n in self.entlastungsroute() ]
+        last = self.entlastungsroute().get_end()
+        list.append( { 'node' : last, 
+                   'lat' : geo_dict[last][1].item(),
+                   'lon' : geo_dict[last][0].item() })
+        return list
+
 class BeaconSignalGroup:
     def __init__(self) -> None:
         self.signals = []

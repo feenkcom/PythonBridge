@@ -174,7 +174,7 @@ PBPharoPipenvProcess >> newProcess [
 				errorBlock: [ :proc :timedOut | 
 					"Don't signal an error if the process was externally killed, e.g. 'kill <pid>', since this is a normal part of the tests.
 					If it was externally killed there isn't an exit code"
-					proc exitStatusInterpreter hasCode ifTrue:
+					(proc exitStatusInterpreter ifNotNil: #hasCode ifNil: [ false ]) ifTrue:
 						[ self error: 'Pharo server process failed unexpectedly' ] ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |

@@ -5,6 +5,7 @@ primitive_types = [
     type(None), 
     bool, 
     int,
+    float,
     bytes,
     str,
     dict,
