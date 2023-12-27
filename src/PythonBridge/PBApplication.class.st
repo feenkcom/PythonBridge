@@ -27,6 +27,20 @@ PBApplication class >> initialize [
 	SessionManager default registerToolClassNamed: self name
 ]
 
+{ #category : #testing }
+PBApplication class >> isWorking [
+	"Return true if my uniqueInstance works by evaluating 1+2 and checking the result is 3"
+
+	^ (self do: [ :app | 
+		app commandFactory
+			<< (P3GBinaryOperator new
+					left: 1;
+					right: 2;
+					operator: $+;
+					yourself).
+		app commandFactory send waitForValue ]) = 3
+]
+
 { #category : #accessing }
 PBApplication class >> runtimeDirectory [
 	"This is the directory basename where the runtime files are located"
@@ -41,24 +55,20 @@ PBApplication class >> shutdown: isImageQuitting [
 
 { #category : #'start-stop' }
 PBApplication class >> start [
-	self isRunning ifTrue: [ Error signal: 'Keras already running.' ].
+	self isRunning ifTrue: [ Error signal: 'Python bridge already running.' ].
 	self stop.
 	uniqueInstance := self new.
 	PBCF reset.
 	uniqueInstance commandFactory reset.
-	uniqueInstance start
+	uniqueInstance start.
+	^ uniqueInstance
 ]
 
 { #category : #testing }
-PBApplication class >> test [ 
-	self assert: (self do: [ :app |
-		app commandFactory << (P3GBinaryOperator new
-                     left: 1;
-                     right: 2;
-                     operator: $+;
-                     yourself).
-		app commandFactory send waitForValue
-	  ]) = 3
+PBApplication class >> test [
+	"Test and assert if my uniqueInstance isWorking"
+	
+	self assert: self isWorking
 ]
 
 { #category : #utils }

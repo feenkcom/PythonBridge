@@ -29,6 +29,11 @@ PBSettings >> debugSocketAddress: anObject [
 ]
 
 { #category : #accessing }
+PBSettings >> pharoSocketAddress [
+	^ pharoSocketAddress
+]
+
+{ #category : #accessing }
 PBSettings >> pipenvPath [
 	^ pipenvPath
 ]
@@ -40,4 +45,9 @@ PBSettings >> pipenvPath: aFileReference [
 	pipenvPath ifNil: [ ^ self ].
 	self assert: [ pipenvPath exists ]
 		description: pipenvPath fullName, ' doesn''t exist'.
+]
+
+{ #category : #accessing }
+PBSettings >> pythonSocketAddress [
+	^ pythonSocketAddress
 ]
