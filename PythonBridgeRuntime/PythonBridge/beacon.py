@@ -31,21 +31,6 @@ def argbeacon(message):
         return wrapper_beacon
     return decorator_beacon
 
-def pushumlbeacon(message):
-    def decorator_beacon(func):
-        @functools.wraps(func)
-        def wrapper_beacon(*args, **kwargs):
-            signal = PushUmlBeaconSignal(message, kwargs)
-            signal.set_start()
-            signal.file = inspect.getsourcefile(func)
-            [_, signal.line] = inspect.getsourcelines(func)
-            value = func(*args, **kwargs)
-            signal.return_queue = kwargs['queue'].copy()
-            signal.set_end()
-            return value
-        return wrapper_beacon
-    return decorator_beacon
-
 class BeaconSignal:
     def __init__(self, message) -> None:
         self.message = message
@@ -83,30 +68,6 @@ class ArgumentBeaconSignal(BeaconSignal):
     def __init__(self, message, args):
         super().__init__(message)
         self.args = args.copy()
-
-class PushUmlBeaconSignal(ArgumentBeaconSignal):
-    def __init__(self, message, args):
-        super().__init__(message, args)
-        self.args['additional_ignore_edges'] = self.args['additional_ignore_edges'].copy()
-        self.args['queue'] = self.args['queue'].copy()
-
-    def entlastungsroute(self):
-        return self.args['entlastungsroute']
-
-    def schienennetz(self):
-        return self.args['schienen_netz']
-    
-    def node_geo_list(self):
-        geo_dict = self.schienennetz().get_geo_data_dict()
-        list =  [ { 'node' : n.ds_100_von, 
-                   'lat' : geo_dict[n.ds_100_von][1].item(),
-                   'lon' : geo_dict[n.ds_100_von][0].item() }
-                 for n in self.entlastungsroute() ]
-        last = self.entlastungsroute().get_end()
-        list.append( { 'node' : last, 
-                   'lat' : geo_dict[last][1].item(),
-                   'lon' : geo_dict[last][0].item() })
-        return list
 
 class BeaconSignalGroup:
     def __init__(self) -> None:
