@@ -29,6 +29,16 @@ PBSettings >> debugSocketAddress: anObject [
 ]
 
 { #category : #accessing }
+PBSettings >> manualCommand [
+	^ 'python start_bridge.py --port {1} --pharo {2} --method {3}{4}' 
+		format: { 
+			self serverSocketAddress port . 
+			self clientSocketAddress port .
+			self messageBrokerStrategy methodArg.
+			self debugMode ifTrue: [ ' --log' ] ifFalse: [ '' ] }
+]
+
+{ #category : #accessing }
 PBSettings >> pharoSocketAddress [
 	^ pharoSocketAddress
 ]
