@@ -13,6 +13,11 @@ PBPharoPlatform class >> httpMessageBrokerClass [
 ]
 
 { #category : #hooks }
+PBPharoPlatform class >> manualProcessClass [
+	^ LanguageLinkManualProcess
+]
+
+{ #category : #hooks }
 PBPharoPlatform class >> pipenvProcessClass [
 	^ PBPharoPipenvProcess
 ]

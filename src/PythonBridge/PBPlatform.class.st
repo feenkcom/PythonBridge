@@ -65,6 +65,11 @@ PBPlatform class >> priority [
 	^ -547835385
 ]
 
+{ #category : #accessing }
+PBPlatform class >> reset [
+	self current: nil
+]
+
 { #category : #hooks }
 PBPlatform class >> socketMessageBrokerClass [
 	self subclassResponsibility
@@ -138,6 +143,11 @@ PBPlatform >> processStrategy: processCls [
 { #category : #'message broker strategy' }
 PBPlatform >> setHttpMessageBroker [
 	self messageBrokerStrategy: self class httpMessageBrokerClass
+]
+
+{ #category : #'process strategy' }
+PBPlatform >> setManualProcess [
+	self processStrategy: self class manualProcessClass
 ]
 
 { #category : #'process strategy' }

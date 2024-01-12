@@ -97,6 +97,25 @@ PBApplication >> errorMessage [
 	^ self serverStatus
 ]
 
+{ #category : #accessing }
+PBApplication >> evaluateSourceSequence: sourceString [
+	| cf lines |
+	cf := self newCommandStringFactory.
+	lines := (sourceString lines collect: #trimRight) reject: #isEmpty.
+	lines isEmpty ifTrue: [ ^ nil ].
+	lines size = 1
+		ifTrue: [
+			cf resultExpression: lines first ]
+		ifFalse: [
+			lines last first isSeparator
+				ifTrue: [ 
+					cf script: (String cr join: lines) ]
+				ifFalse: [
+					cf script: (String cr join: lines allButLast).
+					cf resultExpression: lines last ] ].
+	^ cf sendAndWait
+]
+
 { #category : #initialization }
 PBApplication >> initialize [
 	super initialize.
