@@ -12,6 +12,11 @@ PBPythonHandler >> errorMessage [
 	^ process errorMessage
 ]
 
+{ #category : #accessing }
+PBPythonHandler >> exitCode [
+	^ process exitCode
+]
+
 { #category : #testing }
 PBPythonHandler >> hasProcess [
 
