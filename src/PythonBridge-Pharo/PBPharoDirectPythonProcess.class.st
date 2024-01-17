@@ -40,6 +40,21 @@ PBPharoDirectPythonProcess >> hasProcess [
 	^ process isNotNil
 ]
 
+{ #category : #utilities }
+PBPharoDirectPythonProcess >> installModule: aModule in: aPBApplication [
+	"Install the supplied module using `python -m pip install aModule`"
+	| proc arguments |
+	arguments := { '-m'. 'pip'. 'install'. aModule. }.
+	proc := GtSubprocessWithInMemoryOutput new
+		workingDirectory: self workingDirectory fullName;
+		command: self pythonCommand;
+		arguments: arguments;
+		errorBlock: [ self error: 'Unable to install module: ' ,  aModule ];
+		terminateOnShutdown;
+		yourself.
+	proc runAndWait
+]
+
 { #category : #testing }
 PBPharoDirectPythonProcess >> isRunning [
 	^ process notNil and: [ process isRunning ]
@@ -72,9 +87,9 @@ PBPharoDirectPythonProcess >> processArguments [
 
 { #category : #private }
 PBPharoDirectPythonProcess >> pythonCommand [
-	^ Smalltalk os isMacOS
-		ifTrue: [ 'python3' ]
-		ifFalse: [ 'python' ]
+	Smalltalk os isMacOS ifTrue: [ ^ 'python3' ].
+	Smalltalk os isLinux ifTrue: [ ^ 'python3' ].
+	^ 'python'
 ]
 
 { #category : #private }
