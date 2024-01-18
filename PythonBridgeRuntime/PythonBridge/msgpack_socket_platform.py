@@ -30,22 +30,24 @@ class MsgPackSocketPlatform:
 
     def prim_handle(self):
         try:
-            bridge_globals.logger.log("loop func")
+            bridge_globals.logger.log("HANDLER (MsgPackSocketPlatform): loop func")
             data = self.getConnection().recv(2048)
             if len(data) == 0:
-                time.sleep(0.005)
+                bridge_globals.logger.log("HANDLER (MsgPackSocketPlatform): received zero bytes, done")
+                self.connection.close()
+                self.connection = None
             else:
                 self.unpacker.feed(data)
                 for msg in self.unpacker:
-                    bridge_globals.logger.log("prim handle message")
+                    bridge_globals.logger.log("HANDLER (MsgPackSocketPlatform): prim handle message")
                     self.prim_handle_msg(msg)
         except OSError:
-            bridge_globals.logger.log("OSError: " + str(err))
+            bridge_globals.logger.log("HANDLER (MsgPackSocketPlatform): OSError " + str(err))
             self.stop()
             sys.exit()
             exit(-1)
         except Exception as err:
-            bridge_globals.logger.log("ERROR message: " + str(err))
+            bridge_globals.logger.log("HANDLER (MsgPackSocketPlatform): ERROR " + str(err))
 
     def setup_func(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

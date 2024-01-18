@@ -44,9 +44,12 @@ class EvalCommand:
 	def command_id(self):
 		return self.commandId
 
+def log_stderr_flush(msg):
+	print(str(msg), file=sys.stderr, flush=True)
+	
 class Logger():
 	def log(self, msg):
-		print(str(msg), file=sys.stderr, flush=True)
+		log_stderr_flush(msg)
 
 class NoLogger():
 	def log(self, msg):
@@ -123,6 +126,8 @@ def enqueue_command(data):
 										{k: deserialize(v) for k, v in data["bindings"].items()}))
 
 def run_bridge():
+	log_stderr_flush("PythonBridge starting")
+
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--port", required=False,
 		help="port to be used for receiving instructions")
@@ -133,6 +138,8 @@ def run_bridge():
 	ap.add_argument("--log", required=False, const=True, nargs="?",
     	help="enable logging")
 	args = vars(ap.parse_args())
+	
+	log_stderr_flush(args)
 
 	bridge_globals.pharoPort = args["pharo"]
 	if args["log"]:
@@ -157,7 +164,11 @@ def run_bridge():
 	else:
 		raise Exception("Invalid communication strategy.")
 	bridge_globals.msg_service = msg_service
+	
 	msg_service.start()
+	
+	log_stderr_flush("PythonBridge ready")
+	
 	bridge_globals.logger.log("PYTHON: Start consuming commands")
 	while True:
 		command = globalCommandList.consume_command()
