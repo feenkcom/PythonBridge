@@ -172,9 +172,8 @@ PBPharoPipenvProcess >> newProcess [
 				addAllEnvVariablesFromParentWithoutOverride;
 				terminateOnShutdown;
 				errorBlock: [ :proc :timedOut | 
-					"Don't signal an error if the process was externally killed, e.g. 'kill <pid>', since this is a normal part of the tests.
-					If it was externally killed there isn't an exit code"
-					(proc exitStatusInterpreter ifNotNil: #hasCode ifNil: [ false ]) ifTrue:
+					"Don't signal an error if this is a normal stop"
+					process ifNotNil:
 						[ self error: 'Pharo server process failed unexpectedly' ] ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
@@ -229,6 +228,13 @@ PBPharoPipenvProcess >> pythonMainFile [
 { #category : #accessing }
 PBPharoPipenvProcess >> pythonMainFile: anObject [
 	pythonMainFile := anObject
+]
+
+{ #category : #'start-stop' }
+PBPharoPipenvProcess >> runProcessKiller [
+	PBPharoProcessKiller new
+		application: self application;
+		run
 ]
 
 { #category : #initialization }
@@ -286,6 +292,7 @@ PBPharoPipenvProcess >> stop [
 		do: [ :e | "Do nothing."].
 	process closeAndCleanStreams.
 	process := nil.
+	"self runProcessKiller"
 ]
 
 { #category : #'start-stop' }
