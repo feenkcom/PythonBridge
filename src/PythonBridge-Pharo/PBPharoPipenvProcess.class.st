@@ -287,12 +287,11 @@ PBPharoPipenvProcess >> stdout [
 { #category : #'start-stop' }
 PBPharoPipenvProcess >> stop [
 	process ifNil: [ ^ self ].
-	[ process queryExitStatus ifNil: [ process terminate ]] 
+	[ process queryExitStatus ifNil: [ process terminateAll ]] 
 		on: Error 
 		do: [ :e | "Do nothing."].
 	process closeAndCleanStreams.
 	process := nil.
-	"self runProcessKiller"
 ]
 
 { #category : #'start-stop' }
