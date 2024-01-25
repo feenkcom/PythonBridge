@@ -93,10 +93,10 @@ PBPharoPipenvProcess class >> signalPipenvNotFound [
 
 { #category : #'system startup' }
 PBPharoPipenvProcess class >> startUp: resuming [
-	"On startup any instances saved during the last session will be invalid (since the processes are terminated on shutdown).  Mark them as stopped."
+	"On startup any instances saved during the last session will be invalid (since the processes are terminated on shutdown).
+	Mark them as stopped."
 
-	resuming ifTrue: 
-		[ self allInstancesDo: [ :each | each stop ] ]
+	resuming ifTrue: [ self allInstancesDo: [ :each | each stop ] ]
 ]
 
 { #category : #'start-stop' }
