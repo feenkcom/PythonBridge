@@ -49,7 +49,7 @@ PBApplication class >> runtimeDirectory [
 ]
 
 { #category : #accessing }
-PBApplication class >> shutdown: isImageQuitting [
+PBApplication class >> shutDown: isImageQuitting [
 	isImageQuitting ifTrue: [ self stop ]
 ]
 
