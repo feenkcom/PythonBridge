@@ -3,10 +3,10 @@ import time
 import inspect
 from typing import Any
 
-def beacon(message):
-    def decorator_beacon(func):
+def methodevent(message):
+    def decorate(func):
         @functools.wraps(func)
-        def wrapper_beacon(*args, **kwargs):
+        def wrapped_function(*args, **kwargs):
             signal = BeaconSignal(message)
             signal.set_start()
             signal.file = inspect.getsourcefile(func)
@@ -14,13 +14,13 @@ def beacon(message):
             value = func(*args, **kwargs)
             signal.set_end()
             return value
-        return wrapper_beacon
-    return decorator_beacon
+        return wrapped_function
+    return decorate
 
-def argbeacon(message):
-    def decorator_beacon(func):
+def argmethodevent(message):
+    def decorate(func):
         @functools.wraps(func)
-        def wrapper_beacon(*args, **kwargs):
+        def wrapped_function(*args, **kwargs):
             signal = ArgumentBeaconSignal(message, kwargs)
             signal.set_start()
             signal.file = inspect.getsourcefile(func)
@@ -28,8 +28,8 @@ def argbeacon(message):
             value = func(*args, **kwargs)
             signal.set_end()
             return value
-        return wrapper_beacon
-    return decorator_beacon
+        return wrapped_function
+    return decorate
 
 class BeaconSignal:
     def __init__(self, message) -> None:
