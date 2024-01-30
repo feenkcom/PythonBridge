@@ -1,7 +1,7 @@
 import argparse
 import threading
 import time
-from .beacon import beacon
+from .telemetry import beacon
 
 # Calculate the factorial
 @beacon("Factorial function")
