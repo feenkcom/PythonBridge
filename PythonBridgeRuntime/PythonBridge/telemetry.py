@@ -7,13 +7,14 @@ def methodevent(message):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
-            signal = BeaconSignal(message)
-            signal.set_start()
+            signal = MethodStartSignal(message)
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
-            value = func(*args, **kwargs)
-            signal.set_end()
-            return value
+            try:
+                value = func(*args, **kwargs)
+                return value
+            finally:
+                MethodEndSignal(message)
         return wrapped_function
     return decorate
 
@@ -21,39 +22,32 @@ def argmethodevent(message):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
-            signal = ArgumentBeaconSignal(message, kwargs)
-            signal.set_start()
+            signal = ArgumentMethodStartSignal(message, kwargs)
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
-            value = func(*args, **kwargs)
-            signal.set_end()
-            return value
+            try:
+                value = func(*args, **kwargs)
+                return value
+            finally:
+                MethodEndSignal(message)
         return wrapped_function
     return decorate
 
-class BeaconSignal:
+class TelemetrySignal:
     def __init__(self, message) -> None:
         self.message = message
-        self.file = ''
-        self.line = 0
-        self.start = 0
-        self.end = 0
-        self.children = [] # not computed until requested
-
-    def set_start(self):
-        self.start = time.perf_counter_ns()
+        self.timestamp = time.perf_counter_ns()
         cf = inspect.stack()[1]
         self.file = cf.filename
         self.line = cf.lineno
-        return self
-
-    def set_end(self):
-        self.end = time.perf_counter_ns()
         global signals
         signals.add_signal(self)
-        
-    def duration(self):
-        return self.end-self.start
+
+    def isStartSignal(self):
+        return False
+    
+    def isEndSignal(self):
+        return False
     
     def gtViewSignalTree(self, aBuilder):
         return aBuilder.columnedTree()\
@@ -64,37 +58,71 @@ class BeaconSignal:
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
 
-class ArgumentBeaconSignal(BeaconSignal):
+class TelemetryEvent:
+    def __init__(self, message):
+        self.signals = []
+        self.children = []
+        self.message = message
+
+    def duration(self):
+        if len(self.signals) < 2:
+            return 0
+        else:
+            return self.signals[-1].timestamp - self.signals[0].timestamp
+
+class MethodStartSignal(TelemetrySignal):
+    def isStartSignal(self):
+        return True
+    
+    def isEndSignal(self):
+        return False
+
+class MethodEndSignal(TelemetrySignal):
+    def isStartSignal(self):
+        return False
+    
+    def isEndSignal(self):
+        return True
+
+class ArgumentMethodStartSignal(MethodStartSignal):
     def __init__(self, message, args):
         super().__init__(message)
         self.args = args.copy()
 
-class BeaconSignalGroup:
+class TelemetrySignalGroup:
     def __init__(self) -> None:
         self.signals = []
 
     def get_signals(self):
-        return sorted(self.signals, key=lambda each: each.start)
+        return sorted(self.signals, key=lambda each: each.timestamp)
     
-    def get_signal_tree(self):
+    def get_event_tree(self):
         b = self.get_signals()
         value = []
         index = 0
         while index < len(b):
-            [index, tree] = self.compute_tree(index, b)
+            [index, tree] = self.compute_tree(index, b, 0)
             value.append(tree)
         return value
     
-    def compute_tree(self, index, list):
+    def compute_tree(self, index, list, depth):
+        print(f"Depth: {depth}:{index}/{len(list)}")
         if index >= len(list):
             return [index, []]
-        root = list[index]
+        if not list[index].isStartSignal:
+            return [index+1, list[index]]    # leaf signals
+        root = TelemetryEvent(list[index].message)
+        root.signals.append(list[index])
         index = index + 1
         root.children = []
-        while index < len(list) and list[index].start < root.end:
-            [newindex, kids] = self.compute_tree(index, list)
+        while index < len(list) and not list[index].isEndSignal():
+            [newindex, kids] = self.compute_tree(index, list, depth+1)
+            print(f"*{newindex}*")
             root.children.append(kids)
             index = newindex
+        if index < len(list):
+            root.signals.append(list[index])
+            index = index + 1
         return [index, root]
 
     def add_signal(self, signal):
@@ -105,22 +133,22 @@ class BeaconSignalGroup:
             .title("Signals")\
             .priority(1)\
             .items(lambda: self.get_signals())\
+            .column("Signal Class", lambda each:f"{each.__class__.__name__}")\
             .column("Message", lambda each: each.message)\
-            .column("Start", lambda each: each.start)\
-            .column("End", lambda each: each.end)
+            .column("Timestamp", lambda each: each.timestamp)
     
     def gtViewSignalTree(self, aBuilder):
         return aBuilder.columnedTree()\
             .title("Tree")\
             .priority(2)\
-            .items(lambda: self.get_signal_tree())\
+            .items(lambda: self.get_event_tree())\
             .children(lambda each: each.children)\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
 
 def reset_signals():
     global signals
-    signals = BeaconSignalGroup()
+    signals = TelemetrySignalGroup()
 
 def get_signals():
     global signals
