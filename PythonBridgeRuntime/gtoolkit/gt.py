@@ -20,6 +20,9 @@ class GtViewedObject:
 		allObjectAttributes = dir(self.object)
 		allObjectMethods = filter(lambda each: callable(getattr(self.object, each, None)), allObjectAttributes)
 		objectGtViews = filter(lambda each: getattr(getattr(self.object, each, None), "gtView", False), allObjectMethods)
+		# for now, we keep the old prefix matching, avoiding doubles
+		objectGtViews = set(objectGtViews)
+		objectGtViews.update(filter(lambda each: each.startswith("gtView"), allObjectMethods))
 		# combined into a list of strings
 		result = list(myGtViews) + list(objectGtViews)
 		# when I wrap a @gtView marked method I get false positives, 
