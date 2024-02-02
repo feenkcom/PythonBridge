@@ -18,7 +18,7 @@ class GtViewedObject:
 		myGtViews = filter(lambda each: getattr(getattr(self, each, None), "gtView", False), allMyMethods)
 		# those defined by the object that I wrap
 		allObjectAttributes = dir(self.object)
-		allObjectMethods = filter(lambda each: callable(getattr(self.object, each, None)), allObjectAttributes)
+		allObjectMethods = list(filter(lambda each: callable(getattr(self.object, each, None)), allObjectAttributes))
 		objectGtViews = filter(lambda each: getattr(getattr(self.object, each, None), "gtView", False), allObjectMethods)
 		# for now, we keep the old prefix matching, avoiding doubles
 		objectGtViews = set(objectGtViews)
