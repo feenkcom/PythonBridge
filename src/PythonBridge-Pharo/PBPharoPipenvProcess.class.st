@@ -172,9 +172,10 @@ PBPharoPipenvProcess >> newProcess [
 				addAllEnvVariablesFromParentWithoutOverride;
 				terminateOnShutdown;
 				errorBlock: [ :proc :timedOut | 
-					"Don't signal an error if this is a normal stop"
+					"Don't signal an error if this is a normal stop, else only log it. 
+					If the process is gone, there isn't much left to do."
 					process ifNotNil:
-						[ self error: 'Pharo server process failed unexpectedly' ] ];
+						[ 'Pharo server process failed unexpectedly' crTrace ] ];
 				yourself.
 	environmentVariables associationsDo: [ :assoc |
 		newProcess environmentAt: assoc key put: assoc value ].
