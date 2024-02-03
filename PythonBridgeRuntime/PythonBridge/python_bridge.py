@@ -125,9 +125,7 @@ def enqueue_command(data):
 										data["statements"],
 										{k: deserialize(v) for k, v in data["bindings"].items()}))
 
-def run_bridge():
-	log_stderr_flush("PythonBridge starting")
-
+def parse_bridge_cmd_line_args():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--port", required=False,
 		help="port to be used for receiving instructions")
@@ -137,19 +135,21 @@ def run_bridge():
 		help="identifier for communication protocol strategy http or msgpack")
 	ap.add_argument("--log", required=False, const=True, nargs="?",
     	help="enable logging")
-	args = vars(ap.parse_args())
-	
-	log_stderr_flush(args)
+	return vars(ap.parse_args())
 
+def bridge_args():
+	return { 'port':9099, 'pharo':0, 'method':'msgpack', 'log':True }
+	
+def setup_bridge(args):
 	bridge_globals.pharoPort = args["pharo"]
+
 	if args["log"]:
 		bridge_globals.logger = Logger()
 	else:
 		bridge_globals.logger = NoLogger()
+
 	bridge_globals.pyPort = args["port"]
-	bridge_globals.globalCommandList = PythonCommandList()
-	globalCommandList = bridge_globals.globalCommandList
-	env = dict(globals())
+
 	msg_service = None 
 	if args["port"] == None:
 		args["port"] = '0'
@@ -164,10 +164,15 @@ def run_bridge():
 	else:
 		raise Exception("Invalid communication strategy.")
 	bridge_globals.msg_service = msg_service
-	
-	msg_service.start()
+
+def run_bridge():
+	bridge_globals.msg_service.start()
 	
 	log_stderr_flush("PythonBridge ready")
+	
+	bridge_globals.globalCommandList = PythonCommandList()
+	globalCommandList = bridge_globals.globalCommandList
+	env = dict(globals())
 	
 	bridge_globals.logger.log("PYTHON: Start consuming commands")
 	while True:
@@ -178,5 +183,16 @@ def run_bridge():
 		command.execute_using_env(env)
 		bridge_globals.logger.log("PYTHON: Finished command execution")
 
-if __name__ == "__main__":
+def run_bridge_main():
+	log_stderr_flush("PythonBridge starting")
+
+	args = parse_bridge_cmd_line_args()
+		
+	log_stderr_flush(args)
+
+	setup_bridge(args)
+	
 	run_bridge()
+
+if __name__ == "__main__":
+	run_bridge_main()
