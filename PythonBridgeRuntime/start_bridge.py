@@ -1,4 +1,3 @@
 from PythonBridge import python_bridge
-from PythonBridge.bridge_hooks import *
 
-python_bridge.run_bridge()
+python_bridge.run_bridge_main()
