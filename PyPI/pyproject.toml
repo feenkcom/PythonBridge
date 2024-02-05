@@ -1,0 +1,21 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "gtoolkit_bridge"
+version = "0.0.5"
+description = "Glamorous Toolkit Python Bridge"
+authors = [{name = "feenk team", email = "gt@feenk.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+requires-python = ">=3.10,<4"
+dependencies = [
+	"requests",
+	"Flask",
+	"msgpack"
+]
+
+[project.urls]
+Home = "https://gtoolkit.com"
