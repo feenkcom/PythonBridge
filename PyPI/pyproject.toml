@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "gtoolkit_bridge"
-version = "0.0.5"
+version = "0.0.7"
 description = "Glamorous Toolkit Python Bridge"
 authors = [{name = "feenk team", email = "gt@feenk.com"}]
 readme = "README.md"
