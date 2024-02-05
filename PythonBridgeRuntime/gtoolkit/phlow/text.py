@@ -1,32 +1,56 @@
 from typing import Any
 
+class GtPhlowTextDataSource:
+	def __init__(self, func):
+		self.func = func
+
+	def getText(self):
+		return self.func().asDictionaryForExport()
 
 class GtText:
 	def __init__(self, string):
 		self.string = string
-		self.runs = []
+		self.runGroup = GtPhlowRunGroup()
 
 	def range(self, start, end):
 		return GtPhlowTextRun(self, start, end)
 	
 	def applyAttributes(self, run, attributes):
+		self.runGroup.applyAttributes(run, attributes)
+	
+	def __getattr__(self, name):
+		return getattr(self.range(0, len(self.string) - 1), name)
+
+	def asDictionaryForExport(self):
+		return { "__typeLabel": "remotePhlowText", "string": self.string, "stylerSpecification": self.runGroup.asDictionaryForExport() }
+	
+	def gtViewText(self, view):
+		text = view.textEditor()
+		text.title("Text")
+		text.text(lambda: self)
+		return text
+
+class GtPhlowRunGroup:
+	def __init__(self):
+		self.runs = []
+
+	def applyAttributes(self, run, attributes):
 		self.runs.append((run, attributes))
 
 	def asDictionaryForExport(self):
-		attributedRuns = list(map(lambda attributedRun: {
-			"__typeLabel": "phlowTextRunWithAttributes", 
-			"run": attributedRun[0].asDictionaryForExport(), 
-			"attributes": list(map(lambda each: each.asDictionaryForExport(), attributedRun[1]))}, self.runs))
-		return { "__typeLabel": "remotePhlowTextAttributeRunsStylerSpecification", "attributedRuns": attributedRuns }
+		attributedRuns = { "__typeLabel": "phlowRunsGroup", 
+			"items": list(map(lambda attributedRun: {
+				"__typeLabel": "phlowRun",
+				"startIndex": attributedRun[0].start + 1,
+				"endIndex": attributedRun[0].end + 1,
+				"attributes": list(map(lambda each: each.asDictionaryForExport(), attributedRun[1]))}, self.runs))}
+		return { "__typeLabel": "remotePhlowTextAttributeRunsStylerSpecification", "attributeRuns": attributedRuns }
 
 class GtPhlowTextRun:
 	def __init__(self, text, start, end):
 		self.text = text
 		self.start = start
 		self.end = end
-
-	def asDictionaryForExport(self):
-		return [self.start, self.end]
 
 	def range(self, start, end):
 		return self.text.range(start, end)
