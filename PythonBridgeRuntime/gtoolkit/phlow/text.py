@@ -59,6 +59,10 @@ class GtPhlowTextRun:
 		self.text.applyAttributes(self, [GtPhlowTextBackgroundAttribute(color)])
 		return self
 
+	def black(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("black")])
+		return self
+
 	def bold(self):
 		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("bold")])
 		return self
@@ -74,9 +78,99 @@ class GtPhlowTextRun:
 	def foreground(self, color):
 		self.text.applyAttributes(self, [GtPhlowTextForegroundAttribute(color)])
 		return self
+	
+	def glamorousCodeFont(self):
+		self.fontName("Source Code Pro")
+		return self
+	
+	def glamorousCodeFontAndSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeSize()
+		return self
+	
+	def glamorousCodeFontAndSmallSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeSmallSize()
+		return self
+	
+	def glamorousCodeMiniSize(self):
+		self.fontSize(8)
+		return self
+	
+	def glamorousCodeSize(self):
+		self.fontSize(14)
+		return self
+	
+	def glamorousCodeSmallSize(self):
+		self.fontSize(12)
+		return self
+	
+	def glamorousCodeTinySize(self):
+		self.fontSize(10)
+		return self
+	
+	def glamorousFormEditorCodeFontAndSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeTinySize()
+		return self
+	
+	def glamorousMonospace(self):
+		return self.glamorousCodeFont()
+	
+	def glamorousMonospaceBackground(self):
+		self.glamorousCodeFontAndSmallSize()
+		self.highlight(GtColor.rgb(240, 240, 240))
+		return self
+	
+	def glamorousRegularDefaultFont(self):
+		self.fontName("Source Sans Pro")
+		return self
+	
+	def glamorousRegularFont(self):
+		self.fontName("Source Sans Pro")
+		return self
+	
+	def glamorousRegularFontAndSize(self):
+		self.glamorousRegularFont()
+		self.glamorousRegularSize()
+		return self
+	
+	def glamorousRegularSize(self):
+		return self.fontSize(14)
+	
+	def glamorousRegularSmallSize(self):
+		return self.fontSize(12)
 
 	def highlight(self, color):
 		self.text.applyAttributes(self, [GtPhlowTextHighlightAttribute(color)])
+		return self
+	
+	def italic(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("italic")])
+		return self
+	
+	def light(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("light")])
+		return self
+	
+	def medium(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("medium")])
+		return self
+	
+	def normal(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("normal")])
+		return self
+	
+	def oblique(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("oblique")])
+		return self
+	
+	def regular(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("regular")])
+		return self
+	
+	def thin(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("thin")])
 		return self
 
 class GtPhlowTextAttribute:
@@ -94,21 +188,28 @@ class GtPhlowTextFontWeightAttribute(GtPhlowTextAttribute):
 		self.weight = weight
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontWeightAttribute", "weight": self.weight }
+		return { "__typeLabel": "phlowFontWeightAttribute", "weight": self.weight }
+	
+class GtFontEmphasisAttribute(GtPhlowTextAttribute):
+	def __init__(self,emphasis):
+		self.emphasis = emphasis
+
+	def asDictionaryForExport(self):
+		return { "__typeLabel": "phlowFontEmphasisAttribute", "emphasis": self.emphasis }
 
 class GtPhlowTextFontNameAttribute(GtPhlowTextAttribute):
 	def __init__(self,name):
 		self.name = name
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontNameAttribute", "name": self.name }
+		return { "__typeLabel": "phlowFontNameAttribute", "name": self.name }
 
 class GtPhlowTextFontSizeAttribute(GtPhlowTextAttribute):
 	def __init__(self,size):
 		self.size = size
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontSizeAttribute", "size": self.size }
+		return { "__typeLabel": "phlowFontSizeAttribute", "size": self.size }
 
 class GtPhlowTextForegroundAttribute(GtPhlowTextAttribute):
 	def __init__(self, color):
