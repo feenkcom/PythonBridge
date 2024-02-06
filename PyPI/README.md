@@ -7,7 +7,7 @@ and get results back as proxies or values.
 ## Quick start
 
 ```
-import gtoolkit_bridge.PythonBridge.python_bridge as pb
+import gtoolkit_bridge as pb
 args = pb.bridge_args()
 pb.setup_bridge(args)
 pb.run_bridge()
@@ -16,14 +16,14 @@ pb.run_bridge()
 ## All in one
 
 ```
-import gtoolkit_bridge.PythonBridge.python_bridge as pb
+import gtoolkit_bridge as pb
 pb.run_bridge_default()
 ```
 
 ## Command line
 
 ```
-$ python3 -m gtoolkit_bridge.PythonBridge --port 9099 --pharo 0 --method msgpack --log
+$ python3 -m gtoolkit_bridge --port 9099 --pharo 0 --method msgpack --log
 ```
 
 ## Output

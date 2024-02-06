@@ -98,3 +98,25 @@ class GtViewedObject:
             .title("Print") \
             .priority(300) \
             .setString(str(self.object))
+
+    @gtView
+    def gtViewList(self, aBuilder):
+        if type(self.object) is not list:
+            return aBuilder.empty()
+        return aBuilder.list()\
+            .title("Items")\
+            .priority(150)\
+            .items(lambda: self.object)\
+            .itemFormat(lambda each: str(each))
+    
+    
+    @gtView
+    def gtViewDict(self, aBuilder):
+        if type(self.object) is not dict:
+            return aBuilder.empty()
+        return aBuilder.columnedList()\
+            .title("Items")\
+            .priority(150)\
+            .items(lambda: self.object.items())\
+			.column("Key", lambda each: each[0])\
+			.column("Value", lambda each: each[1])
