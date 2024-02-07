@@ -4,7 +4,7 @@ import time
 import inspect
 from typing import Any
 from abc import ABC, abstractmethod
-from .gt import *
+from gtoolkit.gt import gtView
 
 def methodevent(message):
     def decorate(func):
@@ -40,7 +40,9 @@ class Telemetry(ABC):
     def __init__(self, message):
         super().__init__
         self.message = message
-        self.children = []
+
+    def children(self):
+        return []
 
     @abstractmethod
     def timestamp(self):
@@ -78,25 +80,28 @@ class TelemetrySignal(Telemetry):
             .title("Tree")\
             .priority(2)\
             .items(lambda: [self])\
-            .children(lambda each: each.children)\
+            .children(lambda each: each.children())\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
 
 class TelemetryEvent(Telemetry):
     def __init__(self, message):
         super().__init__(message)
+        self._children = []
+        self.startSignal = None
+        self.endSignal = None
+
+    def children(self):
+        return self._children
 
     def addChild(self, child):
-        bisect.insort(self.children, child, key=lambda x:x.timestamp())
+        bisect.insort(self._children, child, key=lambda x:x.timestamp())
 
     def timestamp(self):
-        return self.children[0].timestamp()
+        return self.startSignal.timestamp()
 
     def duration(self):
-        if len(self.children) < 2:
-            return sum(each.duration() for each in self.children)
-        else:
-            return self.children[-1].timestamp() - self.children[0].timestamp()
+        return self.endSignal.timestamp() - self.startSignal.timestamp()
     
     @gtView
     def gtViewEventTree(self, aBuilder):
@@ -104,7 +109,7 @@ class TelemetryEvent(Telemetry):
             .title("Tree")\
             .priority(2)\
             .items(lambda: [ self ])\
-            .children(lambda each: each.children)\
+            .children(lambda each: each.children())\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
 
@@ -150,14 +155,14 @@ class TelemetrySignalGroup:
         if not list[index].isStartSignal():
             return [index+1, list[index]]    # leaf signals
         root = TelemetryEvent(list[index].message)
-        root.addChild(list[index])
+        root.startSignal = list[index]
         index = index + 1
         while index < len(list) and not list[index].isEndSignal():
             [newindex, kid] = self.compute_tree(index, list, depth+1)
             root.addChild(kid)
             index = newindex
         if index < len(list):
-            root.addChild(list[index])
+            root.endSignal = list[index]
             index = index + 1
         return [index, root]
 
@@ -180,7 +185,7 @@ class TelemetrySignalGroup:
             .title("Tree")\
             .priority(2)\
             .items(lambda: self.get_event_tree())\
-            .children(lambda each: each.children)\
+            .children(lambda each: each.children())\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
 
