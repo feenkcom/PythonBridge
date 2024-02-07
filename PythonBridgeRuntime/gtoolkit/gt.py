@@ -44,13 +44,18 @@ class GtViewedObject:
 
 	def getDataSource(self, viewName):
 		return self.getView(viewName).dataSource()
-	
+
 	def getViewDeclaration(self, viewName):
-		view = self.getView(viewName)
-		exportData = view.asDictionaryForExport()
+		try:
+			view = self.getView(viewName)
+			exportData = view.asDictionaryForExport()
+		except Exception as err:
+			view = ErrorView()
+			view.set_errorMessage(str(err))
+			exportData = view.asDictionaryForExport()
 		exportData["methodSelector"] = viewName
 		return exportData
-		
+	
 	def getViewsDeclarations(self):
 		viewNames = self.getGtViewMethodNames()
 		viewDeclarations = map(lambda each: self.getViewDeclaration(each), viewNames)
@@ -66,7 +71,7 @@ class GtViewedObject:
 	@gtView
 	def gtViewAttributes(self, aBuilder):
 		return aBuilder.columnedList()\
-			.title("Attributes")\
+			.title("Raw")\
 			.priority(200)\
 			.items(lambda: self.attributesFor(self.object, False))\
 			.column("Name", lambda each: each[0])\
@@ -89,3 +94,24 @@ class GtViewedObject:
 			.title("Print")\
 			.priority(300)\
 			.setString(str(self.object))
+
+	@gtView
+	def gtViewList(self, aBuilder):
+		if type(self.object) is not list:
+			return aBuilder.empty()
+		return aBuilder.list()\
+			.title("Items")\
+			.priority(150)\
+			.items(lambda: self.object)\
+			.itemFormat(lambda each: str(each))
+	
+	@gtView
+	def gtViewDict(self, aBuilder):
+		if type(self.object) is not dict:
+			return aBuilder.empty()
+		return aBuilder.columnedList()\
+			.title("Items")\
+			.priority(150)\
+			.items(lambda: self.object.items())\
+			.column("Key", lambda each: each[0])\
+			.column("Value", lambda each: each[1])
