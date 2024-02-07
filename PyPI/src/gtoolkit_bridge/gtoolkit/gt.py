@@ -28,7 +28,7 @@ class GtViewedObject:
         objectGtViews = set(objectGtViews)
         objectGtViews.update(filter(lambda each: each.startswith("gtView"), allObjectMethods))
         # combined into a list of strings
-        result = list(myGtViews) + list(objectGtViews)
+        result = list(set(list(myGtViews) + list(objectGtViews)))
         # when I wrap a @gtView marked method I get false positives,
         # this is normal but they are not real gtViews, remove them
         # my attribute 'object' matches because it is callable and marked
@@ -40,11 +40,13 @@ class GtViewedObject:
         return result
 
     def getView(self, viewName):
-        # first see if I define it
-        if getattr(self, viewName, None) is not None:
-            return getattr(self, viewName)(ViewBuilder())
-        # else delegate to the object that I wrap
-        return getattr(self.object, viewName)(ViewBuilder())
+        myView = getattr(self, viewName, None)
+        objectView = getattr(self.object, viewName, None)
+        if objectView is not None:
+            return objectView(ViewBuilder())
+        if myView is not None:
+            return myView(ViewBuilder())
+        raise Exception(f"Cannot find view {viewName}")
 
     def getDataSource(self, viewName):
         return self.getView(viewName).dataSource()
@@ -124,12 +126,21 @@ class GtViewedObject:
     def gtViewRange(self, aBuilder):
         if type(self.object) is not range:
             return aBuilder.empty()
-        return aBuilder.columnedList()\
+        return aBuilder.list()\
             .title("Range")\
             .priority(150)\
-            .items(lambda: [['start',self.object.start],['stop',self.object.stop],['step',self.object.step]])\
-            .column("Property", lambda each: each[0])\
-            .column("Value", lambda each: each[1])
+            .items(lambda: list(self.object))\
+            .itemFormat(lambda each: str(each))
+
+    @gtView
+    def gtViewSet(self, aBuilder):
+        if type(self.object) is not set:
+            return aBuilder.empty()
+        return aBuilder.list()\
+            .title("Set")\
+            .priority(150)\
+            .items(lambda: list(self.object))\
+            .itemFormat(lambda each: str(each))
 
     @gtView
     def gtViewInteger(self, aBuilder):
