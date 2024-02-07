@@ -44,13 +44,18 @@ class GtViewedObject:
 
 	def getDataSource(self, viewName):
 		return self.getView(viewName).dataSource()
-	
+
 	def getViewDeclaration(self, viewName):
-		view = self.getView(viewName)
-		exportData = view.asDictionaryForExport()
+		try:
+			view = self.getView(viewName)
+			exportData = view.asDictionaryForExport()
+		except Exception as err:
+			view = ErrorView()
+			view.set_errorMessage(str(err))
+			exportData = view.asDictionaryForExport()
 		exportData["methodSelector"] = viewName
 		return exportData
-		
+	
 	def getViewsDeclarations(self):
 		viewNames = self.getGtViewMethodNames()
 		viewDeclarations = map(lambda each: self.getViewDeclaration(each), viewNames)
