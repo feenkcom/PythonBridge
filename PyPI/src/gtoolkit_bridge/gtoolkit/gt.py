@@ -75,7 +75,7 @@ class GtViewedObject:
     @gtView
     def gtViewAttributes(self, aBuilder):
         return aBuilder.columnedList() \
-            .title("Attributes") \
+            .title("Raw") \
             .priority(200) \
             .items(lambda: self.attributesFor(self.object, False)) \
             .column("Name", lambda each: each[0]) \
