@@ -11,4 +11,4 @@ from .gtoolkit.gt import (
 	GtViewedObject
 )
 
-__version__ = "0.0.9"
+from .__version__ import __version__
