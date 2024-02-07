@@ -72,6 +72,7 @@ class GtViewedObject:
         keyValuePairs = map(lambda each: [each, getattr(anObject, each, "")], filteredAttributes)
         return list(keyValuePairs)
 
+
     @gtView
     def gtViewAttributes(self, aBuilder):
         return aBuilder.columnedList() \
@@ -108,8 +109,64 @@ class GtViewedObject:
             .priority(150)\
             .items(lambda: self.object)\
             .itemFormat(lambda each: str(each))
-    
-    
+
+    @gtView
+    def gtViewTuple(self, aBuilder):
+        if type(self.object) is not tuple:
+            return aBuilder.empty()
+        return aBuilder.list()\
+            .title("Items")\
+            .priority(150)\
+            .items(lambda: self.object)\
+            .itemFormat(lambda each: str(each))
+
+    @gtView
+    def gtViewRange(self, aBuilder):
+        if type(self.object) is not range:
+            return aBuilder.empty()
+        return aBuilder.columnedList()\
+            .title("Range")\
+            .priority(150)\
+            .items(lambda: [['start',self.object.start],['stop',self.object.stop],['step',self.object.step]])\
+            .column("Property", lambda each: each[0])\
+            .column("Value", lambda each: each[1])
+
+    @gtView
+    def gtViewInteger(self, aBuilder):
+        if type(self.object) is not int:
+            return aBuilder.empty()
+        return aBuilder.textEditor()\
+            .title("Integer")\
+            .priority(150)\
+            .setString(str(self.object))
+ 
+    @gtView
+    def gtViewFloat(self, aBuilder):
+        if type(self.object) is not float:
+            return aBuilder.empty()
+        return aBuilder.textEditor()\
+            .title("Float")\
+            .priority(150)\
+            .setString(str(self.object))
+
+    @gtView
+    def gtViewString(self, aBuilder):
+        if type(self.object) is not str:
+            return aBuilder.empty()
+        return aBuilder.textEditor()\
+            .title("String")\
+            .priority(150)\
+            .setString(str(self.object))
+
+    @gtView
+    def gtViewBoolean(self, aBuilder):
+        if type(self.object) is not bool:
+            return aBuilder.empty()
+        return aBuilder.textEditor()\
+            .title("Boolean")\
+            .priority(150)\
+            .setString(str(self.object))
+
     @gtView
     def gtViewDict(self, aBuilder):
         if type(self.object) is not dict:
@@ -118,5 +175,5 @@ class GtViewedObject:
             .title("Items")\
             .priority(150)\
             .items(lambda: self.object.items())\
-			.column("Key", lambda each: each[0])\
-			.column("Value", lambda each: each[1])
+            .column("Key", lambda each: each[0])\
+            .column("Value", lambda each: each[1])
