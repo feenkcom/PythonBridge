@@ -17,6 +17,11 @@ PBPythonHandler >> exitCode [
 	^ process exitCode
 ]
 
+{ #category : #accessing }
+PBPythonHandler >> gtPackage [
+	^ process gtPackage
+]
+
 { #category : #testing }
 PBPythonHandler >> hasProcess [
 

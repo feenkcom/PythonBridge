@@ -116,6 +116,11 @@ PBApplication >> evaluateSourceSequence: sourceString [
 	^ cf sendAndWait
 ]
 
+{ #category : #accessing }
+PBApplication >> gtPackage [
+	^ processHandler gtPackage
+]
+
 { #category : #initialization }
 PBApplication >> initialize [
 	super initialize.
