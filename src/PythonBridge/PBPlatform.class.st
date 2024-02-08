@@ -1,6 +1,9 @@
 Class {
 	#name : #PBPlatform,
 	#superclass : #LanguageLinkPlatform,
+	#instVars : [
+		'processStrategy'
+	],
 	#classVars : [
 		'Current'
 	],
@@ -89,7 +92,7 @@ PBPlatform >> defaultSettings [
 		clientSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber);
 		serverSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 1);
 		debugSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 2);
-		messageBrokerStrategy: LanguageLinkMsgPackPharoBroker;
+		messageBrokerStrategy: self messageBrokerStrategy;
 		platform: PBPharoPlatform new;
 		commandFactoryClass: PBCommandFactory;
 		commandClass: PBCommand;
@@ -105,6 +108,17 @@ PBPlatform >> folderForApplication [
 	^ FileLocator imageDirectory / PBApplication runtimeDirectory
 ]
 
+{ #category : #'gt-extensions' }
+PBPlatform >> gtSettingsFor: aView [
+	<gtView>
+
+	^ aView forward 
+		title: 'Settings';
+		priority: 60;
+		object: [ self defaultSettings ];
+		view: #gtSettingsFor:
+]
+
 { #category : #'module creation' }
 PBPlatform >> messageBroker: settings [
 	^ self messageBrokerStrategy settings: settings
@@ -112,7 +126,7 @@ PBPlatform >> messageBroker: settings [
 
 { #category : #'message broker strategy' }
 PBPlatform >> messageBrokerStrategy [
-	^ msgBrokerStrategy ifNil: [ ^ self defaultMessageBrokerClass ]
+	^ msgBrokerStrategy ifNil: [ ^ msgBrokerStrategy := self defaultMessageBrokerClass ]
 ]
 
 { #category : #'message broker strategy' }
