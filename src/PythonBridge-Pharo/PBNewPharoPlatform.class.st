@@ -54,4 +54,9 @@ PBNewPharoPlatform >> defaultMessageBrokerClass [
 
 { #category : #hooks }
 PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
+	anApplication workingDirectory exists
+		ifFalse: [
+			anApplication workingDirectory ensureDirectory.
+			anApplication installModule: 'gtoolkit_bridge'.
+			anApplication installModule: 'debugpy' ]
 ]

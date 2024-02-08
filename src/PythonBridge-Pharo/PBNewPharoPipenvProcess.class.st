@@ -23,6 +23,11 @@ Class {
 }
 
 { #category : #accessing }
+PBNewPharoPipenvProcess class >> pipenvPath [
+	^ PBPharoPipenvProcess pipenvPath
+]
+
+{ #category : #accessing }
 PBNewPharoPipenvProcess >> errorMessage [
 	^ self stderr
 ]
@@ -44,6 +49,18 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 { #category : #testing }
 PBNewPharoPipenvProcess >> isRunning [
 	^ process notNil and: [ process isRunning ]
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> newProcess [
+]
+
+{ #category : #accessing }
+PBNewPharoPipenvProcess >> pipenvPath [
+	"Answer the to use pipenvPath.
+	This may be overridden by the application settings."
+
+	^ self settings pipenvPath ifNil: [ self class pipenvPath ]
 ]
 
 { #category : #'start-stop' }
