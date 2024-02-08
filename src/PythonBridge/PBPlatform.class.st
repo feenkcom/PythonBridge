@@ -93,14 +93,15 @@ PBPlatform >> defaultSettings [
 		serverSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 1);
 		debugSocketAddress: (LanguageLinkSocketAddress ipOrName: 'localhost' port: basePortNumber + 2);
 		messageBrokerStrategy: self messageBrokerStrategy;
-		platform: PBPharoPlatform new;
+		platform: self;
+		serverProcessClass: self processStrategy;
 		commandFactoryClass: PBCommandFactory;
 		commandClass: PBCommand;
 		serializerClass: LanguageLinkSerializer;
 		deserializerClass: PBDeserializer;
 		parserClass: PythonParser;
 		connectionExceptionHandler: PharoLinkConnectionExceptionHandler new;
-		workingDirectory: FileLocator imageDirectory / PBApplication runtimeDirectory
+		workingDirectory: self folderForApplication
 ]
 
 { #category : #accessing }
@@ -172,4 +173,9 @@ PBPlatform >> setPipenvProcess [
 { #category : #'message broker strategy' }
 PBPlatform >> setSocketMessageBroker [
 	self messageBrokerStrategy: self class socketMessageBrokerClass
+]
+
+{ #category : #accessing }
+PBPlatform >> workingDirectory [
+	^ self folderForApplication
 ]
