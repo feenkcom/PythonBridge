@@ -116,5 +116,6 @@ PBPharoDirectPythonProcess >> stdout [
 { #category : #'start-stop' }
 PBPharoDirectPythonProcess >> stop [
 	process ifNil: [ ^ self ].
-	process terminate
+	process terminate.
+	process := nil
 ]

@@ -146,7 +146,7 @@ PBPlatform >> process: application [
 
 { #category : #'process strategy' }
 PBPlatform >> processStrategy [
-	^ processStrategy ifNil: [ ^ self class pipenvProcessClass ]
+	^ processStrategy ifNil: [ processStrategy := self class pipenvProcessClass ]
 ]
 
 { #category : #'process strategy' }
