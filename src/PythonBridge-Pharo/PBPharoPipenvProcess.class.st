@@ -142,22 +142,20 @@ PBPharoPipenvProcess >> initialize [
 { #category : #utilities }
 PBPharoPipenvProcess >> installModule: aString in: aPBApplication [
 	"Install the supplied module using `pipenv run pip install aString`"
-	| pipenvPath proc arguments |
 
-	pipenvPath := aPBApplication settings pipenvPath ifNil: [ self class pipenvPath ].
-	arguments := { 'run'. 'pip'. 'install'. aString. }.
+	| proc arguments |
+	arguments := { 'run' . 'pip' . 'install' . aString }.
 	proc := GtSubprocessWithInMemoryOutput new
-		command: pipenvPath fullName;
-		arguments: arguments;
-		workingDirectory: aPBApplication workingDirectory fullName;
-		addAllEnvVariablesFromParentWithoutOverride;
-		errorBlock: [ self error: 'Unable to install module: ', aString asString ];
-		terminateOnShutdown;
-		yourself.
-	environmentVariables associationsDo: [ :assoc |
-		proc environmentAt: assoc key put: assoc value ].
-	proc runAndWait.
-
+			command: self pipenvPath fullName;
+			arguments: arguments;
+			workingDirectory: self workingDirectory fullName;
+			addAllEnvVariablesFromParentWithoutOverride;
+			errorBlock: [ self error: 'Unable to install module: ' , aString asString ];
+			terminateOnShutdown;
+			yourself.
+	environmentVariables
+		associationsDo: [ :assoc | proc environmentAt: assoc key put: assoc value ].
+	proc runAndWait
 ]
 
 { #category : #testing }
