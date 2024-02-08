@@ -170,31 +170,29 @@ PBPharoPipenvProcess >> isRunning [
 { #category : #private }
 PBPharoPipenvProcess >> newProcess [
 	| newProcess |
-
 	newProcess := GtSubprocessWithInMemoryOutput new
-				command: (self settings pipenvPath ifNil:
-					[ self class pipenvPath ]) fullName;
-				arguments: self processArguments;
-				workingDirectory: self workingDirectory fullName;
-				addAllEnvVariablesFromParentWithoutOverride;
-				terminateOnShutdown;
-				errorBlock: [ :proc :timedOut | 
-					"Don't signal an error if this is a normal stop, else only log it. 
-					If the process is gone, there isn't much left to do."
-					process ifNotNil:
-						[ 'Pharo server process failed unexpectedly' crTrace ] ];
-				yourself.
-	environmentVariables associationsDo: [ :assoc |
-		newProcess environmentAt: assoc key put: assoc value ].
+			command: self pipenvPath fullName;
+			arguments: self processArguments;
+			workingDirectory: self workingDirectory fullName;
+			addAllEnvVariablesFromParentWithoutOverride;
+			errorBlock: [ :proc :timedOut |
+				"Don't signal an error if this is a normal stop, else only log it. 
+				If the process is gone, there isn't much left to do."
+				process ifNotNil: [ 'Pharo server process failed unexpectedly' crTrace ] ];
+			yourself.
+	OSPlatform current isWindows
+		ifFalse: [ newProcess terminateOnShutdown ].
+	environmentVariables
+		associationsDo: [ :assoc | newProcess environmentAt: assoc key put: assoc value ].
 	^ newProcess
 ]
 
 { #category : #accessing }
-PBPharoPipenvProcess >> pipenvPath [ 
-	"Answer the default pipenvPath.
+PBPharoPipenvProcess >> pipenvPath [
+	"Answer the to use pipenvPath.
 	This may be overridden by the application settings."
 
-	^ self class pipenvPath
+	^ self settings pipenvPath ifNil: [ self class pipenvPath ]
 ]
 
 { #category : #accessing }
