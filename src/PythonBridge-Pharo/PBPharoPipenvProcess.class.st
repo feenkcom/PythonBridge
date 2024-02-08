@@ -118,6 +118,13 @@ PBPharoPipenvProcess >> errorMessage [
 	^ self stderr
 ]
 
+{ #category : #accessing }
+PBPharoPipenvProcess >> gtPackage [
+	"Answer the name of the Python package where top level gt code lives"
+	
+	^ #gtoolkit asP3GI
+]
+
 { #category : #testing }
 PBPharoPipenvProcess >> hasProcess [
 	"Answer a boolean indicating whether the receiver has a process object"
