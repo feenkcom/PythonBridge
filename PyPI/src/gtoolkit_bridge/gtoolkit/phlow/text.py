@@ -1,23 +1,50 @@
 from typing import Any
 
+class GtPhlowTextDataSource:
+	def __init__(self, func):
+		self.func = func
+
+	def getText(self):
+		return self.func().asDictionaryForExport()
 
 class GtText:
 	def __init__(self, string):
 		self.string = string
-		self.runs = []
+		self.runGroup = GtPhlowRunGroup()
 
 	def range(self, start, end):
 		return GtPhlowTextRun(self, start, end)
 	
 	def applyAttributes(self, run, attributes):
+		self.runGroup.applyAttributes(run, attributes)
+	
+	def __getattr__(self, name):
+		return getattr(self.range(0, len(self.string) - 1), name)
+
+	def asDictionaryForExport(self):
+		return { "__typeLabel": "remotePhlowText", "string": self.string, "stylerSpecification": self.runGroup.asDictionaryForExport() }
+	
+	def gtViewText(self, view):
+		text = view.textEditor()
+		text.title("Text")
+		text.text(lambda: self)
+		return text
+
+class GtPhlowRunGroup:
+	def __init__(self):
+		self.runs = []
+
+	def applyAttributes(self, run, attributes):
 		self.runs.append((run, attributes))
 
 	def asDictionaryForExport(self):
-		attributedRuns = list(map(lambda attributedRun: {
-			"__typeLabel": "phlowTextRunWithAttributes", 
-			"run": attributedRun[0].asDictionaryForExport(), 
-			"attributes": list(map(lambda each: each.asDictionaryForExport(), attributedRun[1]))}, self.runs))
-		return { "__typeLabel": "remotePhlowTextAttributeRunsStylerSpecification", "attributedRuns": attributedRuns }
+		attributedRuns = { "__typeLabel": "phlowRunsGroup", 
+			"items": list(map(lambda attributedRun: {
+				"__typeLabel": "phlowRun",
+				"startIndex": attributedRun[0].start + 1,
+				"endIndex": attributedRun[0].end + 1,
+				"attributes": list(map(lambda each: each.asDictionaryForExport(), attributedRun[1]))}, self.runs))}
+		return { "__typeLabel": "remotePhlowTextAttributeRunsStylerSpecification", "attributeRuns": attributedRuns }
 
 class GtPhlowTextRun:
 	def __init__(self, text, start, end):
@@ -25,14 +52,15 @@ class GtPhlowTextRun:
 		self.start = start
 		self.end = end
 
-	def asDictionaryForExport(self):
-		return [self.start, self.end]
-
 	def range(self, start, end):
 		return self.text.range(start, end)
 
 	def background(self, color):
 		self.text.applyAttributes(self, [GtPhlowTextBackgroundAttribute(color)])
+		return self
+
+	def black(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("black")])
 		return self
 
 	def bold(self):
@@ -50,9 +78,99 @@ class GtPhlowTextRun:
 	def foreground(self, color):
 		self.text.applyAttributes(self, [GtPhlowTextForegroundAttribute(color)])
 		return self
+	
+	def glamorousCodeFont(self):
+		self.fontName("Source Code Pro")
+		return self
+	
+	def glamorousCodeFontAndSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeSize()
+		return self
+	
+	def glamorousCodeFontAndSmallSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeSmallSize()
+		return self
+	
+	def glamorousCodeMiniSize(self):
+		self.fontSize(8)
+		return self
+	
+	def glamorousCodeSize(self):
+		self.fontSize(14)
+		return self
+	
+	def glamorousCodeSmallSize(self):
+		self.fontSize(12)
+		return self
+	
+	def glamorousCodeTinySize(self):
+		self.fontSize(10)
+		return self
+	
+	def glamorousFormEditorCodeFontAndSize(self):
+		self.glamorousCodeFont()
+		self.glamorousCodeTinySize()
+		return self
+	
+	def glamorousMonospace(self):
+		return self.glamorousCodeFont()
+	
+	def glamorousMonospaceBackground(self):
+		self.glamorousCodeFontAndSmallSize()
+		self.highlight(GtColor.rgb(240, 240, 240))
+		return self
+	
+	def glamorousRegularDefaultFont(self):
+		self.fontName("Source Sans Pro")
+		return self
+	
+	def glamorousRegularFont(self):
+		self.fontName("Source Sans Pro")
+		return self
+	
+	def glamorousRegularFontAndSize(self):
+		self.glamorousRegularFont()
+		self.glamorousRegularSize()
+		return self
+	
+	def glamorousRegularSize(self):
+		return self.fontSize(14)
+	
+	def glamorousRegularSmallSize(self):
+		return self.fontSize(12)
 
 	def highlight(self, color):
 		self.text.applyAttributes(self, [GtPhlowTextHighlightAttribute(color)])
+		return self
+	
+	def italic(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("italic")])
+		return self
+	
+	def light(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("light")])
+		return self
+	
+	def medium(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("medium")])
+		return self
+	
+	def normal(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("normal")])
+		return self
+	
+	def oblique(self):
+		self.text.applyAttributes(self, [GtFontEmphasisAttribute("oblique")])
+		return self
+	
+	def regular(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("regular")])
+		return self
+	
+	def thin(self):
+		self.text.applyAttributes(self, [GtPhlowTextFontWeightAttribute("thin")])
 		return self
 
 class GtPhlowTextAttribute:
@@ -70,21 +188,28 @@ class GtPhlowTextFontWeightAttribute(GtPhlowTextAttribute):
 		self.weight = weight
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontWeightAttribute", "weight": self.weight }
+		return { "__typeLabel": "phlowFontWeightAttribute", "weight": self.weight }
+	
+class GtFontEmphasisAttribute(GtPhlowTextAttribute):
+	def __init__(self,emphasis):
+		self.emphasis = emphasis
+
+	def asDictionaryForExport(self):
+		return { "__typeLabel": "phlowFontEmphasisAttribute", "emphasis": self.emphasis }
 
 class GtPhlowTextFontNameAttribute(GtPhlowTextAttribute):
 	def __init__(self,name):
 		self.name = name
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontNameAttribute", "name": self.name }
+		return { "__typeLabel": "phlowFontNameAttribute", "name": self.name }
 
 class GtPhlowTextFontSizeAttribute(GtPhlowTextAttribute):
 	def __init__(self,size):
 		self.size = size
 
 	def asDictionaryForExport(self):
-		return { "__typeLabel": "phlowTextFontSizeAttribute", "size": self.size }
+		return { "__typeLabel": "phlowFontSizeAttribute", "size": self.size }
 
 class GtPhlowTextForegroundAttribute(GtPhlowTextAttribute):
 	def __init__(self, color):

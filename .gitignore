@@ -1,8 +1,7 @@
 /.venv
 /PythonBridge
-/__pycache__
+__pycache__
 .DS_Store
 Pipfile.lock
 /.vscode
-/tests/__pycache__
 *.code-workspace
