@@ -56,7 +56,13 @@ PBNewPharoPlatform >> defaultMessageBrokerClass [
 PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
 	anApplication workingDirectory exists
 		ifFalse: [
-			anApplication workingDirectory ensureDirectory.
-			anApplication installModule: 'gtoolkit_bridge'.
-			anApplication installModule: 'debugpy' ]
+			[
+				anApplication workingDirectory createDirectory.
+				"Ask our application to install a number of Python modules inside our isolated pipenv environment"
+				"The special nil module creates the pipenv virtual environment itself"
+				#(nil 'gtoolkit_bridge' 'debugpy')
+					do: [ :each | anApplication installModule: each ] 
+			] asJob
+				title: 'Installing PythonBridge runtime environment';
+				run ]
 ]

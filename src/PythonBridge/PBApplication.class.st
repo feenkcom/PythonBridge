@@ -137,10 +137,10 @@ PBApplication >> initializeHandlers [
 ]
 
 { #category : #utils }
-PBApplication >> installModule: aString [
-	"Install the supplied module using `pipenv run pip install aString`"
+PBApplication >> installModule: aModule [
+	"Install the supplied module aModule"
 
-	PBPharoPipenvProcess new installModule: aString in: self
+	self processHandler installModule: aModule
 ]
 
 { #category : #'instance creation' }
