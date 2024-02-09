@@ -61,8 +61,18 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 			self error: 'Unable to execute pipenv '
 				, (Character space join: args)  ].
 	proc runAndWait.
+	self assert: proc isSuccess
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedModules [
+	| proc |
+	proc := self newBaseProcess.
+	proc arguments: #( 'graph' ).
+	proc errorBlock: [ self error: 'pipenv graph failed' ].
+	proc runAndWait.
 	self assert: proc isSuccess.
-	('pipenv ' , (Character space join: args)) crTrace
+	^ proc stdout
 ]
 
 { #category : #testing }
