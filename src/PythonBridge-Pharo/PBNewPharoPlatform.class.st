@@ -56,7 +56,7 @@ PBNewPharoPlatform >> defaultMessageBrokerClass [
 PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
 	anApplication workingDirectory exists
 		ifFalse: [
-			anApplication workingDirectory ensureDirectory.
-			anApplication installModule: 'gtoolkit_bridge'.
-			anApplication installModule: 'debugpy' ]
+			anApplication workingDirectory createDirectory.
+			#( nil 'gtoolkit_bridge' 'debugpy' ) do: [ :each |
+				anApplication installModule: each ] ]
 ]

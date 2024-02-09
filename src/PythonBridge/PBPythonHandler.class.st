@@ -34,6 +34,13 @@ PBPythonHandler >> initializeHandler [
 	process := PBPlatform current process: self application
 ]
 
+{ #category : #utilities }
+PBPythonHandler >> installModule: aModule [
+	"Install the supplied module aModule"
+
+	process installModule: aModule in: application
+]
+
 { #category : #testing }
 PBPythonHandler >> isRunning [
 	^ process isRunning
