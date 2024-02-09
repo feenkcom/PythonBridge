@@ -75,6 +75,17 @@ PBNewPharoPipenvProcess >> installedModules [
 	^ proc stdout
 ]
 
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedVirtualEnvironment [
+	| proc |
+	proc := self newBaseProcess.
+	proc arguments: #( '--venv' ).
+	proc errorBlock: [ self error: 'pipenv --venv failed' ].
+	proc runAndWait.
+	self assert: proc isSuccess.
+	^ proc stdout
+]
+
 { #category : #testing }
 PBNewPharoPipenvProcess >> isRunning [
 	^ process notNil and: [ process isRunning ]
