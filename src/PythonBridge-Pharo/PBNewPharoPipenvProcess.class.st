@@ -68,11 +68,11 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 PBNewPharoPipenvProcess >> installedModules [
 	| proc |
 	proc := self newBaseProcess.
-	proc arguments: #( 'graph' ).
+	proc arguments: #( 'graph' '--json' ).
 	proc errorBlock: [ self error: 'pipenv graph failed' ].
 	proc runAndWait.
 	self assert: proc isSuccess.
-	^ proc stdout
+	^ NeoJSONObject fromString: proc stdout
 ]
 
 { #category : #utilities }
@@ -169,6 +169,6 @@ PBNewPharoPipenvProcess >> stdout [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> stop [
 	process ifNil: [ ^ self ].
-	process terminate.
+	process terminateAll.
 	process := nil
 ]
