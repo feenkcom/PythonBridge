@@ -162,11 +162,11 @@ PBApplication >> pipenvPath [
 
 { #category : #printing }
 PBApplication >> printOn: aStream [
-	aStream
-		<< self class name;
-		<< '('.
+	super printOn: aStream.
+	aStream << '('.
 	self isRunning
-		ifFalse: [ aStream << 'not running)'.
+		ifFalse: [
+			aStream << 'not running)'.
 			^ self ].
 	aStream
 		print: settings clientSocketAddress;
