@@ -50,8 +50,7 @@ PBApplication class >> runtimeDirectory [
 
 { #category : #'system startup & shutdown' }
 PBApplication class >> shutDown: isImageQuitting [
-	isImageQuitting ifTrue: [ 
-		self allInstancesDo: [ :each | each stop ] ]
+	isImageQuitting ifTrue: [ self stopAllInstances ]
 ]
 
 { #category : #'start-stop' }
@@ -67,8 +66,12 @@ PBApplication class >> start [
 
 { #category : #'system startup & shutdown' }
 PBApplication class >> startUp: isImageStarting [
-	isImageStarting ifTrue: [ 
-		self allInstancesDo: [ :each | each stop ] ]
+	isImageStarting ifTrue: [ self stopAllInstances ]
+]
+
+{ #category : #'system startup & shutdown' }
+PBApplication class >> stopAllInstances [
+	self allInstancesDo: [ :each | each stop ]
 ]
 
 { #category : #testing }
