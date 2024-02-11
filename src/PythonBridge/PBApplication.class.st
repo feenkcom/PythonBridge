@@ -48,20 +48,27 @@ PBApplication class >> runtimeDirectory [
 	^ 'PythonBridgeRuntime'
 ]
 
-{ #category : #accessing }
+{ #category : #'system startup & shutdown' }
 PBApplication class >> shutDown: isImageQuitting [
-	isImageQuitting ifTrue: [ self stop ]
+	isImageQuitting ifTrue: [ 
+		self allInstancesDo: [ :each | each stop ] ]
 ]
 
 { #category : #'start-stop' }
 PBApplication class >> start [
-	self isRunning ifTrue: [ Error signal: 'Python bridge already running.' ].
+	self isRunning ifTrue: [ ^ uniqueInstance ].
 	self stop.
 	uniqueInstance := self new.
 	PBCF reset.
 	uniqueInstance commandFactory reset.
 	uniqueInstance start.
 	^ uniqueInstance
+]
+
+{ #category : #'system startup & shutdown' }
+PBApplication class >> startUp: isImageStarting [
+	isImageStarting ifTrue: [ 
+		self allInstancesDo: [ :each | each stop ] ]
 ]
 
 { #category : #testing }

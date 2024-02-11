@@ -86,7 +86,7 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 	| proc args |
 	args := OrderedCollection with: 'install'. 
 	aModule ifNotNil: [ args add: aModule ].
-	proc := self newBaseProcess.
+	proc := self newOneShotProcess.
 	proc
 		arguments: args;
 		errorBlock: [ 
@@ -99,7 +99,7 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedModules [
 	| proc |
-	proc := self newBaseProcess.
+	proc := self newOneShotProcess.
 	proc arguments: #( 'graph' '--json-tree' ).
 	proc errorBlock: [ self error: 'pipenv graph failed' ].
 	proc runAndWait.
@@ -110,7 +110,7 @@ PBNewPharoPipenvProcess >> installedModules [
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedVirtualEnvironment [
 	| proc |
-	proc := self newBaseProcess.
+	proc := self newOneShotProcess.
 	proc arguments: #( '--venv' ).
 	proc errorBlock: [ self error: 'pipenv --venv failed' ].
 	proc runAndWait.
@@ -130,9 +130,15 @@ PBNewPharoPipenvProcess >> newBaseProcess [
 			command: self pipenvPath fullName;
 			workingDirectory: self workingDirectory fullName;
 			addAllEnvVariablesFromParentWithoutOverride;
-			terminateOnShutdown;
 			yourself.
 	^ newProcess
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> newOneShotProcess [
+	^ self newBaseProcess
+		terminateOnShutdown;
+		yourself
 ]
 
 { #category : #private }
