@@ -24,7 +24,7 @@ Class {
 
 { #category : #accessing }
 PBNewPharoPipenvProcess class >> pipenvPath [
-	^ PBPharoPipenvProcess pipenvPath
+	^ PBPharoPipenvPathFinder pipenvPath
 ]
 
 { #category : #accessing }
