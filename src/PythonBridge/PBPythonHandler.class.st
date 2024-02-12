@@ -18,6 +18,13 @@ PBPythonHandler >> exitCode [
 ]
 
 { #category : #accessing }
+PBPythonHandler >> gtDetails [
+	^ super gtDetails , {
+		{ #process . process }
+	}
+]
+
+{ #category : #accessing }
 PBPythonHandler >> gtPackage [
 	^ process gtPackage
 ]

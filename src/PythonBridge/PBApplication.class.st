@@ -48,20 +48,30 @@ PBApplication class >> runtimeDirectory [
 	^ 'PythonBridgeRuntime'
 ]
 
-{ #category : #accessing }
+{ #category : #'system startup & shutdown' }
 PBApplication class >> shutDown: isImageQuitting [
-	isImageQuitting ifTrue: [ self stop ]
+	isImageQuitting ifTrue: [ self stopAllInstances ]
 ]
 
 { #category : #'start-stop' }
 PBApplication class >> start [
-	self isRunning ifTrue: [ Error signal: 'Python bridge already running.' ].
+	self isRunning ifTrue: [ ^ uniqueInstance ].
 	self stop.
 	uniqueInstance := self new.
 	PBCF reset.
 	uniqueInstance commandFactory reset.
 	uniqueInstance start.
 	^ uniqueInstance
+]
+
+{ #category : #'system startup & shutdown' }
+PBApplication class >> startUp: isImageStarting [
+	isImageStarting ifTrue: [ self stopAllInstances ]
+]
+
+{ #category : #'system startup & shutdown' }
+PBApplication class >> stopAllInstances [
+	self allInstancesDo: [ :each | each stop ]
 ]
 
 { #category : #testing }
@@ -162,11 +172,11 @@ PBApplication >> pipenvPath [
 
 { #category : #printing }
 PBApplication >> printOn: aStream [
-	aStream
-		<< self class name;
-		<< '('.
+	super printOn: aStream.
+	aStream << '('.
 	self isRunning
-		ifFalse: [ aStream << 'not running)'.
+		ifFalse: [
+			aStream << 'not running)'.
 			^ self ].
 	aStream
 		print: settings clientSocketAddress;

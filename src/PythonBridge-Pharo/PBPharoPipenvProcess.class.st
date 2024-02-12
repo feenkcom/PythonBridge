@@ -7,28 +7,17 @@ Class {
 		'serverDebugger',
 		'pythonMainFile'
 	],
-	#classVars : [
-		'PipenvPath'
-	],
 	#category : #'PythonBridge-Pharo-Processes'
 }
 
-{ #category : #'class initialization' }
-PBPharoPipenvProcess class >> initialize [ 
-
-	SessionManager default registerUserClassNamed: self name.
-]
-
 { #category : #initialization }
 PBPharoPipenvProcess class >> pipenvPath [
-	^ PipenvPath 
-			ifNil: [ PipenvPath := self resolvePipenvPath ]
-			ifNotNil: [ PipenvPath ]
+	^ PBPharoPipenvPathFinder pipenvPath
 ]
 
 { #category : #initialization }
 PBPharoPipenvProcess class >> pipenvPath: aFileReference [
-	PipenvPath := aFileReference
+	PBPharoPipenvPathFinder pipenvPath: aFileReference
 ]
 
 { #category : #accessing }
@@ -41,62 +30,6 @@ PBPharoPipenvProcess class >> reset [
 	<script>
 
 	PipenvPath := nil.
-]
-
-{ #category : #initialization }
-PBPharoPipenvProcess class >> resolvePipenvPath [
-	| path process |
-	process := GtSubprocessWithInMemoryOutput new
-			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
-			arguments: #('pipenv').
-	Smalltalk os isWindows
-		ifFalse: [ | originalPath extraPath extendedPath |
-			originalPath := $: split: (Smalltalk os environment at: 'PATH').
-			"Search in some extra places that might not be in PATH"
-			extraPath := #('/usr/local/bin').
-			extendedPath := $: join: extraPath , originalPath.
-			process environmentAt: 'PATH' put: extendedPath ].
-	process
-		addAllEnvVariablesFromParentWithoutOverride;
-		terminateOnShutdown;
-		runAndWait.
-	(#(0 1) includes: process exitCode)
-		ifFalse: [ self signalPipenvNotFound ].
-	path := process stdout trimBoth.
-	Smalltalk os isWindows
-		ifTrue: [ path := (path lines
-					select: [ :aString | 
-						"We want to remove HOME\.pyenv\pyenv-win\shims\pipenv,
-						because it is a BASH script that is supposed to be executed
-						in cygwin or in git-bash."
-						#(bat exe) includes: aString asFileReference extension asLowercase ])
-					ifEmpty: [ self signalPipenvNotFound ]
-					ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
-	path ifEmpty: [ self signalPipenvNotFound ].
-	^ path asFileReference
-]
-
-{ #category : #initialization }
-PBPharoPipenvProcess class >> signalPipenvNotFound [
-	"
-	PythonBridge use the unix command `which` to find the route of the `pipenv` command. 
-	From Pharo we could not find the route, therefore you have to set it mannualy.
-		
-	To find the path of Pipenv in your system run the command `which pipenv` in the terminal.
-	To set the path in PythonBridge send the following message:
-	
-	PBPharoPipenvProcess pipenvPath: '/usr/local/bin/pipenv' asFileReference
-	
-	"
-	Error signal: 'Error: Pipenv command could not be found.'
-]
-
-{ #category : #'system startup' }
-PBPharoPipenvProcess class >> startUp: resuming [
-	"On startup any instances saved during the last session will be invalid (since the processes are terminated on shutdown).
-	Mark them as stopped."
-
-	resuming ifTrue: [ self allInstancesDo: [ :each | each stop ] ]
 ]
 
 { #category : #'start-stop' }

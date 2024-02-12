@@ -24,7 +24,7 @@ Class {
 
 { #category : #accessing }
 PBNewPharoPipenvProcess class >> pipenvPath [
-	^ PBPharoPipenvProcess pipenvPath
+	^ PBPharoPipenvPathFinder pipenvPath
 ]
 
 { #category : #accessing }
@@ -44,6 +44,38 @@ PBNewPharoPipenvProcess >> gtPackage [
 	^ #gtoolkit_bridge asP3GI => #gtoolkit
 ]
 
+{ #category : #'gt extensions' }
+PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
+	<gtView>
+	^ composite columnedList
+		title: 'Details';
+		priority: 40;
+		items: [ {
+			{ 'running' . self isRunning }.
+			{ 'working directory' . self workingDirectory }.
+			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
+			{ 'server address' . self settings serverSocketAddress }.
+			{ 'message format' . PBPlatform current messageBrokerStrategy methodArg }.
+			{ 'debug mode' . self debugMode }
+		} ];
+		column: 'Key' text: #first weight: 0.5;
+		column: 'Value' text: #second;
+		send: #last
+]
+
+{ #category : #'gt extensions' }
+PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
+	<gtView>
+	^ composite columnedTree
+		title: 'Modules';
+		priority: 50;
+		items: [ self installedModules ];
+		children: [ :each | each at: #dependencies ];
+		column: #name text: [ :each | each at: #package_name ];
+		column: #version text: [ :each | each at: #installed_version ];
+		expandAll
+]
+
 { #category : #accessing }
 PBNewPharoPipenvProcess >> hasProcess [
 	^ process isNotNil
@@ -54,7 +86,7 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 	| proc args |
 	args := OrderedCollection with: 'install'. 
 	aModule ifNotNil: [ args add: aModule ].
-	proc := self newBaseProcess.
+	proc := self newOneShotProcess.
 	proc
 		arguments: args;
 		errorBlock: [ 
@@ -67,12 +99,23 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedModules [
 	| proc |
-	proc := self newBaseProcess.
-	proc arguments: #( 'graph' ).
+	proc := self newOneShotProcess.
+	proc arguments: #( 'graph' '--json-tree' ).
 	proc errorBlock: [ self error: 'pipenv graph failed' ].
 	proc runAndWait.
 	self assert: proc isSuccess.
-	^ proc stdout
+	^ NeoJSONObject fromString: proc stdout
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedVirtualEnvironment [
+	| proc |
+	proc := self newOneShotProcess.
+	proc arguments: #( '--venv' ).
+	proc errorBlock: [ self error: 'pipenv --venv failed' ].
+	proc runAndWait.
+	self assert: proc isSuccess.
+	^ proc stdout lines first
 ]
 
 { #category : #testing }
@@ -87,9 +130,15 @@ PBNewPharoPipenvProcess >> newBaseProcess [
 			command: self pipenvPath fullName;
 			workingDirectory: self workingDirectory fullName;
 			addAllEnvVariablesFromParentWithoutOverride;
-			terminateOnShutdown;
 			yourself.
 	^ newProcess
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> newOneShotProcess [
+	^ self newBaseProcess
+		terminateOnShutdown;
+		yourself
 ]
 
 { #category : #private }
@@ -134,7 +183,7 @@ PBNewPharoPipenvProcess >> processArguments [
 		add: '--pharo';
 		add: self settings clientSocketAddress port asString;
 		add: '--method';
-		add: PBPlatform current messageBrokerStrategy methodArg.
+		add: self settings messageBrokerStrategy methodArg.
 	self debugMode ifTrue: [ args add: '--log' ].
 	^ args
 ]
@@ -158,6 +207,6 @@ PBNewPharoPipenvProcess >> stdout [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> stop [
 	process ifNil: [ ^ self ].
-	process terminate.
+	process terminateAll.
 	process := nil
 ]

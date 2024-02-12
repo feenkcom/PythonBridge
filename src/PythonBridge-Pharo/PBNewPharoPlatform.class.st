@@ -61,7 +61,8 @@ PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
 				"Ask our application to install a number of Python modules inside our isolated pipenv environment"
 				"The special nil module creates the pipenv virtual environment itself"
 				#(nil 'gtoolkit_bridge' 'debugpy')
-					do: [ :each | anApplication installModule: each ] ] asJob
+					do: [ :each | anApplication installModule: each ] 
+			] asJob
 				title: 'Installing PythonBridge runtime environment';
 				run ]
 ]
