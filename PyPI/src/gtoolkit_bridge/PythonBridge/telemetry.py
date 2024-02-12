@@ -4,7 +4,7 @@ import time
 import inspect
 from typing import Any
 from abc import ABC, abstractmethod
-from gtoolkit.gt import gtView
+from gtoolkit_bridge import gtView
 
 def methodevent(message):
     def decorate(func):
