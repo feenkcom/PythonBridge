@@ -11,4 +11,11 @@ from .gtoolkit.gt import (
 	GtViewedObject
 )
 
+from .PythonBridge.telemetry import (
+	methodevent,
+	argmethodevent,
+	reset_signals,
+	get_signals
+)
+
 from .__version__ import __version__
