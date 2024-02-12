@@ -54,6 +54,7 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'running' . self isRunning }.
 			{ 'working directory' . self workingDirectory }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
+			{ 'python version' . self installedPythonVersion }.
 			{ 'server address' . self settings serverSocketAddress }.
 			{ 'message format' . PBPlatform current messageBrokerStrategy methodArg }.
 			{ 'debug mode' . self debugMode }
@@ -105,6 +106,17 @@ PBNewPharoPipenvProcess >> installedModules [
 	proc runAndWait.
 	self assert: proc isSuccess.
 	^ NeoJSONObject fromString: proc stdout
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedPythonVersion [
+	| proc |
+	proc := self newOneShotProcess.
+	proc arguments: #( 'run' 'python' '-c' 'import sys;print(sys.version)' ).
+	proc errorBlock: [ self error: 'pipenv run failed' ].
+	proc runAndWait.
+	self assert: proc isSuccess.
+	^ proc stdout lines first
 ]
 
 { #category : #utilities }
