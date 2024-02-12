@@ -29,7 +29,7 @@ PBNewPharoPlatform class >> pipenvProcessClass [
 
 { #category : #accessing }
 PBNewPharoPlatform class >> priority [
-	^ 0
+	^ 20
 ]
 
 { #category : #hooks }
