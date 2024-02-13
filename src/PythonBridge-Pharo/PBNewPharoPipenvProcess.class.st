@@ -17,7 +17,8 @@ Class {
 	#name : #PBNewPharoPipenvProcess,
 	#superclass : #LanguageLinkAbstractProcess,
 	#instVars : [
-		'process'
+		'process',
+		'serverDebugger'
 	],
 	#category : #'PythonBridge-Pharo-Processes'
 }
@@ -25,6 +26,15 @@ Class {
 { #category : #accessing }
 PBNewPharoPipenvProcess class >> pipenvPath [
 	^ PBPharoPipenvPathFinder pipenvPath
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> debuggerStateChangedAction: aDAPThreadStateChanged [
+	"Respond to the debugger state changed notification.
+	Signal all promises that the debugger has been paused."
+
+	aDAPThreadStateChanged isStopped ifTrue:
+		[ self application notifyDebuggerPaused: serverDebugger ]
 ]
 
 { #category : #accessing }
@@ -62,6 +72,7 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 						ifFalse: [ '' ] 
 				. process }.
 			{ 'message format' . PBPlatform current messageBrokerStrategy methodArg }.
+			{ 'debugger enabled' . self isDebuggerEnabled }.
 			{ 'debug mode' . self debugMode }
 		} ];
 		column: 'Key' text: #first weight: 0.5;
@@ -82,7 +93,7 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 		expandAll
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 PBNewPharoPipenvProcess >> hasProcess [
 	^ process isNotNil
 ]
@@ -136,6 +147,11 @@ PBNewPharoPipenvProcess >> installedVirtualEnvironment [
 ]
 
 { #category : #testing }
+PBNewPharoPipenvProcess >> isDebuggerEnabled [
+	^ self settings serverDebugMode
+]
+
+{ #category : #testing }
 PBNewPharoPipenvProcess >> isRunning [
 	^ process notNil and: [ process isRunning ]
 ]
@@ -184,7 +200,7 @@ PBNewPharoPipenvProcess >> pipenvPath [
 PBNewPharoPipenvProcess >> processArguments [
 	| args |
 	args := OrderedCollection with: 'run' with: 'python'.
-	self settings serverDebugMode
+	self isDebuggerEnabled
 		ifTrue: [ 
 			args
 				add: '-m';
@@ -208,7 +224,22 @@ PBNewPharoPipenvProcess >> processArguments [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> start [
 	process := self newProcess.
-	process run
+	process run.
+	self isDebuggerEnabled ifTrue: [ self startServerDebugger]
+]
+
+{ #category : #'start-stop' }
+PBNewPharoPipenvProcess >> startServerDebugger [
+	"Start the debugger, tell the server to run and set up inspection on halt"
+
+	"Give the server some time to start"
+	1 second wait.
+	serverDebugger := DAPPythonDebugger new 
+		localRoot: self workingDirectory;
+		connectTo: #[127 0 0 1] port: self settings debugSocketAddress port.
+	serverDebugger announcer 
+		when: DAPThreadStateChanged 
+		do: [ :announcement | self debuggerStateChangedAction: announcement ]
 ]
 
 { #category : #accessing }
