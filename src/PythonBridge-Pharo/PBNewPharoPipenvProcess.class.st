@@ -56,6 +56,11 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
 			{ 'server address' . self settings serverSocketAddress }.
+			{ 'process id'
+				. (process notNil and: [ process hasProcess ])
+						ifTrue: [ process process id ]
+						ifFalse: [ '' ] 
+				. process }.
 			{ 'message format' . PBPlatform current messageBrokerStrategy methodArg }.
 			{ 'debug mode' . self debugMode }
 		} ];
