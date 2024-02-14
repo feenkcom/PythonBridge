@@ -66,7 +66,8 @@ class TelemetrySignal(Telemetry):
         self.file = cf.filename
         self.line = cf.lineno
         global signals
-        signals.add_signal(self)
+        if signals is not None:
+            signals.add_signal(self)
 
     def timestamp(self):
         return self._timestamp
