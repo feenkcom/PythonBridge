@@ -10,6 +10,9 @@ def methodevent(message):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
+            global signals
+            if signals is None:
+                return func(*args, **kwargs)
             signal = MethodStartSignal(message)
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
@@ -25,6 +28,9 @@ def argmethodevent(message):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
+            global signals
+            if signals is None:
+                return func(*args, **kwargs)           
             signal = ArgumentMethodStartSignal(message, kwargs)
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
@@ -188,6 +194,9 @@ class TelemetrySignalGroup:
             .children(lambda each: each.children())\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
+
+def start_signals():
+    reset_signals()
 
 def reset_signals():
     global signals
