@@ -7,6 +7,7 @@ import sys
 
 from .stoppable_thread import StoppableThread
 from .msgpack_serializer import MsgPackSerializer
+from .msgpack_serializer import addMapping as msgpack_serializer_addMapping
 from .bridge_utils import random_str
 from .bridge_utils import log_msg
 
@@ -26,7 +27,7 @@ class MsgPackSocketPlatform:
         self.async_handlers = {}
     
     def addMapping(self, key_type, mapping_function):
-        msgpack_serializer.addMapping(key_type, mapping_function)
+        msgpack_serializer_addMapping(key_type, mapping_function)
 
     def set_handler(self, msg_type, async_handler):
         self.async_handlers[msg_type] = async_handler
