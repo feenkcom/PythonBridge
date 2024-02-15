@@ -65,6 +65,7 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'working directory' . self workingDirectory }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
+			{ 'python bridge version' . self installedPythonBridgeVersion }.
 			{ 'server address' . self settings serverSocketAddress }.
 			{ 'process id'
 				. (process notNil and: [ process hasProcess ])
@@ -122,6 +123,14 @@ PBNewPharoPipenvProcess >> installedModules [
 	proc runAndWait.
 	self assert: proc isSuccess.
 	^ NeoJSONObject fromString: proc stdout
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedPythonBridgeVersion [
+	^ self application newCommandFactory
+		<< #gtoolkit_bridge asP3GI import;
+		<< (#gtoolkit_bridge asP3GI => #__version__);
+		sendAndWait
 ]
 
 { #category : #utilities }

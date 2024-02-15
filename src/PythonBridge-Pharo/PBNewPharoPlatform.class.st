@@ -53,6 +53,15 @@ PBNewPharoPlatform >> defaultMessageBrokerClass [
 ]
 
 { #category : #hooks }
+PBNewPharoPlatform >> deleteRuntimeEnvironment [
+	"Delete the whole PythonBridgeRuntime working directory.
+	This will effectively force reinstallation on the next run.
+	Only execute when you have not added or editing anything there"
+	
+	self workingDirectory deleteAll
+]
+
+{ #category : #hooks }
 PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
 	anApplication workingDirectory exists
 		ifFalse: [
