@@ -71,17 +71,6 @@ PBCommandQueueTest >> testFinishNotFoundCommand [
 ]
 
 { #category : #tests }
-PBCommandQueueTest >> testFinishOutOfSync1Command [
-	| cc1 cc2 |
-	cc1 := PBCommand new.
-	cc2 := PBCommand new.
-	queue addCommand: cc1.
-	queue addCommand: cc2.
-	self deny: (queue finishCommand: cc2).
-	self assert: queue isEmpty
-]
-
-{ #category : #tests }
 PBCommandQueueTest >> testFinishOutOfSync2Command [
 	| cc1 cc2 |
 	cc1 := PBCommand new.
@@ -90,6 +79,18 @@ PBCommandQueueTest >> testFinishOutOfSync2Command [
 	queue addCommand: cc2.
 	queue finishCommand: cc2.
 	queue finishCommand: cc1.
+	self assert: queue isEmpty
+]
+
+{ #category : #tests }
+PBCommandQueueTest >> testFinishedOutOfSequenceCommand [
+	| cc1 cc2 |
+	cc1 := PBCommand new.
+	cc2 := PBCommand new.
+	queue addCommand: cc1.
+	queue addCommand: cc2.
+	self assert: (queue finishCommand: cc1).
+	self assert: (queue finishCommand: cc2).
 	self assert: queue isEmpty
 ]
 
