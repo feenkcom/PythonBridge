@@ -158,6 +158,13 @@ PBPharoPipenvProcess >> processArguments [
 ]
 
 { #category : #accessing }
+PBPharoPipenvProcess >> pythonBridgePackage [
+	"Answer the name of the Python package where top level PythonBridge code lives"
+	
+	^ #PythonBridge asP3GI
+]
+
+{ #category : #accessing }
 PBPharoPipenvProcess >> pythonMainFile [
 	^ pythonMainFile ifNil: [ self workingDirectory / 'start_bridge.py' ]
 ]

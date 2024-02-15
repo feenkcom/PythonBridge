@@ -186,6 +186,11 @@ PBApplication >> printOn: aStream [
 ]
 
 { #category : #accessing }
+PBApplication >> pythonBridgePackage [
+	^ processHandler pythonBridgePackage
+]
+
+{ #category : #accessing }
 PBApplication >> runtimeDirectory [
 	"This is the directory basename where the runtime files are located"
 

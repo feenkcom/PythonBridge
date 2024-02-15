@@ -66,6 +66,11 @@ PBPythonHandler >> platform [
 	^ PBPlatform current
 ]
 
+{ #category : #accessing }
+PBPythonHandler >> pythonBridgePackage [
+	^ process pythonBridgePackage
+]
+
 { #category : #testing }
 PBPythonHandler >> start [
 	self platform ensureEnvironmentForApp: self application.

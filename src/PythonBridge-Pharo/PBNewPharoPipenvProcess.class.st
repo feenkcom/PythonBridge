@@ -230,6 +230,13 @@ PBNewPharoPipenvProcess >> processArguments [
 	^ args
 ]
 
+{ #category : #accessing }
+PBNewPharoPipenvProcess >> pythonBridgePackage [
+	"Answer the name of the Python package where top level PythonBridge code lives as a P3GIdentifier"
+	
+	^ #gtoolkit_bridge asP3GI => #PythonBridge
+]
+
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> start [
 	process := self newProcess.
