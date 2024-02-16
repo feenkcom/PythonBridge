@@ -70,7 +70,8 @@ PBPharoPipenvPathFinder class >> signalPipenvNotFound [
 	
 	or set it in your PBApplication's PBSettings:
 	
-	myPBApplication settings: pipenvPath: '/usr/local/bin/pipenv' asFileReference
+	myPBApplication settings pipenvPath: '/usr/local/bin/pipenv' asFileReference
 	"
-	Error signal: 'Error: Pipenv command could not be found.'
+	
+	Error signal: 'pipenv command could not be found'
 ]

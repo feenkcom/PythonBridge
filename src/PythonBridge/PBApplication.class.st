@@ -176,6 +176,11 @@ PBApplication >> pipenvPath [
 	^ settings pipenvPath ifNil: [ processHandler pipenvPath ]
 ]
 
+{ #category : #'start-stop' }
+PBApplication >> postInitialization [
+	self processHandler applicationReady
+]
+
 { #category : #printing }
 PBApplication >> printOn: aStream [
 	super printOn: aStream.

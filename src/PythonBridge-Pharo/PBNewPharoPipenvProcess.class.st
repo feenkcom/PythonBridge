@@ -18,7 +18,8 @@ Class {
 	#superclass : #LanguageLinkAbstractProcess,
 	#instVars : [
 		'process',
-		'serverDebugger'
+		'serverDebugger',
+		'started'
 	],
 	#category : #'PythonBridge-Pharo-Processes'
 }
@@ -26,6 +27,11 @@ Class {
 { #category : #accessing }
 PBNewPharoPipenvProcess class >> pipenvPath [
 	^ PBPharoPipenvPathFinder pipenvPath
+]
+
+{ #category : #'start-stop' }
+PBNewPharoPipenvProcess >> applicationReady [
+	started := true
 ]
 
 { #category : #private }
@@ -62,10 +68,14 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 		priority: 40;
 		items: [ {
 			{ 'running' . self isRunning }.
+			{ 'started' . self hasStarted }.
 			{ 'working directory' . self workingDirectory }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
-			{ 'python bridge version' . self installedPythonBridgeVersion }.
+			{ 'python bridge version' 
+				. self application isRunning 
+					ifTrue: [ self installedPythonBridgeVersion ] 
+					ifFalse: [ '' ] }.
 			{ 'server address' . self settings serverSocketAddress }.
 			{ 'process id'
 				. (process notNil and: [ process hasProcess ])
@@ -97,6 +107,17 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 { #category : #testing }
 PBNewPharoPipenvProcess >> hasProcess [
 	^ process isNotNil
+]
+
+{ #category : #testing }
+PBNewPharoPipenvProcess >> hasStarted [
+	^ started
+]
+
+{ #category : #initalization }
+PBNewPharoPipenvProcess >> initialize [
+	super initialize.
+	started := false
 ]
 
 { #category : #utilities }
@@ -190,8 +211,12 @@ PBNewPharoPipenvProcess >> newProcess [
 	args := self processArguments.
 	proc
 		arguments: args;
-		errorBlock: [ 
-			process ifNotNil: [
+		errorBlock: [
+			"Until #started has been confirmed by our application,
+			errors here are considered related to startup.
+			Later on, we ignore errors here are ignored,
+			we assume the external process died out of our control."
+			self hasStarted ifFalse: [
 				self error: 'Unable to run pipenv '
 					, (Character space join: args) ] ].
 	^ proc
@@ -203,6 +228,16 @@ PBNewPharoPipenvProcess >> pipenvPath [
 	This may be overridden by the application settings."
 
 	^ self settings pipenvPath ifNil: [ self class pipenvPath ]
+]
+
+{ #category : #printing }
+PBNewPharoPipenvProcess >> printOn: stream [
+	super printOn: stream.
+	stream nextPut: $(.
+	self isRunning
+		ifTrue: [ stream print: self settings serverSocketAddress ]
+		ifFalse: [ stream nextPutAll: 'not running' ].
+	stream nextPut: $)
 ]
 
 { #category : #private }
@@ -239,6 +274,7 @@ PBNewPharoPipenvProcess >> pythonBridgePackage [
 
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> start [
+	started := false.
 	process := self newProcess.
 	process run.
 	self isDebuggerEnabled ifTrue: [ self startServerDebugger]
