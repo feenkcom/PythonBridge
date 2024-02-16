@@ -70,6 +70,11 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'running' . self isRunning }.
 			{ 'started' . self hasStarted }.
 			{ 'working directory' . self workingDirectory }.
+			{ 'installation complete' 
+				. (self workingDirectory / 'complete.log') exists
+					ifTrue: [ 'yes @ ' , (self workingDirectory / 'complete.log') contents ]
+					ifFalse: [ 'no' ] }.
+			{ 'install log' . self workingDirectory / 'install.log' }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
 			{ 'python bridge version' 
