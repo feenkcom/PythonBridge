@@ -6,15 +6,21 @@ from typing import Any
 from abc import ABC, abstractmethod
 from gtoolkit_bridge import gtView
 
-def methodevent(message):
+def methodevent(message=""):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
             if 'signals' not in globals():
                 return func(*args, **kwargs)
+            nonlocal message
+            if message=="":
+                message = func.__name__
             signal = MethodStartSignal(message)
-            signal.file = inspect.getsourcefile(func)
-            [_, signal.line] = inspect.getsourcelines(func)
+            try:
+                signal.file = inspect.getsourcefile(func)
+                [_, signal.line] = inspect.getsourcelines(func)
+            except:
+                pass
             try:
                 value = func(*args, **kwargs)
                 return value
@@ -23,15 +29,21 @@ def methodevent(message):
         return wrapped_function
     return decorate
 
-def argmethodevent(message):
+def argmethodevent(message=""):
     def decorate(func):
         @functools.wraps(func)
         def wrapped_function(*args, **kwargs):
             if 'signals' not in globals():
-                return func(*args, **kwargs)           
+                return func(*args, **kwargs)
+            nonlocal message
+            if message=="":
+                message = func.__name__           
             signal = ArgumentMethodStartSignal(message, kwargs)
-            signal.file = inspect.getsourcefile(func)
-            [_, signal.line] = inspect.getsourcelines(func)
+            try:
+                signal.file = inspect.getsourcefile(func)
+                [_, signal.line] = inspect.getsourcelines(func)
+            except:
+                pass
             try:
                 value = func(*args, **kwargs)
                 return value
