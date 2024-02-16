@@ -7,6 +7,11 @@ Class {
 	#category : #'PythonBridge-Core'
 }
 
+{ #category : #'start-stop' }
+PBPythonHandler >> applicationReady [
+	process applicationReady
+]
+
 { #category : #accessing }
 PBPythonHandler >> errorMessage [
 	^ process errorMessage
@@ -66,7 +71,12 @@ PBPythonHandler >> platform [
 	^ PBPlatform current
 ]
 
-{ #category : #testing }
+{ #category : #accessing }
+PBPythonHandler >> pythonBridgePackage [
+	^ process pythonBridgePackage
+]
+
+{ #category : #'start-stop' }
 PBPythonHandler >> start [
 	self platform ensureEnvironmentForApp: self application.
 	^ process start
@@ -86,7 +96,7 @@ PBPythonHandler >> stdout [
 	^ process stdout
 ]
 
-{ #category : #testing }
+{ #category : #'start-stop' }
 PBPythonHandler >> stop [
 	^ process stop
 ]

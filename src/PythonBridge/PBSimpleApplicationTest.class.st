@@ -33,8 +33,12 @@ PBSimpleApplicationTest >> testSimpleLambda [
 
 { #category : #tests }
 PBSimpleApplicationTest >> testSimpleMapping [
-	| obj type |
-	obj := self cf sendAndWait: #bridge_globals asP3GI => #msg_service.
+	| globals obj type |
+	globals := self app newCommandFactory
+		<< (self app pythonBridgePackage => 'bridge_globals') import;
+		<< (self app pythonBridgePackage => 'bridge_globals' => 'bridge_globals') call;
+		sendAndWait.
+	obj := globals at: #msg_service.
 	type := self cf sendAndWait: (#type asP3GI callWith: (Array with: obj)).
 	self application addMapping: type to: (P3GLambda 
 														argument: #x asP3GI 

@@ -7,12 +7,12 @@ Class {
 { #category : #tests }
 PBPythonObjectTest >> setUp [
 	super setUp.
-	self cf << (#PythonBridge asP3GI => #object_registry) import
+	self cf << (self app pythonBridgePackage => #object_registry) import
 ]
 
 { #category : #tests }
 PBPythonObjectTest >> stubPythonObjectExpression [
-	^ #PythonBridge asP3GI => #object_registry => #Registry callWith: #()
+	^ self app pythonBridgePackage => #object_registry => #Registry callWith: #()
 ]
 
 { #category : #tests }

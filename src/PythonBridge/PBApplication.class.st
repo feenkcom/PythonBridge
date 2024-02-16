@@ -83,9 +83,15 @@ PBApplication class >> test [
 
 { #category : #utils }
 PBApplication >> addMapping: pythonType to: pythonFunction [
-	self commandFactory 
-		send: (#bridge_globals asP3GI => #msg_service => #addMapping 
-						callWith: (Array with: pythonType with: pythonFunction))
+	| globals msgService |
+	globals := self newCommandFactory
+			<< (self pythonBridgePackage => 'bridge_globals') import;
+			<< (self pythonBridgePackage => 'bridge_globals' => 'bridge_globals') call;
+			sendAndWait.
+	msgService := globals at: #msg_service.
+	self commandFactory
+		sendAndWait: (msgService => #addMapping
+				callWith: (Array with: pythonType with: pythonFunction))
 ]
 
 { #category : #accessing }
@@ -170,6 +176,11 @@ PBApplication >> pipenvPath [
 	^ settings pipenvPath ifNil: [ processHandler pipenvPath ]
 ]
 
+{ #category : #'start-stop' }
+PBApplication >> postInitialization [
+	self processHandler applicationReady
+]
+
 { #category : #printing }
 PBApplication >> printOn: aStream [
 	super printOn: aStream.
@@ -183,6 +194,11 @@ PBApplication >> printOn: aStream [
 		<< ', ';
 		print: settings serverSocketAddress;
 		<< ')'
+]
+
+{ #category : #accessing }
+PBApplication >> pythonBridgePackage [
+	^ processHandler pythonBridgePackage
 ]
 
 { #category : #accessing }
