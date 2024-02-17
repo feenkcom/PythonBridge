@@ -93,7 +93,8 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 		} ];
 		column: 'Key' text: #first weight: 0.5;
 		column: 'Value' text: #second;
-		send: #last
+		send: #last;
+		actionUpdateButton
 ]
 
 { #category : #'gt extensions' }
