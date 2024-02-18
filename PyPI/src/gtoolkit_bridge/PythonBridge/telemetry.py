@@ -38,7 +38,7 @@ def argmethodevent(message=""):
             nonlocal message
             if message=="":
                 message = func.__name__           
-            signal = ArgumentMethodStartSignal(message, kwargs)
+            signal = ArgumentMethodStartSignal(message, args, kwargs)
             try:
                 signal.file = inspect.getsourcefile(func)
                 [_, signal.line] = inspect.getsourcelines(func)
@@ -146,9 +146,10 @@ class MethodEndSignal(TelemetrySignal):
         return True
 
 class ArgumentMethodStartSignal(MethodStartSignal):
-    def __init__(self, message, args):
+    def __init__(self, message, args, kwargs):
         super().__init__(message)
         self.args = args.copy()
+        self.kwargs = kwargs.copy()
 
 class TelemetrySignalGroup:
     def __init__(self) -> None:
