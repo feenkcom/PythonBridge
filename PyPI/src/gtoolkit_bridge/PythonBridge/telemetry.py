@@ -2,8 +2,11 @@ import bisect
 import functools
 import time
 import inspect
+
 from typing import Any
-from abc import ABC, abstractmethod
+from abc import ABC, abstract-method
+from copy import copy
+
 from gtoolkit_bridge import gtView
 
 def methodevent(message=""):
@@ -38,7 +41,7 @@ def argmethodevent(message=""):
             nonlocal message
             if message=="":
                 message = func.__name__           
-            signal = ArgumentMethodStartSignal(message, kwargs)
+            signal = ArgumentMethodStartSignal(message, args, kwargs)
             try:
                 signal.file = inspect.getsourcefile(func)
                 [_, signal.line] = inspect.getsourcelines(func)
@@ -51,6 +54,22 @@ def argmethodevent(message=""):
                 MethodEndSignal(message)
         return wrapped_function
     return decorate
+
+def gtTrace(func):
+    @functools.wraps(func)
+    def wrapper_gtTrace(*args, **kwargs):
+        if 'signals' not in globals():
+            return func(*args, **kwargs)
+        funcName = func.__name__
+        funcArgNames = inspect.getfullargspec(func).args
+        funcArgs = [(name, copy(value)) for name, value in zip(funcArgNames, args)]
+        if (funcArgNames[0] == 'self'):
+            funcArgs = funcArgs[1:]
+        ArgumentMethodStartSignal(funcName, funcArgs, kwargs)
+        value = func(*args, **kwargs)
+        ResultMethodEndSignal(funcName, value)
+        return value
+    return wrapper_gtTrace
 
 class Telemetry(ABC):
     def __init__(self, message):
@@ -146,9 +165,33 @@ class MethodEndSignal(TelemetrySignal):
         return True
 
 class ArgumentMethodStartSignal(MethodStartSignal):
-    def __init__(self, message, args):
+    def __init__(self, message, args, kwargs):
         super().__init__(message)
         self.args = args.copy()
+        self.kwargs = kwargs.copy()
+        
+    @gtView
+    def gtViewCall(self, aBuilder):
+        return aBuilder.columnedList()\
+            .title("Call")\
+            .priority(5)\
+            .items(lambda: [ ("message",self.message), ("arguments",self.args), ("keyword-arguments",self.kwargs) ])\
+            .column("property", lambda each: each[0])\
+            .column("value", lambda each: each[1])
+            
+class ResultMethodEndSignal(MethodEndSignal):
+    def __init__(self, message, result):
+        super().__init__(message)
+        self.result = copy(result)
+        
+    @gtView
+    def gtViewCall(self, aBuilder):
+        return aBuilder.columnedList()\
+            .title("Call")\
+            .priority(5)\
+            .items(lambda: [ ("message",self.message), ("result",self.result) ])\
+            .column("property", lambda each: each[0])\
+            .column("value", lambda each: each[1])
 
 class TelemetrySignalGroup:
     def __init__(self) -> None:

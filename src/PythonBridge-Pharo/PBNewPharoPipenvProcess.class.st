@@ -70,6 +70,11 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'running' . self isRunning }.
 			{ 'started' . self hasStarted }.
 			{ 'working directory' . self workingDirectory }.
+			{ 'installation complete' 
+				. (self workingDirectory / 'complete.log') exists
+					ifTrue: [ 'yes @ ' , (self workingDirectory / 'complete.log') contents ]
+					ifFalse: [ 'no' ] }.
+			{ 'install log' . self workingDirectory / 'install.log' }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
 			{ 'python bridge version' 
@@ -88,7 +93,8 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 		} ];
 		column: 'Key' text: #first weight: 0.5;
 		column: 'Value' text: #second;
-		send: #last
+		send: #last;
+		actionUpdateButton
 ]
 
 { #category : #'gt extensions' }
@@ -122,17 +128,27 @@ PBNewPharoPipenvProcess >> initialize [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
-	| proc args |
+	| proc args description time |
 	args := OrderedCollection with: 'install'. 
 	aModule ifNotNil: [ args add: aModule ].
+	description := Character space join: #(pipenv) , args.
+	time := Time millisecondClockValue.
 	proc := self newOneShotProcess.
 	proc
 		arguments: args;
-		errorBlock: [ 
-			self error: 'Unable to execute pipenv '
-				, (Character space join: args)  ].
+		errorBlock: [ self error: 'Unable to execute ' , description ].
 	proc runAndWait.
-	self assert: proc isSuccess
+	self assert: proc isSuccess.
+	self workingDirectory / 'install.log' writeStreamDo: [ :out |
+		out setToEnd.
+		(ZnNewLineWriterStream on: out) 
+			print: DateAndTime now;
+			space;
+			nextPutAll: description;
+			space;
+			print: (Time millisecondsSince: time);
+			nextPutAll: 'ms';
+			cr ]
 ]
 
 { #category : #utilities }
@@ -159,7 +175,7 @@ PBNewPharoPipenvProcess >> installedPythonVersion [
 	| proc |
 	proc := self newOneShotProcess.
 	proc arguments: #( 'run' 'python' '-c' 'import sys;print(sys.version)' ).
-	proc errorBlock: [ self error: 'pipenv run failed' ].
+	proc errorBlock: [ self error: 'pipenv run python failed' ].
 	proc runAndWait.
 	self assert: proc isSuccess.
 	^ proc stdout lines first

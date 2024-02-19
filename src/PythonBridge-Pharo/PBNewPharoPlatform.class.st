@@ -63,14 +63,17 @@ PBNewPharoPlatform >> deleteRuntimeEnvironment [
 
 { #category : #hooks }
 PBNewPharoPlatform >> ensureEnvironmentForApp: anApplication [
-	anApplication workingDirectory exists
+	(anApplication workingDirectory exists 
+			and: [ (anApplication workingDirectory / 'complete.log') exists ])
 		ifFalse: [
 			[
 				anApplication workingDirectory createDirectory.
 				"Ask our application to install a number of Python modules inside our isolated pipenv environment"
 				"The special nil module creates the pipenv virtual environment itself"
 				#(nil 'gtoolkit_bridge' 'debugpy')
-					do: [ :each | anApplication installModule: each ] 
+					do: [ :each | anApplication installModule: each ].
+				(anApplication workingDirectory / 'complete.log') ensureDelete; writeStreamDo: [ :out |
+					out print: DateAndTime now]
 			] asJob
 				title: 'Installing PythonBridge runtime environment';
 				run ]
