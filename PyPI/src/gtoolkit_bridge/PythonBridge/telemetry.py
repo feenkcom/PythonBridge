@@ -4,7 +4,7 @@ import time
 import inspect
 
 from typing import Any
-from abc import ABC, abstract-method
+from abc import ABC, abstractmethod
 from copy import copy
 
 from gtoolkit_bridge import gtView
