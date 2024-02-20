@@ -2,7 +2,7 @@
 
 echo "Running Python Example"
 
-image_dir = `pwd`
+image_dir=`pwd`
 
 cd ..
 
