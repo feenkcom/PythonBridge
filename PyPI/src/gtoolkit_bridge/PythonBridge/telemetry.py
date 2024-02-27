@@ -140,6 +140,15 @@ class TelemetryEvent(Telemetry):
     def duration(self):
         return self.endSignal.timestamp() - self.startSignal.timestamp()
     
+    def getArgs(self):
+        return []
+        
+    def getKwargs(self):
+        return {}
+        
+    def getResult(self):
+        return None
+    
     @gtView
     def gtViewEventTree(self, aBuilder):
         return aBuilder.columnedTree()\
@@ -149,6 +158,15 @@ class TelemetryEvent(Telemetry):
             .children(lambda each: each.children())\
             .column("Message", lambda each: each.message)\
             .column("Duration", lambda each: each.duration())
+
+    @gtView
+    def gtViewCall(self, aBuilder):
+        return aBuilder.columnedList()\
+            .title("Call")\
+            .priority(5)\
+            .items(lambda: [ ("message",self.message), ("arguments",self.startSignal.getArgs()), ("keyword-arguments",self.startSignal.getKwargs()), ("result",self.endSignal.getResult()) ])\
+            .column("property", lambda each: each[0])\
+            .column("value", lambda each: each[1])
 
 class MethodStartSignal(TelemetrySignal):
     def isStartSignal(self):
@@ -170,6 +188,12 @@ class ArgumentMethodStartSignal(MethodStartSignal):
         self.args = args.copy()
         self.kwargs = kwargs.copy()
         
+    def getArgs(self):
+        return self.args
+    
+    def getKwargs(self):
+        return self.kwargs
+        
     @gtView
     def gtViewCall(self, aBuilder):
         return aBuilder.columnedList()\
@@ -183,7 +207,10 @@ class ResultMethodEndSignal(MethodEndSignal):
     def __init__(self, message, result):
         super().__init__(message)
         self.result = copy(result)
-        
+    
+    def getResult(self):
+        return self.result
+    
     @gtView
     def gtViewCall(self, aBuilder):
         return aBuilder.columnedList()\

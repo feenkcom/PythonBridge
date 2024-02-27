@@ -1,14 +1,13 @@
 #!/bin/bash
 
-echo "Running Python Example"
+echo "Running Python Examples & Tests"
 
-image_dir = `pwd`
+image_dir=`pwd`
 
 cd ..
 
 export PATH=/home/ubuntu/.local/bin:$PATH
 
-xvfb-run -a ./gt-installer --verbose --workspace ${image_dir} test --disable-deprecation-rewrites --packages 'PythonBridge' 'PythonBridge-Pharo' 
+pipenv --version
 
-# xvfb-run -a ./gt-installer --verbose --workspace ${image_dir} test 'PythonBridge-Pharo'
-
+./gt-installer --verbose --workspace ${image_dir} test --disable-deprecation-rewrites --packages 'PythonBridge' 'PythonBridge-Pharo'
