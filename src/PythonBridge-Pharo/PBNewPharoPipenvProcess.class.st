@@ -43,6 +43,17 @@ PBNewPharoPipenvProcess >> debuggerStateChangedAction: aDAPThreadStateChanged [
 		[ self application notifyDebuggerPaused: serverDebugger ]
 ]
 
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> deleteInstalledVirtualEnvironment [
+	"pipenv virtual environments are just directories.
+	they are named after the directory they were created in with a hash of the path to it.
+	PBNewPharoPlatform>>#deleteRuntimeEnvironment is not enough to delete
+	the virtual environment that is often stored somewhere else.
+	to really start over, call this method first"
+	
+	self installedVirtualEnvironment deleteAll
+]
+
 { #category : #accessing }
 PBNewPharoPipenvProcess >> errorMessage [
 	^ self stderr

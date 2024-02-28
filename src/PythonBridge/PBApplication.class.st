@@ -129,6 +129,7 @@ PBApplication >> evaluateSourceSequence: sourceString [
 				ifFalse: [
 					cf script: (String cr join: lines allButLast).
 					cf resultExpression: lines last ] ].
+	self isRunning ifFalse: [ self start ].
 	^ cf sendAndWait
 ]
 
