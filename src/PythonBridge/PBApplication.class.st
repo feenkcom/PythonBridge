@@ -32,13 +32,13 @@ PBApplication class >> isWorking [
 	"Return true if my uniqueInstance works by evaluating 1+2 and checking the result is 3"
 
 	^ (self do: [ :app | 
-		app commandFactory
+		app newCommandFactory
 			<< (P3GBinaryOperator new
 					left: 1;
 					right: 2;
 					operator: $+;
-					yourself).
-		app commandFactory send waitForValue ]) = 3
+					yourself);
+			sendAndWait ]) = 3
 ]
 
 { #category : #accessing }
@@ -58,8 +58,6 @@ PBApplication class >> start [
 	self isRunning ifTrue: [ ^ uniqueInstance ].
 	self stop.
 	uniqueInstance := self new.
-	PBCF reset.
-	uniqueInstance commandFactory reset.
 	uniqueInstance start.
 	^ uniqueInstance
 ]
@@ -89,14 +87,9 @@ PBApplication >> addMapping: pythonType to: pythonFunction [
 			<< (self pythonBridgePackage => 'bridge_globals' => 'bridge_globals') call;
 			sendAndWait.
 	msgService := globals at: #msg_service.
-	self commandFactory
+	self newCommandFactory
 		sendAndWait: (msgService => #addMapping
 				callWith: (Array with: pythonType with: pythonFunction))
-]
-
-{ #category : #accessing }
-PBApplication >> commandFactory [
-	^ PBCF
 ]
 
 { #category : #accessing }

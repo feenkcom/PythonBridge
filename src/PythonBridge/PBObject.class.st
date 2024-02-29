@@ -59,16 +59,16 @@ PBObject >> basicCreateObjectArgs: posArgs nameArgs: nameArgs [
 				with: nameArgs asDictionary)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 PBObject >> basicCreateObjectExpr: anExpression [
-	| varName |
+	| varName commandFactory |
 	self isCreated ifTrue: [ ^ self ].
 	varName := self newPythonVar.
 	pythonVariable := varName.
-	self application commandFactory << (
-		self registerIdPyExpression: anExpression).
+	commandFactory := self application newCommandFactory.
+	commandFactory << (self registerIdPyExpression: anExpression).
 	self registerObject.
-	self application commandFactory send.
+	commandFactory send.
 ]
 
 { #category : #'as yet unclassified' }

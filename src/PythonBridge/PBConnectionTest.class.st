@@ -3,18 +3,15 @@ Class {
 	#superclass : #TestCase,
 	#instVars : [
 		'application',
-		'oldApplication',
-		'oldApp',
-		'oldCF'
+		'oldApplication'
 	],
 	#category : #'PythonBridge-Tests'
 }
 
 { #category : #running }
 PBConnectionTest >> setUp [
-	oldApp := PBApplication uniqueInstance.
-	oldCF := PBCF current.
-	PBCF current: nil.
+	oldApplication := PBApplication uniqueInstance.
+
 	application := PBApplication new.
 	PBApplication uniqueInstance: application
 ]
@@ -22,8 +19,8 @@ PBConnectionTest >> setUp [
 { #category : #running }
 PBConnectionTest >> tearDown [
 	application stop.
-	PBApplication uniqueInstance: oldApp.
-	PBCF current: oldCF
+	
+	PBApplication uniqueInstance: oldApplication
 ]
 
 { #category : #tests }
