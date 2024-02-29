@@ -63,7 +63,7 @@ PBTestCase >> cfSend [
 
 { #category : #initialization }
 PBTestCase >> commandFactory [
-	^ self application commandFactory
+	^ commandFactory ifNil: [ commandFactory :=  self application newCommandFactory ]
 ]
 
 { #category : #asserting }
@@ -79,5 +79,6 @@ PBTestCase >> resolveId: anId [
 { #category : #running }
 PBTestCase >> setUp [
 	super setUp.
-	self cf reset
+	commandFactory := nil.
+	promise := nil
 ]

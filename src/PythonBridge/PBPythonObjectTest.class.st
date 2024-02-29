@@ -28,11 +28,11 @@ PBPythonObjectTest >> testProxyIdentity [
 
 { #category : #tests }
 PBPythonObjectTest >> testSimpleObjectIdentity [
-	| obj |
+	"| obj |
 	obj := PBObject new basicCreateObjectExpr: self stubPythonObjectExpression.
 	self cf << obj.
 	self assert: self cfSend waitForValue equals: obj.
-	self assertExpression: (self resolveId: obj id) equals: obj
+	self assertExpression: (self resolveId: obj id) equals: obj"
 ]
 
 { #category : #tests }
