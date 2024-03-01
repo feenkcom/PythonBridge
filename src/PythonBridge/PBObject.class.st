@@ -41,34 +41,35 @@ PBObject >> applicationClass [
 	self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
-PBObject >> basicCreateObject [
-	self basicCreateObjectArgs: #()
-]
-
-{ #category : #'as yet unclassified' }
-PBObject >> basicCreateObjectArgs: posArgs [
-	self basicCreateObjectArgs: posArgs nameArgs: Dictionary new
-]
-
-{ #category : #'as yet unclassified' }
-PBObject >> basicCreateObjectArgs: posArgs nameArgs: nameArgs [
-	^ self basicCreateObjectExpr: 
-			(self pythonConstructor 
-				callWith: posArgs 
-				with: nameArgs asDictionary)
+{ #category : #accessing }
+PBObject >> basicCreateObjectArgs: posArgs nameArgs: nameArgs using: commandFactory [
+	^ self
+		basicCreateObjectExpr: (self pythonConstructor callWith: posArgs with: nameArgs asDictionary)
+		using: commandFactory
 ]
 
 { #category : #accessing }
-PBObject >> basicCreateObjectExpr: anExpression [
-	| varName commandFactory |
+PBObject >> basicCreateObjectArgs: posArgs using: commandFactory [
+	self
+		basicCreateObjectArgs: posArgs
+		nameArgs: Dictionary new
+		using: commandFactory
+]
+
+{ #category : #accessing }
+PBObject >> basicCreateObjectExpr: anExpression using: commandFactory [
+	| varName |
 	self isCreated ifTrue: [ ^ self ].
 	varName := self newPythonVar.
 	pythonVariable := varName.
-	commandFactory := self application newCommandFactory.
 	commandFactory << (self registerIdPyExpression: anExpression).
 	self registerObject.
-	commandFactory send.
+	commandFactory send
+]
+
+{ #category : #accessing }
+PBObject >> basicCreateObjectUsing: commandFactory [
+	self basicCreateObjectArgs: #() using: commandFactory
 ]
 
 { #category : #'as yet unclassified' }
