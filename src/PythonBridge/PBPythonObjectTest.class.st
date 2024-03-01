@@ -12,6 +12,9 @@ PBPythonObjectTest >> setUp [
 
 { #category : #tests }
 PBPythonObjectTest >> stubPythonObjectExpression [
+	"Return a Python expression that gives us a Python object that we can use for testing purposes.
+	It could be any object, but we use the gobal Registry since we know that exists."
+	
 	^ self app pythonBridgePackage => #object_registry => #Registry callWith: #()
 ]
 
@@ -28,11 +31,13 @@ PBPythonObjectTest >> testProxyIdentity [
 
 { #category : #tests }
 PBPythonObjectTest >> testSimpleObjectIdentity [
-	"| obj |
-	obj := PBObject new basicCreateObjectExpr: self stubPythonObjectExpression.
+	| obj |
+	obj := PBObject new 
+		basicCreateObjectExpr: self stubPythonObjectExpression
+		using: self cf.
 	self cf << obj.
 	self assert: self cfSend waitForValue equals: obj.
-	self assertExpression: (self resolveId: obj id) equals: obj"
+	self assertExpression: (self resolveId: obj id) equals: obj
 ]
 
 { #category : #tests }
