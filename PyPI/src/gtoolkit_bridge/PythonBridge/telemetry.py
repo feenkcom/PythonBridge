@@ -65,7 +65,12 @@ def gtTrace(func):
         funcArgs = [(name, copy(value)) for name, value in zip(funcArgNames, args)]
         if (funcArgNames[0] == 'self'):
             funcArgs = funcArgs[1:]
-        ArgumentMethodStartSignal(funcName, funcArgs, kwargs)
+        signal = ArgumentMethodStartSignal(funcName, funcArgs, kwargs)
+        try:
+            signal.file = inspect.getsourcefile(func)
+            [_, signal.line] = inspect.getsourcelines(func)
+        except:
+            pass
         value = func(*args, **kwargs)
         ResultMethodEndSignal(funcName, value)
         return value
@@ -129,7 +134,7 @@ class TelemetryEvent(Telemetry):
         self.endSignal = None
 
     def children(self):
-        return self._children
+        return [self.startSignal, *self._children, self.endSignal]
 
     def addChild(self, child):
         bisect.insort(self._children, child, key=lambda x:x.timestamp())
