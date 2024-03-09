@@ -64,15 +64,18 @@ def gtTrace(func):
         funcArgNames = inspect.getfullargspec(func).args
         funcArgs = [(name, copy(value)) for name, value in zip(funcArgNames, args)]
         if (funcArgNames[0] == 'self'):
+            receiver = args[0]
             funcArgs = funcArgs[1:]
-        signal = ArgumentMethodStartSignal(funcName, funcArgs, kwargs)
+        else:
+            receiver = None
+        signal = ArgumentMethodStartSignal(receiver, funcName, funcArgs, kwargs)
         try:
             signal.file = inspect.getsourcefile(func)
             [_, signal.line] = inspect.getsourcelines(func)
         except:
             pass
         value = func(*args, **kwargs)
-        ResultMethodEndSignal(funcName, value)
+        ResultMethodEndSignal(receiver, funcName, value)
         return value
     return wrapper_gtTrace
 
@@ -169,7 +172,7 @@ class TelemetryEvent(Telemetry):
         return aBuilder.columnedList()\
             .title("Call")\
             .priority(5)\
-            .items(lambda: [ ("message",self.message), ("arguments",self.startSignal.getArgs()), ("keyword-arguments",self.startSignal.getKwargs()), ("result",self.endSignal.getResult()) ])\
+            .items(lambda: [ ("receiver before",self.startSignal.getReceiver()), ("message",self.message), ("arguments",self.startSignal.getArgs()), ("keyword-arguments",self.startSignal.getKwargs()), ("receiver after",self.endSignal.getReceiver()), ("result",self.endSignal.getResult()) ])\
             .column("property", lambda each: each[0])\
             .column("value", lambda each: each[1])
 
@@ -188,10 +191,14 @@ class MethodEndSignal(TelemetrySignal):
         return True
 
 class ArgumentMethodStartSignal(MethodStartSignal):
-    def __init__(self, message, args, kwargs):
+    def __init__(self, receiver, message, args, kwargs):
         super().__init__(message)
+        self.receiver = copy(receiver)
         self.args = args.copy()
         self.kwargs = kwargs.copy()
+        
+    def getReceiver(self):
+        return self.receiver
         
     def getArgs(self):
         return self.args
@@ -204,15 +211,19 @@ class ArgumentMethodStartSignal(MethodStartSignal):
         return aBuilder.columnedList()\
             .title("Call")\
             .priority(5)\
-            .items(lambda: [ ("message",self.message), ("arguments",self.args), ("keyword-arguments",self.kwargs) ])\
+            .items(lambda: [ ("receiver",self.receiver), ("message",self.message), ("arguments",self.args), ("keyword-arguments",self.kwargs) ])\
             .column("property", lambda each: each[0])\
             .column("value", lambda each: each[1])
             
 class ResultMethodEndSignal(MethodEndSignal):
-    def __init__(self, message, result):
+    def __init__(self, receiver, message, result):
         super().__init__(message)
+        self.receiver = copy(receiver)
         self.result = copy(result)
     
+    def getReceiver(self):
+        return self.receiver
+        
     def getResult(self):
         return self.result
     
@@ -221,7 +232,7 @@ class ResultMethodEndSignal(MethodEndSignal):
         return aBuilder.columnedList()\
             .title("Call")\
             .priority(5)\
-            .items(lambda: [ ("message",self.message), ("result",self.result) ])\
+            .items(lambda: [ ("receiver",self.receiver), ("message",self.message), ("result",self.result) ])\
             .column("property", lambda each: each[0])\
             .column("value", lambda each: each[1])
 
