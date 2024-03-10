@@ -46,6 +46,31 @@ PBProxyObject >> asJsonDictionary [
 		#__pyid__ -> pythonVariable name } asDictionary.
 ]
 
+{ #category : #accessing }
+PBProxyObject >> attributeAt: attributeName [
+	"Answer the value of the named attribute in the Python object that I represent"
+
+	^ self newCommandFactory
+		<< (self => attributeName);
+		sendAndWait
+]
+
+{ #category : #accessing }
+PBProxyObject >> callMethod: methodName [
+	"Call methodName on the Python object that I represent and return the result"
+
+	^ self callMethod: methodName withArgs: #()
+]
+
+{ #category : #accessing }
+PBProxyObject >> callMethod: methodName withArgs: arguments [
+	"Call methodName with arguments on the Python object that I represent and return the result"
+
+	^ self newCommandFactory
+		<< (self => methodName callWith: arguments);
+		sendAndWait
+]
+
 { #category : #hooks }
 PBProxyObject >> createObject [
 	self shouldNotImplement
