@@ -9,12 +9,16 @@ Class {
 }
 
 { #category : #'instance creation' }
-PBProxyObject class >> pythonClass: pythonClass pythonVar: pyVar application: application [
-	| proxyClass |
-
-	proxyClass := self allSubclasses
-		detect: [ :each | each pythonClass = pythonClass ]
-		ifNone: [ self ].
+PBProxyObject class >> pythonClass: pythonClass pythonVar: pyVar application: application superclasses: supers [
+	| proxyClass proxyClasses |
+	proxyClasses := (self allSubclasses
+			collect: [ :each | each pythonClass -> each ]) asDictionary.
+	proxyClass := proxyClasses
+			at: pythonClass
+			ifAbsent: [ supers
+					detect: [ :sup | proxyClasses includesKey: sup ]
+					ifFound: [ :sup | proxyClasses at: sup ]
+					ifNone: [ PBProxyObject ] ].
 	^ proxyClass new
 		pythonVariable: pyVar;
 		pythonClass: pythonClass;
