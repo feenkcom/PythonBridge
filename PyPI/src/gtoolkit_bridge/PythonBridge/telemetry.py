@@ -201,8 +201,8 @@ class ArgumentMethodStartSignal(MethodStartSignal):
         return self.receiver
         
     def getArgs(self):
-        return self.args
-    
+        return dict(self.args)
+        
     def getKwargs(self):
         return self.kwargs
         

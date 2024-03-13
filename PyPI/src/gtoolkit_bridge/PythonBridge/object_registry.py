@@ -70,8 +70,17 @@ class Registry():
             return obj
         return {
             '__pyclass__': type(obj).__name__,
-            '__pyid__': self.register(obj)
+            '__pyid__': self.register(obj),
+            '__superclasses__': self.superclassesOf(obj)
             }
+    
+    def superclassesOf(self, obj):
+        c = type(obj).__base__
+        supers = []
+        while c is not None:
+            supers.append(c.__name__)
+            c = c.__base__
+        return supers
 
 class RegistryError(Exception):
     pass

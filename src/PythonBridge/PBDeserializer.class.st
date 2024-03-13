@@ -13,10 +13,11 @@ PBDeserializer class >> deserialize: anObject [
 { #category : #'private protocol' }
 PBDeserializer >> buildProxyFor: rawObject [
 	| proxy |
-	proxy :=  PBProxyObject 
-					pythonClass: (rawObject at: #__pyclass__)
-					pythonVar: (rawObject at: #__pyid__) asP3GI
-					application: self application.
+	proxy := PBProxyObject
+			pythonClass: (rawObject at: #__pyclass__)
+			pythonVar: (rawObject at: #__pyid__) asP3GI
+			application: self application
+			superclasses: (rawObject at: #__superclasses__ ifAbsent: [ #() ]).
 	self executionHandler registerObject: proxy.
 	^ proxy
 ]
