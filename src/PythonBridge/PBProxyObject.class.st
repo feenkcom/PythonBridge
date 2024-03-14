@@ -81,6 +81,29 @@ PBProxyObject >> createObject [
 ]
 
 { #category : #accessing }
+PBProxyObject >> doesNotUnderstand: aMessage [
+	"PBProxyObjects attempt to forward unimplemented messages to python with the following semantics:
+	1) Unary selectors are first tried as attribute of the python object.
+	2) If the attribute is a method, it is called and the value returned, otherwise the attribute value
+	   is returned
+	3) If a keyword message is sent, we attempt to call a method on the python object with only the first keyword as the method name and all the arguments.
+	4) If any of this fails, we simply fall back to DNU 
+	"
+	| sel |
+	sel := aMessage selector.
+	[ | val method args |
+	sel isKeyword
+		ifTrue: [ method := aMessage selector keywords first copyWithout: $:.
+			args := aMessage arguments.
+			^ self callMethod: method withArgs: args ]
+		ifFalse: [ val := self attributeAt: sel.
+			^ (val class == PBProxyObject and: [ val pythonClass = 'method' ])
+				ifTrue: [ self callMethod: sel ]
+				ifFalse: [ val ] ] ] on: Exception do: [  ].
+	^ super doesNotUnderstand: aMessage
+]
+
+{ #category : #accessing }
 PBProxyObject >> languageLinkSerializable [
 	^ self asJsonDictionary
 ]
