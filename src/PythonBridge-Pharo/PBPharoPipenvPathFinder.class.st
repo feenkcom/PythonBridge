@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #accessing }
+PBPharoPipenvPathFinder class >> extraPathNonWindows [
+	^ #('/usr/local/bin' '/opt/homebrew/bin')
+]
+
+{ #category : #accessing }
 PBPharoPipenvPathFinder class >> pipenvPath [
 	^ PipenvPath
 		ifNil: [ PipenvPath := self resolvePipenvPath ]
@@ -19,6 +24,11 @@ PBPharoPipenvPathFinder class >> pipenvPath: aFileReference [
 	PipenvPath := aFileReference
 ]
 
+{ #category : #utilites }
+PBPharoPipenvPathFinder class >> reset [
+	self pipenvPath: nil
+]
+
 { #category : #utilities }
 PBPharoPipenvPathFinder class >> resolvePipenvPath [
 	| path process |
@@ -26,11 +36,10 @@ PBPharoPipenvPathFinder class >> resolvePipenvPath [
 			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
 			arguments: #('pipenv').
 	Smalltalk os isWindows
-		ifFalse: [ | originalPath extraPath extendedPath |
+		ifFalse: [ | originalPath extendedPath |
 			originalPath := $: split: (Smalltalk os environment at: 'PATH').
-			"Search in some extra places that might not be in PATH"
-			extraPath := #('/usr/local/bin').
-			extendedPath := $: join: extraPath , originalPath.
+			"Search in some extra places that might not be in PATH by default"
+			extendedPath := $: join: self extraPathNonWindows , originalPath.
 			process environmentAt: 'PATH' put: extendedPath ].
 	process
 		addAllEnvVariablesFromParentWithoutOverride;
@@ -54,8 +63,7 @@ PBPharoPipenvPathFinder class >> resolvePipenvPath [
 
 { #category : #privavte }
 PBPharoPipenvPathFinder class >> signalPipenvNotFound [
-	"
-	PythonBridge use the unix command `which` or the windows command `where`
+	"PythonBridge use the unix command `which` or the windows command `where`
 	to find the full path of the `pipenv` command. 
 	From Pharo we could not find the route, therefore you have to set it mannualy.
 		
@@ -70,8 +78,7 @@ PBPharoPipenvPathFinder class >> signalPipenvNotFound [
 	
 	or set it in your PBApplication's PBSettings:
 	
-	myPBApplication settings pipenvPath: '/usr/local/bin/pipenv' asFileReference
-	"
+	myPBApplication settings pipenvPath: '/usr/local/bin/pipenv' asFileReference"
 	
 	Error signal: 'pipenv command could not be found'
 ]
