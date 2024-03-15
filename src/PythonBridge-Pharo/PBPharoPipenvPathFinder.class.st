@@ -9,7 +9,7 @@ Class {
 
 { #category : #accessing }
 PBPharoPipenvPathFinder class >> extraPathNonWindows [
-	^ #('/usr/local/bin' '/opt/homebrew/bin')
+	^ #('/usr/local/bin' '/opt/homebrew/bin' '/opt/local/bin')
 ]
 
 { #category : #accessing }
