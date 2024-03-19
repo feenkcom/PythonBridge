@@ -124,8 +124,11 @@ PBObject >> newPythonVar [
 	^ self class newPythonVar
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 PBObject >> pythonClass [
+	"Return the Python class/type name that I am a mirror of.
+	Fully qualified name unless it is one of the builtins."
+	
 	self subclassResponsibility
 ]
 

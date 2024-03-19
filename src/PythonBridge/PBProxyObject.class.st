@@ -8,6 +8,19 @@ Class {
 	#category : #'PythonBridge-Core'
 }
 
+{ #category : #accessing }
+PBProxyObject class >> pythonClass [
+	"Return the Python class/type name that I am a mirror of.
+	Fully qualified name unless it is one of the builtins."
+
+	"The default is to return PBProxyObject which is no actual Python class,
+	see #pythonClass:pythonVar:application:superclasses: for how this maps to me"
+	
+	"Subclasses can override this to request the creation of a different mirror instance"
+	
+	^ 'PBProxyObject'
+]
+
 { #category : #'instance creation' }
 PBProxyObject class >> pythonClass: pythonClass pythonVar: pyVar application: application superclasses: supers [
 	| proxyClass proxyClasses |
@@ -118,6 +131,9 @@ PBProxyObject >> printOn: str [
 
 { #category : #accessing }
 PBProxyObject >> pythonClass [
+	"Return the Python class/type name that I am a mirror of.
+	Fully qualified name unless it is one of the builtins."
+	
 	^ pythonClass
 ]
 
