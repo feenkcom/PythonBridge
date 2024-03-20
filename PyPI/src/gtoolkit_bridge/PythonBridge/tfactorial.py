@@ -1,10 +1,10 @@
 import argparse
 import threading
 import time
-from gtoolkit_bridge import argmethodevent
+from gtoolkit_bridge import gtTrace
 
 # Calculate the factorial
-@argmethodevent("Factorial function")
+@gtTrace
 def factorial(n, t):
     time.sleep(n*t/4)
     print("Start: " + str(t) + ": " + str(n))
@@ -18,7 +18,7 @@ def factorial(n, t):
 
 
 # Calculate the factorial and print the result
-@argmethodevent("Factorial thread")
+@gtTrace
 def factorial_thread(n, t):
     time.sleep(2)
     result = factorial(n, t)

@@ -15,7 +15,8 @@ from .PythonBridge.telemetry import (
 	methodevent,
 	argmethodevent,
 	reset_signals,
-	get_signals
+	get_signals,
+	gtTrace
 )
 
 from .__version__ import __version__

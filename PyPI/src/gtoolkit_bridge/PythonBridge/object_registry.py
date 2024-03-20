@@ -69,7 +69,7 @@ class Registry():
         if obj is None:
             return obj
         return {
-            '__pyclass__': type(obj).__name__,
+            '__pyclass__': self.qualifiedNameOf(type(obj)),
             '__pyid__': self.register(obj),
             '__superclasses__': self.superclassesOf(obj)
             }
@@ -78,9 +78,16 @@ class Registry():
         c = type(obj).__base__
         supers = []
         while c is not None:
-            supers.append(c.__name__)
+            supers.append(self.qualifiedNameOf(c))
             c = c.__base__
         return supers
+
+    def qualifiedNameOf(self, type):
+        if type.__module__ is None or type.__module__ == 'builtins':
+           return type.__name__
+        else:
+           return type.__module__ + '.' + type.__name__
+
 
 class RegistryError(Exception):
     pass
