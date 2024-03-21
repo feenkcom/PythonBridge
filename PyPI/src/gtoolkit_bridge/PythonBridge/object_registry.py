@@ -11,6 +11,7 @@ def registry():
 class Registry():
 
     def __init__(self):
+        self.idToRefCount = {}
         self.idToObjMap = {}
         self.objToIdMap = {}
 
@@ -24,6 +25,7 @@ class Registry():
         if obj is None:
             return 0
         if id(obj) in self.objToIdMap:
+            self.idToRefCount[id(obj)] += 1
             return self.objToIdMap[id(obj)]
         else:
             return self._register(obj, self.createNewObjId())
@@ -47,14 +49,18 @@ class Registry():
             raise ResolveUnknownObject(objId)
 
     def _register(self, obj, newObjId):
+        self.idToRefCount[id(obj)] = 1
         self.idToObjMap[newObjId] = obj
         self.objToIdMap[id(obj)] = newObjId
         return newObjId
 
     def clean(self, objId):
         obj = self.idToObjMap[objId]
-        del self.idToObjMap[objId]
-        del self.objToIdMap[id(obj)]
+        self.idToRefCount[id(obj)] -= 1
+        if self.idToRefCount[id(obj)] == 0:
+            del self.idToRefCount[id(obj)]
+            del self.idToObjMap[objId]
+            del self.objToIdMap[id(obj)]
 
     def isProxy(self, anObject):
         is_proxy = False
