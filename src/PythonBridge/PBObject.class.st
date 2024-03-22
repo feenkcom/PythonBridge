@@ -30,6 +30,11 @@ PBObject class >> newPythonVar [
 	^ PBPlatform current newRandomName asP3GIdentifier
 ]
 
+{ #category : #accessing }
+PBObject >> = anObject [
+	^ (anObject isKindOf: PBObject) and: [ self id = anObject id ]
+]
+
 { #category : #initialization }
 PBObject >> application [
 	^ self applicationClass uniqueInstance
@@ -58,13 +63,9 @@ PBObject >> basicCreateObjectArgs: posArgs using: commandFactory [
 
 { #category : #accessing }
 PBObject >> basicCreateObjectExpr: anExpression using: commandFactory [
-	| varName |
 	self isCreated ifTrue: [ ^ self ].
-	varName := self newPythonVar.
-	pythonVariable := varName.
 	commandFactory << (self registerIdPyExpression: anExpression).
-	self registerObject.
-	commandFactory send
+	pythonVariable := commandFactory sendAndWait asP3GI
 ]
 
 { #category : #accessing }
@@ -80,6 +81,11 @@ PBObject >> createObject [
 { #category : #'as yet unclassified' }
 PBObject >> ensureCreateObject [
 	self isCreated ifFalse: [ self createObject ]
+]
+
+{ #category : #accessing }
+PBObject >> hash [
+	^ pythonVariable hash
 ]
 
 { #category : #accessing }
@@ -152,9 +158,9 @@ PBObject >> pythonVariable [
 	^ pythonVariable
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 PBObject >> registerIdPyExpression: objExpr [
-	^ self pythonRegistryExpression => #register_with_id callWith: (Array with: objExpr with: self id)
+	^ self pythonRegistryExpression => #register callWith: (Array with: objExpr)
 ]
 
 { #category : #'as yet unclassified' }
