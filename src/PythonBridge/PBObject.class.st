@@ -65,7 +65,8 @@ PBObject >> basicCreateObjectArgs: posArgs using: commandFactory [
 PBObject >> basicCreateObjectExpr: anExpression using: commandFactory [
 	self isCreated ifTrue: [ ^ self ].
 	commandFactory << (self registerIdPyExpression: anExpression).
-	pythonVariable := commandFactory sendAndWait asP3GI
+	pythonVariable := commandFactory sendAndWait asP3GI.
+	self registerObject
 ]
 
 { #category : #accessing }
