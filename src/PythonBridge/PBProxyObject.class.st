@@ -40,6 +40,11 @@ PBProxyObject class >> pythonClass: pythonClass pythonVar: pyVar application: ap
 ]
 
 { #category : #accessing }
+PBProxyObject >> = anObject [
+	^ anObject class = self class and: [ pythonVariable = anObject pythonVariable ]
+]
+
+{ #category : #accessing }
 PBProxyObject >> application [
 	^ application
 ]
@@ -114,6 +119,11 @@ PBProxyObject >> doesNotUnderstand: aMessage [
 				ifTrue: [ self callMethod: sel ]
 				ifFalse: [ val ] ] ] on: Exception do: [  ].
 	^ super doesNotUnderstand: aMessage
+]
+
+{ #category : #accessing }
+PBProxyObject >> hash [
+	^ pythonVariable hash
 ]
 
 { #category : #accessing }
