@@ -31,9 +31,14 @@ PBExecutionHandler >> newCommandStringFactory [
 		yourself
 ]
 
-{ #category : #initialization }
-PBExecutionHandler >> objectRegistry [
-	^ objectRegistry
+{ #category : #accessing }
+PBExecutionHandler >> registerObject: aProxyObject [
+	"Don't register the object. Gets a new proxy every time"
+	weakRegistry 
+		registerObject: aProxyObject 
+		finalizer: (LanguageLinkRegistryFinalizer 
+							variable: aProxyObject id 
+							executionHandler: self)
 ]
 
 { #category : #'private protocol' }
