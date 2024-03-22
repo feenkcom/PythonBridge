@@ -1,4 +1,3 @@
-from uuid import uuid1
 from .bridge_globals import bridge_globals
 
 def ensure_global_registry():
