@@ -25,20 +25,21 @@ PBMethodObject >> file [
 { #category : #accessing }
 PBMethodObject >> gtSourceFor: aView [
 	<gtView>
+	| sl | 
+	[ sl := self sourceLines ] on: Exception do: [ ^ aView empty ].
 	^ aView forward
 		title: 'Source';
 		priority: 2;
-		object: [ | sl |
-		sl := self sourceLines.
-		GtLSPFileLocation new
+		object: [ 
+			GtLSPFileLocation new
 				lspFile: self file;
 				startPosition: (GtLSPPositionStructure new
-						line: sl second-1;
+						line: sl second - 1;
 						character: 0;
 						yourself);
 				endPosition: (GtLSPPositionStructure new
-						line: sl second + sl first size-2;
-						character: sl first last size-1;
+						line: sl second + sl first size - 2;
+						character: sl first last size - 1;
 						yourself) ];
 		view: #gtLiveFor:
 ]
