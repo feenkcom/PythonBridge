@@ -18,17 +18,22 @@ def methodevent(message=""):
             nonlocal message
             if message=="":
                 message = func.__name__
-            signal = MethodStartSignal(message)
+            start_signal = MethodStartSignal(message)
             try:
-                signal.file = inspect.getsourcefile(func)
-                [_, signal.line] = inspect.getsourcelines(func)
+                start_signal.file = inspect.getsourcefile(func)
+                [_, start_signal.line] = inspect.getsourcelines(func)
             except:
                 pass
             try:
                 value = func(*args, **kwargs)
                 return value
             finally:
-                MethodEndSignal(message)
+                end_signal = MethodEndSignal(message)
+                try:
+                   end_signal.file = inspect.getsourcefile(func)
+                   [_, end_signal.line] = inspect.getsourcelines(func)
+                except:
+                   pass
         return wrapped_function
     return decorate
 
@@ -41,17 +46,22 @@ def argmethodevent(message=""):
             nonlocal message
             if message=="":
                 message = func.__name__           
-            signal = ArgumentMethodStartSignal(message, args, kwargs)
+            start_signal = ArgumentMethodStartSignal(message, args, kwargs)
             try:
-                signal.file = inspect.getsourcefile(func)
-                [_, signal.line] = inspect.getsourcelines(func)
+                start_signal.file = inspect.getsourcefile(func)
+                [_, start_signal.line] = inspect.getsourcelines(func)
             except:
                 pass
             try:
                 value = func(*args, **kwargs)
                 return value
             finally:
-                MethodEndSignal(message)
+                end_signal = MethodEndSignal(message)
+                try:
+                    end_signal.file = inspect.getsourcefile(func)
+                    [_, end_signal.line] = inspect.getsourcelines(func)
+                except:
+                    pass
         return wrapped_function
     return decorate
 
@@ -68,14 +78,19 @@ def gtTrace(func):
             funcArgs = funcArgs[1:]
         else:
             receiver = None
-        signal = ArgumentMethodStartSignal(receiver, funcName, funcArgs, kwargs)
+        start_signal = ArgumentMethodStartSignal(receiver, funcName, funcArgs, kwargs)
         try:
-            signal.file = inspect.getsourcefile(func)
-            [_, signal.line] = inspect.getsourcelines(func)
+            start_signal.file = inspect.getsourcefile(func)
+            [_, start_signal.line] = inspect.getsourcelines(func)
         except:
             pass
         value = func(*args, **kwargs)
-        ResultMethodEndSignal(receiver, funcName, value)
+        end_signal = ResultMethodEndSignal(receiver, funcName, value)
+        try:
+            end_signal.file = inspect.getsourcefile(func)
+            [_, end_signal.line] = inspect.getsourcelines(func)
+        except:
+            pass
         return value
     return wrapper_gtTrace
 
@@ -99,10 +114,13 @@ class TelemetrySignal(Telemetry):
     def __init__(self, message) -> None:
         super().__init__(message)
         self._timestamp = time.perf_counter_ns()
-        cf = inspect.stack()[1]
+        st = inspect.stack()
+        for cf in st:
+          f_self = cf.frame.f_locals.get("self", None)
+          if f_self is None or not isinstance(f_self, TelemetrySignal):
+            break
         self.file = cf.filename
         self.line = cf.lineno
-
         if 'signals' in globals():
             global signals
             signals.add_signal(self)
