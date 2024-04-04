@@ -34,6 +34,16 @@ PBPythonHandler >> gtPackage [
 	^ process gtPackage
 ]
 
+{ #category : #'gt extensions' }
+PBPythonHandler >> gtViewInstalledModulesIn: composite [
+	<gtView>
+	^ composite forward
+		title: 'Modules';
+		priority: 30;
+		object: [ process ];
+		view: #gtViewInstalledModulesIn:
+]
+
 { #category : #testing }
 PBPythonHandler >> hasProcess [
 

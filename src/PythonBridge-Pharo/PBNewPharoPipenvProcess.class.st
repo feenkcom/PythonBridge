@@ -114,10 +114,34 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 	^ composite columnedTree
 		title: 'Modules';
 		priority: 50;
-		items: [ self installedModules ];
+		items: [ self installedModulesTree ];
 		children: [ :each | each at: #dependencies ];
 		column: #name text: [ :each | each at: #package_name ];
 		column: #version text: [ :each | each at: #installed_version ];
+		actionStencil: [ :aTab | | aptitude |
+			aptitude := BrGlamorousWithDropdownAptitude
+				handle: [
+					BrButton new
+						aptitude: BrGlamorousButtonWithIconAptitude;
+						icon: BrGlamorousVectorIcons add;
+						label: 'Install Python module' ]
+				content: [ | moduleInstallationPane |
+					moduleInstallationPane := PBModuleInstallationPane new.
+					moduleInstallationPane
+						acceptAction: [ :aModel :aButton | | moduleName |
+							moduleName := moduleInstallationPane moduleName.
+							self installModule: moduleName in: self application.
+							self inform: 'Successfully installed Python module ' , moduleName.
+							aTab viewContentElement phlow update.
+							aButton fireEvent: BrDropdownHideWish new ];
+						cancelAction: [ :aModel :aButton |
+							aButton fireEvent: BrDropdownHideWish new ].
+					moduleInstallationPane asElement ].			
+			BrButton new
+				aptitude: BrGlamorousButtonWithIconAptitude + aptitude;
+				icon: BrGlamorousVectorIcons add;
+				label: 'Install Python module' ];
+		actionUpdateButton;
 		expandAll
 ]
 
@@ -164,6 +188,17 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedModules [
+	| proc |
+	proc := self newOneShotProcess.
+	proc arguments: #( 'graph' '--json' ).
+	proc errorBlock: [ self error: 'pipenv graph failed' ].
+	proc runAndWait.
+	self assert: proc isSuccess.
+	^ NeoJSONObject fromString: proc stdout
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> installedModulesTree [
 	| proc |
 	proc := self newOneShotProcess.
 	proc arguments: #( 'graph' '--json-tree' ).
