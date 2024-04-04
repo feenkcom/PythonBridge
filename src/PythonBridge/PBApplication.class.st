@@ -131,6 +131,16 @@ PBApplication >> gtPackage [
 	^ processHandler gtPackage
 ]
 
+{ #category : #accessing }
+PBApplication >> gtViewInstalledModulesIn: composite [
+	<gtView>
+	^ composite forward
+		title: 'Modules';
+		priority: 55;
+		object: [ self processHandler ];
+		view: #gtViewInstalledModulesIn:
+]
+
 { #category : #initialization }
 PBApplication >> initialize [
 	super initialize.
