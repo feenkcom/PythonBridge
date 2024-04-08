@@ -131,11 +131,12 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 						acceptAction: [ :aModel :aButton | | moduleName |
 							moduleName := moduleInstallationPane moduleName.
 							self installModule: moduleName in: self application.
-							self inform: 'Successfully installed Python module ' , moduleName.
-							aTab viewContentElement phlow update.
-							aButton fireEvent: BrDropdownHideWish new ];
+							aButton enqueueTask: (BlTaskAction new 
+								action: [ aTab viewContentElement phlow update.
+									aButton fireEvent: BrDropdownHideWish new]) ];
 						cancelAction: [ :aModel :aButton |
-							aButton fireEvent: BrDropdownHideWish new ].
+							aButton enqueueTask: (BlTaskAction new 
+								action: [ aButton fireEvent: BrDropdownHideWish new ]) ].
 					moduleInstallationPane asElement ].			
 			BrButton new
 				aptitude: BrGlamorousButtonWithIconAptitude + aptitude;
