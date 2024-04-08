@@ -42,18 +42,14 @@ PBModuleInstallationPane >> magritteAcceptAction [
 	<magritteActionDescription>
 	^ super magritteAcceptAction
 		label: 'Install Python module';
-		onSuccessCallback: (GtMagritteCallback new 
-			action: self acceptAction;
-			beInUIProcess)
+		onSuccessCallback: (GtMagritteCallback new action: self acceptAction)
 ]
 
 { #category : #magritte }
 PBModuleInstallationPane >> magritteCancelAction [
 	<magritteActionDescription>
 	^ super magritteCancelAction
-		onSuccessCallback: (GtMagritteCallback new 
-			action: self cancelAction; 
-			beInUIProcess)
+		onSuccessCallback: (GtMagritteCallback new action: self cancelAction)
 ]
 
 { #category : #accessing }
