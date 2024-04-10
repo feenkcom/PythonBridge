@@ -110,3 +110,10 @@ PBPythonHandler >> stdout [
 PBPythonHandler >> stop [
 	^ process stop
 ]
+
+{ #category : #utilities }
+PBPythonHandler >> uninstallModule: aModule [
+	"Uninstall the supplied module aModule"
+
+	process uninstallModule: aModule in: application
+]
