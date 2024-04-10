@@ -142,6 +142,12 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 				aptitude: BrGlamorousButtonWithIconAptitude + aptitude;
 				icon: BrGlamorousVectorIcons add;
 				label: 'Install Python module' ];
+		contextItemLabel: 'Uninstall' 
+			action: [ :element :item | | moduleName |
+				moduleName := item value at: #package_name.
+				self uninstallModule: moduleName in: self application.
+				element enqueueTask: (BlTaskAction new 
+					action: [ element phlow fireUpdateWish ]) ];
 		actionUpdateButton;
 		expandAll
 ]
@@ -372,4 +378,29 @@ PBNewPharoPipenvProcess >> stop [
 	process ifNil: [ ^ self ].
 	process terminateAll.
 	process := nil
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> uninstallModule: aModule in: aPBApplication [
+	| proc args description time |
+	args := OrderedCollection with: 'uninstall'. 
+	aModule ifNotNil: [ args add: aModule ].
+	description := Character space join: #(pipenv) , args.
+	time := Time millisecondClockValue.
+	proc := self newOneShotProcess.
+	proc
+		arguments: args;
+		errorBlock: [ self error: 'Unable to execute ' , description ].
+	proc runAndWait.
+	self assert: proc isSuccess.
+	self workingDirectory / 'install.log' writeStreamDo: [ :out |
+		out setToEnd.
+		(ZnNewLineWriterStream on: out) 
+			print: DateAndTime now;
+			space;
+			nextPutAll: description;
+			space;
+			print: (Time millisecondsSince: time);
+			nextPutAll: 'ms';
+			cr ]
 ]

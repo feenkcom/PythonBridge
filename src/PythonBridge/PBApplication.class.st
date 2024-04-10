@@ -217,6 +217,13 @@ PBApplication >> serverPath [
 	^ self pipenvPath
 ]
 
+{ #category : #utils }
+PBApplication >> uninstallModule: aModule [
+	"Uninstall the supplied module aModule"
+
+	self processHandler uninstallModule: aModule
+]
+
 { #category : #accessing }
 PBApplication >> workingDirectory [ 
 
