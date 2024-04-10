@@ -147,7 +147,7 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 				moduleName := item value at: #package_name.
 				self uninstallModule: moduleName in: self application.
 				element enqueueTask: (BlTaskAction new 
-					action: [ element phlow fireUpdateWish ]) ];
+					action: [ element parent parent parent phlow update ]) ];
 		actionUpdateButton;
 		expandAll
 ]
