@@ -98,7 +98,7 @@ class MsgPackSocketPlatform:
             loop_func= self.prim_handle,
             setup_func= self.setup_func)
         self.thread.start()
-        time.sleep(.1)
+        # time.sleep(.1)
 
     def send_async_message(self, msg):
         self.getConnection().send(self.packer.pack(msg))
