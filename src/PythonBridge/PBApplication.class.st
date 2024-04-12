@@ -126,12 +126,25 @@ PBApplication >> evaluateSourceSequence: sourceString [
 	^ cf sendAndWait
 ]
 
+{ #category : #ui }
+PBApplication >> gtEditActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons edit;
+		tooltip: 'Open LSP Editor';
+		priority: 20;
+		action: [ :element |
+			| model |
+			model := GtLSPPythonModel onDirectory: self settings workingDirectory.
+			element phlow spawnObject: model ]
+]
+
 { #category : #accessing }
 PBApplication >> gtPackage [
 	^ processHandler gtPackage
 ]
 
-{ #category : #accessing }
+{ #category : #ui }
 PBApplication >> gtViewInstalledModulesIn: composite [
 	<gtView>
 	^ composite forward

@@ -26,6 +26,25 @@ PBSettings >> debugSocketAddress: anObject [
 	debugSocketAddress := anObject
 ]
 
+{ #category : #utils }
+PBSettings >> deleteRuntimeEnvironment [
+	"Delete the whole PythonBridgeRuntime working directory.
+	This will effectively force reinstallation on the next run.
+	Only execute when you have not added or editing anything there"
+	
+	self workingDirectory deleteAll
+]
+
+{ #category : #ui }
+PBSettings >> gtDeleteActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons remove;
+		tooltip: 'Delete the runtime environment';
+		priority: 20;
+		action: [ :element | self deleteRuntimeEnvironment ]
+]
+
 { #category : #accessing }
 PBSettings >> manualCommand [
 	^ 'python start_bridge.py --port {1} --pharo {2} --method {3}{4}' 
