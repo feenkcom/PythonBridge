@@ -51,7 +51,16 @@ PBNewPharoPipenvProcess >> deleteInstalledVirtualEnvironment [
 	the virtual environment that is often stored somewhere else.
 	to really start over, call this method first"
 	
-	self installedVirtualEnvironment deleteAll
+	self installedVirtualEnvironment asFileReference deleteAll
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> deleteRuntimeEnvironment [
+	"Delete the whole PythonBridgeRuntime working directory.
+	This will effectively force reinstallation on the next run.
+	Only execute when you have not added or editing anything there"
+	
+	self workingDirectory deleteAll
 ]
 
 { #category : #accessing }
@@ -62,6 +71,36 @@ PBNewPharoPipenvProcess >> errorMessage [
 { #category : #accessing }
 PBNewPharoPipenvProcess >> exitCode [
 	^ process exitCode
+]
+
+{ #category : #'gt extensions' }
+PBNewPharoPipenvProcess >> gtDeleteActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons remove;
+		tooltip: 'Delete the runtime environment';
+		priority: 25;
+		action: [ :element | self deleteRuntimeEnvironment ]
+]
+
+{ #category : #'gt extensions' }
+PBNewPharoPipenvProcess >> gtDeleteVirtualEnvironmentActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons remove;
+		tooltip: 'Delete the installed virtual environment';
+		priority: 30;
+		action: [ :element | self deleteInstalledVirtualEnvironment ]
+]
+
+{ #category : #'gt extensions' }
+PBNewPharoPipenvProcess >> gtLinkActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons add;
+		tooltip: 'Link gtoolkit_bridge PyPI sources';
+		priority: 20;
+		action: [ :element | self linkGToolkitBridgePyPISources ]
 ]
 
 { #category : #accessing }
@@ -253,6 +292,22 @@ PBNewPharoPipenvProcess >> isDebuggerEnabled [
 { #category : #testing }
 PBNewPharoPipenvProcess >> isRunning [
 	^ process notNil and: [ process isRunning ]
+]
+
+{ #category : #utilities }
+PBNewPharoPipenvProcess >> linkGToolkitBridgePyPISources [
+	"To work on the gtoolkit_bridge sources themselves, create a symbolic link
+	from the working directory to the PyPI git sources, which assumes GT in dev mode.
+	You have to restart the bridge so that this code gets picked up."
+
+	| pyPI bridgeRuntime exitCode |
+	pyPI := FileLocator gtResource / 'feenkcom' / 'PythonBridge' / 'PyPI' / 'src' / 'gtoolkit_bridge'.
+	self assert: pyPI exists.
+	bridgeRuntime := self workingDirectory.
+	(bridgeRuntime / 'gtoolkit_bridge') exists
+		ifFalse: [
+			exitCode := LibC runCommand: 'cd ' , bridgeRuntime fullName , ' && ln -s ' , pyPI fullName.
+			self assert: exitCode isZero ]
 ]
 
 { #category : #private }
