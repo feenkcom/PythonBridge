@@ -19,7 +19,8 @@ Class {
 	#instVars : [
 		'process',
 		'serverDebugger',
-		'started'
+		'started',
+		'checkProcess'
 	],
 	#category : #'PythonBridge-Pharo-Processes'
 }
@@ -330,19 +331,33 @@ PBNewPharoPipenvProcess >> newOneShotProcess [
 
 { #category : #private }
 PBNewPharoPipenvProcess >> newProcess [
-	| proc args|
-	proc := self newBaseProcess.
+	| proc builder command args envVars |
+
+	builder := GtExternalProcessBuilder new.
 	args := self processArguments.
-	proc
-		arguments: args;
-		errorBlock: [
-			"Until #started has been confirmed by our application,
+	builder
+		command: self pipenvPath fullName;
+		workingDirectory: self workingDirectory fullName;
+		args: args.
+	command := builder createNativeCommand.
+	envVars := Dictionary new.
+	Smalltalk os environment asDictionary keysAndValuesDo: [ :key :value |
+		envVars at: key ifAbsentPut: value ].
+	command clearEnv.
+	envVars keysAndValuesDo: [ :key :value |
+		command setEnv: key value: value ].
+	proc := command spawn.
+	checkProcess := [ | status |
+		[ 1 second wait.
+		status := proc tryWait.
+		status isNil ] whileTrue.
+		(self hasStarted not and: [ status isSuccess not ]) ifTrue:
+			[ "Until #started has been confirmed by our application,
 			errors here are considered related to startup.
 			Later on, we ignore errors here are ignored,
 			we assume the external process died out of our control."
-			self hasStarted ifFalse: [
-				self error: 'Unable to run pipenv '
-					, (Character space join: args) ] ].
+			self error: 'Unable to run pipenv '
+					, (Character space join: args) ] ] forkNamed: 'PythonBridge status check'.
 	^ proc
 ]
 
@@ -400,7 +415,6 @@ PBNewPharoPipenvProcess >> pythonBridgePackage [
 PBNewPharoPipenvProcess >> start [
 	started := false.
 	process := self newProcess.
-	process run.
 	self isDebuggerEnabled ifTrue: [ self startServerDebugger]
 ]
 
