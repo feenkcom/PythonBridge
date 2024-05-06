@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 echo "Running Python Examples & Tests"
 
@@ -20,4 +21,4 @@ ulimit -c unlimited
 
 ./bin/GlamorousToolkit-cli --print-stack-on-signals --beacon-all GlamorousToolkit.image examples PythonBridge PythonBridge-Pharo --junit-xml-output --verbose --disable-deprecation-rewrites
 
-./bin/GlamorousToolkit-cli --print-stack-on-signals --beacon-all GlamorousToolkit.image test PythonBridge PythonBridge-Pharo --junit-xml-output --verbose --disable-deprecation-rewrites
+./bin/GlamorousToolkit-cli --print-stack-on-signals --beacon-all GlamorousToolkit.image test PythonBridge PythonBridge-Pharo --verbose --disable-deprecation-rewrites
