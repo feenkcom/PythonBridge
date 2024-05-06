@@ -15,6 +15,9 @@ pipenv --version
 
 cd $image_dir
 
+# Allow core dumps to be written
+ulimit -c unlimited
+
 ./bin/GlamorousToolkit-cli GlamorousToolkit.image examples PythonBridge PythonBridge-Pharo --junit-xml-output --verbose --disable-deprecation-rewrites
 
 ./bin/GlamorousToolkit-cli GlamorousToolkit.image test PythonBridge PythonBridge-Pharo --junit-xml-output --verbose --disable-deprecation-rewrites
