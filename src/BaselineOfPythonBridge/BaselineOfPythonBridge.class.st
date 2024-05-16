@@ -17,7 +17,7 @@ BaselineOfPythonBridge >> baseline: spec [
 				spec repository: 'github://feenkcom/msgpack-smalltalk:main/repository' ].
 		spec 
 			package: 'PythonBridge' with: [
-				spec requires: #('OSSubprocess' 'Python3Generator' ). ];
+				spec requires: #('Python3Generator' ). ];
 			package: 'PythonBridge-Pharo' with: [
 				spec requires: #('PythonBridge' 'MessagePack' ). ];
 			package: 'PythonBridge-Bootstrap' with: [
