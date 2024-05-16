@@ -9,6 +9,8 @@ Class {
 
 { #category : #accessing }
 PBPharoPipenvPathFinder class >> extraPathNonWindows [
+	"Search in some extra places that might not be in PATH by default"
+				
 	^ #('/usr/local/bin' '/opt/homebrew/bin' '/opt/local/bin')
 ]
 
@@ -31,33 +33,28 @@ PBPharoPipenvPathFinder class >> reset [
 
 { #category : #utilities }
 PBPharoPipenvPathFinder class >> resolvePipenvPath [
-	| path process |
-	process := GtSubprocessWithInMemoryOutput new
+	| builder output path |
+	builder := GtExternalProcessBuilder new
 			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
-			arguments: #('pipenv').
+			arg: 'pipenv'.
 	Smalltalk os isWindows
 		ifFalse: [ | originalPath extendedPath |
 			originalPath := $: split: (Smalltalk os environment at: 'PATH').
-			"Search in some extra places that might not be in PATH by default"
 			extendedPath := $: join: self extraPathNonWindows , originalPath.
-			process environmentAt: 'PATH' put: extendedPath ].
-	process
-		addAllEnvVariablesFromParentWithoutOverride;
-		terminateOnShutdown;
-		runAndWait.
-	(#(0 1) includes: process exitCode)
-		ifFalse: [ self signalPipenvNotFound ].
-	path := process stdout trimBoth.
+			builder env: 'PATH' value: extendedPath ].
+	output := builder output.
+	output status isSuccess
+		ifFalse: [ ^ self signalPipenvNotFound ].
+	path := output stdout trimBoth.
 	Smalltalk os isWindows
-		ifTrue: [ path := (path lines
-					select: [ :aString | 
-						"We want to remove HOME\.pyenv\pyenv-win\shims\pipenv,
-						because it is a BASH script that is supposed to be executed
-						in cygwin or in git-bash."
-						#(bat exe) includes: aString asFileReference extension asLowercase ])
-					ifEmpty: [ self signalPipenvNotFound ]
-					ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
-	path ifEmpty: [ self signalPipenvNotFound ].
+		ifTrue: [ | lines | 
+			lines := path lines
+					collect: [ :line | line trimBoth asFileReference ]
+					thenSelect: [ :each | #(bat exe) includes: each extension asLowercase ].
+			path := lines
+				ifEmpty: [ ^ self signalPipenvNotFound ]
+				ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
+	path ifEmpty: [ ^ self signalPipenvNotFound ].
 	^ path asFileReference
 ]
 
