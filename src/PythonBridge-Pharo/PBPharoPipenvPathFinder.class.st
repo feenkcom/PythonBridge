@@ -53,7 +53,7 @@ PBPharoPipenvPathFinder class >> resolvePipenvPath [
 					thenSelect: [ :each | #(bat exe) includes: each extension asLowercase ].
 			path := lines
 				ifEmpty: [ ^ self signalPipenvNotFound ]
-				ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
+				ifNotEmpty: [ :anArray | anArray first fullName trimBoth] ].
 	path ifEmpty: [ ^ self signalPipenvNotFound ].
 	^ path asFileReference
 ]
