@@ -20,7 +20,9 @@ Class {
 		'process',
 		'serverDebugger',
 		'started',
-		'checkProcess'
+		'monitorProcess',
+		'stdoutStream',
+		'stderrStream'
 	],
 	#category : #'PythonBridge-Pharo-Processes'
 }
@@ -33,6 +35,16 @@ PBNewPharoPipenvProcess class >> pipenvPath [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> applicationReady [
 	started := true
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> copyEnvVarsTo: command [
+	| envVars |
+	envVars := Dictionary new.
+	Smalltalk os environment asDictionary
+		keysAndValuesDo: [ :key :value | envVars at: key ifAbsentPut: value ].
+	command clearEnv.
+	envVars keysAndValuesDo: [ :key :value | command setEnv: key value: value ]
 ]
 
 { #category : #private }
@@ -71,7 +83,7 @@ PBNewPharoPipenvProcess >> errorMessage [
 
 { #category : #accessing }
 PBNewPharoPipenvProcess >> exitCode [
-	^ process exitCode
+	^ process tryWait ifNotNil: [ :status | status code ]
 ]
 
 { #category : #'gt extensions' }
@@ -205,6 +217,8 @@ PBNewPharoPipenvProcess >> hasStarted [
 { #category : #initalization }
 PBNewPharoPipenvProcess >> initialize [
 	super initialize.
+	stdoutStream := String new writeStream.
+	stderrStream := String new writeStream.
 	started := false
 ]
 
@@ -306,6 +320,18 @@ PBNewPharoPipenvProcess >> linkGToolkitBridgePyPISources [
 ]
 
 { #category : #private }
+PBNewPharoPipenvProcess >> monitorProcess [
+	"This runs alongside the native process"
+	| status |
+	process waitForExitDoing: [ self pollStdoutAndStderr ].
+	status := process ifNotNil: [ process tryWait ].
+	"Until #started has been confirmed by our application, errors here are considered related to startup.
+	Later on, we ignore errors here, we assume the external process died out of our control."
+	(self hasStarted not and: [ status isNil or: [ status isSuccess not ] ])
+		ifTrue: [ self error: 'Unable to run pipenv ' , (Character space join: self processArguments) ].
+]
+
+{ #category : #private }
 PBNewPharoPipenvProcess >> newExternalProcessBuilder [
 	| builder |
 	builder := GtExternalProcessBuilder new
@@ -317,30 +343,17 @@ PBNewPharoPipenvProcess >> newExternalProcessBuilder [
 
 { #category : #private }
 PBNewPharoPipenvProcess >> newPythonBridgeProcess [
-	| proc builder command args envVars |
-
+	| builder command |
 	builder := self newExternalProcessBuilder.
 	builder args: self processArguments.
 	command := builder createNativeCommand.
-	envVars := Dictionary new.
-	Smalltalk os environment asDictionary keysAndValuesDo: [ :key :value |
-		envVars at: key ifAbsentPut: value ].
-	command clearEnv.
-	envVars keysAndValuesDo: [ :key :value |
-		command setEnv: key value: value ].
-	proc := command spawn.
-	checkProcess := [ | status |
-		[ 1 second wait.
-		status := proc tryWait.
-		status isNil ] whileTrue.
-		(self hasStarted not and: [ status isSuccess not ]) ifTrue:
-			[ "Until #started has been confirmed by our application,
-			errors here are considered related to startup.
-			Later on, we ignore errors here are ignored,
-			we assume the external process died out of our control."
-			self error: 'Unable to run pipenv '
-					, (Character space join: args) ] ] forkNamed: 'PythonBridge status check'.
-	^ proc
+	self copyEnvVarsTo: command.
+	builder
+		pipeStdout;
+		pipeStderr.
+	process := command spawn.
+	process terminateOnShutdown.
+	monitorProcess := [ self monitorProcess ] forkNamed: 'PythonBridge monitor'
 ]
 
 { #category : #accessing }
@@ -349,6 +362,13 @@ PBNewPharoPipenvProcess >> pipenvPath [
 	This may be overridden by the application settings."
 
 	^ self settings pipenvPath ifNil: [ self class pipenvPath ]
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> pollStdoutAndStderr [
+	process ifNil: [ ^ self ].
+	stdoutStream nextPutAll: process asynchronousStdout pollString.
+	stderrStream nextPutAll: process asynchronousStderr pollString. 
 ]
 
 { #category : #printing }
@@ -396,7 +416,7 @@ PBNewPharoPipenvProcess >> pythonBridgePackage [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> start [
 	started := false.
-	process := self newPythonBridgeProcess.
+	self newPythonBridgeProcess.
 	self isDebuggerEnabled ifTrue: [ self startServerDebugger]
 ]
 
@@ -416,12 +436,12 @@ PBNewPharoPipenvProcess >> startServerDebugger [
 
 { #category : #accessing }
 PBNewPharoPipenvProcess >> stderr [
-	^ "process stderr" 'stderr not yet implemented'
+	^ stderrStream contents
 ]
 
 { #category : #accessing }
 PBNewPharoPipenvProcess >> stdout [
-	^ "process stdout" 'stdout not yet implemented'
+	^ stdoutStream contents
 ]
 
 { #category : #'start-stop' }
