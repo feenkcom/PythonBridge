@@ -1,3 +1,24 @@
+"
+I am PBPharoPipenvPathFinder, a cross platform tool to discover and manage the path to the pipenv executable.
+
+```
+PBPharoPipenvPathFinder pipenvPath
+```
+
+The path is cached. When it is not set, a discovery process runs to search in the system's PATH and a bunch of extra locations.
+
+```
+PBPharoPipenvPathFinder resolvePipenvPath
+```
+
+You can specify the explicitly if necessary, when it cannot be found.
+
+```
+PBPharoPipenvPathFinder pipenvPath: '/usr/local/bin/pipenv'
+```
+
+
+"
 Class {
 	#name : #PBPharoPipenvPathFinder,
 	#superclass : #Object,
@@ -46,16 +67,18 @@ PBPharoPipenvPathFinder class >> resolvePipenvPath [
 	output status isSuccess
 		ifFalse: [ ^ self signalPipenvNotFound ].
 	path := output stdout trimBoth.
-	Smalltalk os isWindows
+	^ Smalltalk os isWindows
 		ifTrue: [ | lines | 
 			lines := path lines
 					collect: [ :line | line trimBoth asFileReference ]
 					thenSelect: [ :each | #(bat exe) includes: each extension asLowercase ].
-			path := lines
-				ifEmpty: [ ^ self signalPipenvNotFound ]
-				ifNotEmpty: [ :anArray | anArray first trimBoth ] ].
-	path ifEmpty: [ ^ self signalPipenvNotFound ].
-	^ path asFileReference
+			lines
+				ifEmpty: [ self signalPipenvNotFound ]
+				ifNotEmpty: [ :anArray | anArray first ] ]
+		ifFalse: [
+			path 
+				ifEmpty: [ self signalPipenvNotFound ]
+				ifNotEmpty: [ path asFileReference ] ]
 ]
 
 { #category : #privavte }
