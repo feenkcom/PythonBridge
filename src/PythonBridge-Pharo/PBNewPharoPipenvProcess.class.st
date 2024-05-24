@@ -134,8 +134,8 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 					ifFalse: [ '' ] }.
 			{ 'server address' . self settings serverSocketAddress }.
 			{ 'process id'
-				. (process notNil and: [ process hasProcess ])
-						ifTrue: [ process process id ]
+				. (process notNil and: [ process isRunning ])
+						ifTrue: [ process id ]
 						ifFalse: [ '' ] 
 				. process }.
 			{ 'message format' . PBPlatform current messageBrokerStrategy methodArg }.
@@ -210,17 +210,15 @@ PBNewPharoPipenvProcess >> initialize [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
-	| proc args description time |
+	| builder  args description time output  |
 	args := OrderedCollection with: 'install'. 
 	aModule ifNotNil: [ args add: aModule ].
 	description := Character space join: #(pipenv) , args.
 	time := Time millisecondClockValue.
-	proc := self newOneShotProcess.
-	proc
-		arguments: args;
-		errorBlock: [ self error: 'Unable to execute ' , description ].
-	proc runAndWait.
-	self assert: proc isSuccess.
+	builder := self newExternalProcessBuilder.
+	builder arguments: args.
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
 	self workingDirectory / 'install.log' writeStreamDo: [ :out |
 		out setToEnd.
 		(ZnNewLineWriterStream on: out) 
@@ -235,24 +233,22 @@ PBNewPharoPipenvProcess >> installModule: aModule in: aPBApplication [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedModules [
-	| proc |
-	proc := self newOneShotProcess.
-	proc arguments: #( 'graph' '--json' ).
-	proc errorBlock: [ self error: 'pipenv graph failed' ].
-	proc runAndWait.
-	self assert: proc isSuccess.
-	^ NeoJSONObject fromString: proc stdout
+	| builder output  |
+	builder := self newExternalProcessBuilder.
+	builder arguments: #( 'graph' '--json' ).
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
+	^ NeoJSONObject fromString: output stdout
 ]
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedModulesTree [
-	| proc |
-	proc := self newOneShotProcess.
-	proc arguments: #( 'graph' '--json-tree' ).
-	proc errorBlock: [ self error: 'pipenv graph failed' ].
-	proc runAndWait.
-	self assert: proc isSuccess.
-	^ NeoJSONObject fromString: proc stdout
+	| builder output  |
+	builder := self newExternalProcessBuilder.
+	builder arguments: #( 'graph' '--json-tree' ).
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
+	^ NeoJSONObject fromString: output stdout
 ]
 
 { #category : #utilities }
@@ -265,24 +261,22 @@ PBNewPharoPipenvProcess >> installedPythonBridgeVersion [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedPythonVersion [
-	| proc |
-	proc := self newOneShotProcess.
-	proc arguments: #( 'run' 'python' '-c' 'import sys;print(sys.version)' ).
-	proc errorBlock: [ self error: 'pipenv run python failed' ].
-	proc runAndWait.
-	self assert: proc isSuccess.
-	^ proc stdout lines first
+	| builder output  |
+	builder := self newExternalProcessBuilder.
+	builder arguments: #( 'run' 'python' '-c' 'import sys;print(sys.version)' ).
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
+	^ output stdout lines first
 ]
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> installedVirtualEnvironment [
-	| proc |
-	proc := self newOneShotProcess.
-	proc arguments: #( '--venv' ).
-	proc errorBlock: [ self error: 'pipenv --venv failed' ].
-	proc runAndWait.
-	self assert: proc isSuccess.
-	^ proc stdout lines first
+	| builder output  |
+	builder := self newExternalProcessBuilder.
+	builder arguments: #( '--venv' ).
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
+	^ output stdout lines first
 ]
 
 { #category : #testing }
@@ -312,33 +306,21 @@ PBNewPharoPipenvProcess >> linkGToolkitBridgePyPISources [
 ]
 
 { #category : #private }
-PBNewPharoPipenvProcess >> newBaseProcess [
-	| newProcess |
-	newProcess := GtSubprocessWithInMemoryOutput new
+PBNewPharoPipenvProcess >> newExternalProcessBuilder [
+	| builder |
+	builder := GtExternalProcessBuilder new
 			command: self pipenvPath fullName;
-			workingDirectory: self workingDirectory fullName;
-			addAllEnvVariablesFromParentWithoutOverride;
+			workingDirectory: self workingDirectory;
 			yourself.
-	^ newProcess
+	^ builder
 ]
 
 { #category : #private }
-PBNewPharoPipenvProcess >> newOneShotProcess [
-	^ self newBaseProcess
-		terminateOnShutdown;
-		yourself
-]
-
-{ #category : #private }
-PBNewPharoPipenvProcess >> newProcess [
+PBNewPharoPipenvProcess >> newPythonBridgeProcess [
 	| proc builder command args envVars |
 
-	builder := GtExternalProcessBuilder new.
-	args := self processArguments.
-	builder
-		command: self pipenvPath fullName;
-		workingDirectory: self workingDirectory fullName;
-		args: args.
+	builder := self newExternalProcessBuilder.
+	builder args: self processArguments.
 	command := builder createNativeCommand.
 	envVars := Dictionary new.
 	Smalltalk os environment asDictionary keysAndValuesDo: [ :key :value |
@@ -414,7 +396,7 @@ PBNewPharoPipenvProcess >> pythonBridgePackage [
 { #category : #'start-stop' }
 PBNewPharoPipenvProcess >> start [
 	started := false.
-	process := self newProcess.
+	process := self newPythonBridgeProcess.
 	self isDebuggerEnabled ifTrue: [ self startServerDebugger]
 ]
 
@@ -434,12 +416,12 @@ PBNewPharoPipenvProcess >> startServerDebugger [
 
 { #category : #accessing }
 PBNewPharoPipenvProcess >> stderr [
-	^ process stderr
+	^ "process stderr" 'stderr not yet implemented'
 ]
 
 { #category : #accessing }
 PBNewPharoPipenvProcess >> stdout [
-	^ process stdout 
+	^ "process stdout" 'stdout not yet implemented'
 ]
 
 { #category : #'start-stop' }
@@ -451,17 +433,15 @@ PBNewPharoPipenvProcess >> stop [
 
 { #category : #utilities }
 PBNewPharoPipenvProcess >> uninstallModule: aModule in: aPBApplication [
-	| proc args description time |
+	| builder  args description time output  |
 	args := OrderedCollection with: 'uninstall'. 
 	aModule ifNotNil: [ args add: aModule ].
 	description := Character space join: #(pipenv) , args.
 	time := Time millisecondClockValue.
-	proc := self newOneShotProcess.
-	proc
-		arguments: args;
-		errorBlock: [ self error: 'Unable to execute ' , description ].
-	proc runAndWait.
-	self assert: proc isSuccess.
+	builder := self newExternalProcessBuilder.
+	builder arguments: args.
+	output := self waitForProcessAsync: builder.
+	self assert: output status isSuccess.
 	self workingDirectory / 'install.log' writeStreamDo: [ :out |
 		out setToEnd.
 		(ZnNewLineWriterStream on: out) 
@@ -472,4 +452,18 @@ PBNewPharoPipenvProcess >> uninstallModule: aModule in: aPBApplication [
 			print: (Time millisecondsSince: time);
 			nextPutAll: 'ms';
 			cr ]
+]
+
+{ #category : #private }
+PBNewPharoPipenvProcess >> waitForProcessAsync: processBuilder [
+	"Run the native process described in processBuilder and wait for it to complete and produce output.
+	The output, an instance of GtNativeExternalProcessOutput, can be queried for its status, stdout and stderr.
+	This wait will block the current process but not the VM"
+
+	| nativeProcess |
+	processBuilder 
+		pipeStdout; 
+		pipeStderr.
+	nativeProcess := processBuilder spawn.
+	^ nativeProcess waitAsyncWithOutput
 ]
