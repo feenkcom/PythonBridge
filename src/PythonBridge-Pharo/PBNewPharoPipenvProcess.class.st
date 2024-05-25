@@ -322,8 +322,14 @@ PBNewPharoPipenvProcess >> linkGToolkitBridgePyPISources [
 { #category : #private }
 PBNewPharoPipenvProcess >> monitorProcess [
 	"This runs alongside the native process"
-	| status |
-	process waitForExitDoing: [ self pollStdoutAndStderr ].
+	| asynchronousStdout asynchronousStderr status |
+	stdoutStream := String new writeStream.
+	stderrStream := String new writeStream.
+	asynchronousStdout := process asynchronousStdout.
+	asynchronousStderr := process asynchronousStderr.
+	process waitForExitDoing: [
+		stdoutStream nextPutAll: asynchronousStdout pollString.
+		stderrStream nextPutAll: asynchronousStderr pollString ].
 	status := process ifNotNil: [ process tryWait ].
 	"Until #started has been confirmed by our application, errors here are considered related to startup.
 	Later on, we ignore errors here, we assume the external process died out of our control."
@@ -346,11 +352,11 @@ PBNewPharoPipenvProcess >> newPythonBridgeProcess [
 	| builder command |
 	builder := self newExternalProcessBuilder.
 	builder args: self processArguments.
-	command := builder createNativeCommand.
-	self copyEnvVarsTo: command.
 	builder
 		pipeStdout;
 		pipeStderr.
+	command := builder createNativeCommand.
+	self copyEnvVarsTo: command.
 	process := command spawn.
 	process terminateOnShutdown.
 	monitorProcess := [ self monitorProcess ] forkNamed: 'PythonBridge monitor'
@@ -362,13 +368,6 @@ PBNewPharoPipenvProcess >> pipenvPath [
 	This may be overridden by the application settings."
 
 	^ self settings pipenvPath ifNil: [ self class pipenvPath ]
-]
-
-{ #category : #private }
-PBNewPharoPipenvProcess >> pollStdoutAndStderr [
-	process ifNil: [ ^ self ].
-	stdoutStream nextPutAll: process asynchronousStdout pollString.
-	stderrStream nextPutAll: process asynchronousStderr pollString. 
 ]
 
 { #category : #printing }
