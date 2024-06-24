@@ -384,6 +384,7 @@ PBNewPharoPipenvProcess >> printOn: stream [
 PBNewPharoPipenvProcess >> processArguments [
 	| args |
 	args := OrderedCollection with: 'run' with: 'python'.
+	args add: '-u'.
 	self isDebuggerEnabled
 		ifTrue: [ 
 			args
