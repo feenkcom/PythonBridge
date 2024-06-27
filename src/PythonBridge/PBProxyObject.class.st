@@ -102,6 +102,7 @@ PBProxyObject >> doesNotUnderstand: aMessage [
 	3) If a keyword message is sent, we attempt to call a method on the python object with only the first keyword as the method name and all the arguments.
 	4) If any of this fails, we simply fall back to DNU 
 	"
+
 	| sel |
 	sel := aMessage selector.
 	[ | val method args |
@@ -110,7 +111,8 @@ PBProxyObject >> doesNotUnderstand: aMessage [
 			args := aMessage arguments.
 			^ self callMethod: method withArgs: args ]
 		ifFalse: [ val := self attributeAt: sel.
-			^ (val class == PBProxyObject and: [ val pythonClass = 'method' ])
+			^ ((val class == PBProxyObject or: [ val class inheritsFrom: PBProxyObject ])
+				and: [ val pythonClass = 'method' ])
 				ifTrue: [ self callMethod: sel ]
 				ifFalse: [ val ] ] ] on: Exception do: [  ].
 	^ super doesNotUnderstand: aMessage
