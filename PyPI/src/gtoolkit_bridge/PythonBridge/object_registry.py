@@ -17,8 +17,6 @@ class Registry():
         return anId in self.idToObjMap
     
     def register(self, obj):
-        if obj is None:
-            return 0
         if hex(id(obj)) in self.idToObjMap:
             self.idToRefCount[id(obj)] += 1
             return hex(id(obj))
@@ -53,8 +51,6 @@ class Registry():
         return is_proxy
 
     def proxy(self, obj):
-        if obj is None:
-            return obj
         return {
             '__pyclass__': self.qualifiedNameOf(type(obj)),
             '__pyid__': self.register(obj),
