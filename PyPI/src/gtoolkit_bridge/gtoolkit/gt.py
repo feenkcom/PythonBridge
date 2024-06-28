@@ -179,6 +179,15 @@ class GtViewedObject:
             .setString(str(self.object))
 
     @gtView
+    def gtViewNone(self, aBuilder):
+        if self.object is not None:
+            return aBuilder.empty()
+        return aBuilder.textEditor()\
+            .title("None")\
+            .priority(150)\
+            .setString("None")
+
+    @gtView
     def gtViewDict(self, aBuilder):
         if type(self.object) is not dict:
             return aBuilder.empty()
