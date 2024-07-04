@@ -22,7 +22,7 @@ PBPythonHandler >> exitCode [
 	^ process exitCode
 ]
 
-{ #category : #accessing }
+{ #category : #'gt extensions' }
 PBPythonHandler >> gtDetails [
 	^ super gtDetails , {
 		{ #process . process }
