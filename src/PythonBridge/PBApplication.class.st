@@ -164,8 +164,8 @@ PBApplication >> initialize [
 { #category : #initialization }
 PBApplication >> initializeHandlers [
 	loggingHandler := LanguageLinkLoggingHandler application: self.
-	communicationHandler := PBCommunicationHandler application: self.
 	processHandler := PBPythonHandler application: self.
+	communicationHandler := PBCommunicationHandler application: self.
 	executionHandler := PBExecutionHandler application: self
 ]
 
@@ -207,9 +207,9 @@ PBApplication >> printOn: aStream [
 			aStream << 'not running)'.
 			^ self ].
 	aStream
-		print: settings clientSocketAddress;
-		<< ', ';
 		print: settings serverSocketAddress;
+		<< ', ';
+		print: settings clientSocketAddress;
 		<< ')'
 ]
 

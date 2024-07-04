@@ -4,6 +4,17 @@ Class {
 	#category : #'PythonBridge-Execution'
 }
 
+{ #category : #'gt extensions' }
+PBExecutionHandler >> gtDetails [
+	^ super gtDetails , {
+		{ #commandQueue . commandQueue }.
+		{ #mapperFactory . mapperFactory }.
+		{ #promiseRegistry . promiseRegistry }.
+		{ #weakRegistry . weakRegistry }.
+		{ #objectRegistry . objectRegistry }.
+	}
+]
+
 { #category : #initialization }
 PBExecutionHandler >> initializeHandler [
 	commandQueue := LanguageLinkCommandRegistry new.
