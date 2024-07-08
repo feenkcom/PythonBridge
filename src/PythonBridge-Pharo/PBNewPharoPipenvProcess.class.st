@@ -37,6 +37,11 @@ PBNewPharoPipenvProcess >> applicationReady [
 	started := true
 ]
 
+{ #category : #accessing }
+PBNewPharoPipenvProcess >> completionLog [
+	^ self workingDirectory / 'complete.log'
+]
+
 { #category : #private }
 PBNewPharoPipenvProcess >> copyEnvVarsTo: command [
 	| envVars |
@@ -134,10 +139,10 @@ PBNewPharoPipenvProcess >> gtViewDetailsIn: composite [
 			{ 'started' . self hasStarted }.
 			{ 'working directory' . self workingDirectory }.
 			{ 'installation complete' 
-				. (self workingDirectory / 'complete.log') exists
-					ifTrue: [ 'yes @ ' , (self workingDirectory / 'complete.log') contents ]
+				. self completionLog exists
+					ifTrue: [ 'yes @ ' , self completionLog contents ]
 					ifFalse: [ 'no' ] }.
-			{ 'install log' . self workingDirectory / 'install.log' }.
+			{ 'install log' . self installLog }.
 			{ 'virtual environment' . self installedVirtualEnvironment asFileReference }.
 			{ 'python version' . self installedPythonVersion }.
 			{ 'python bridge version' 
@@ -220,6 +225,11 @@ PBNewPharoPipenvProcess >> initialize [
 	stdoutStream := String new writeStream.
 	stderrStream := String new writeStream.
 	started := false
+]
+
+{ #category : #accessing }
+PBNewPharoPipenvProcess >> installLog [
+	^ self workingDirectory / 'install.log'
 ]
 
 { #category : #utilities }

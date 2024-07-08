@@ -82,6 +82,11 @@ PBPythonHandler >> platform [
 ]
 
 { #category : #accessing }
+PBPythonHandler >> process [
+	^ process
+]
+
+{ #category : #accessing }
 PBPythonHandler >> pythonBridgePackage [
 	^ process pythonBridgePackage
 ]
