@@ -22,6 +22,11 @@ PBMethodObject >> file [
 		yourself
 ]
 
+{ #category : #'as yet unclassified' }
+PBMethodObject >> gtPhlowIncludesCompiledMethod: aCompiledMethod [ 
+	^ false
+]
+
 { #category : #accessing }
 PBMethodObject >> gtSourceFor: aView [
 	<gtView>
