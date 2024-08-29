@@ -2,9 +2,6 @@ from .phlow.view_builder import ViewBuilder
 from .phlow.view_error import ErrorView
 
 
-generator_cls = type(x for x in range(1))
-
-
 def gtView(func):
     setattr(func, "gtView", True)
     return func
@@ -119,7 +116,7 @@ class GtViewedObject:
 
     @gtView
     def gtViewList(self, aBuilder):
-        if type(self.object) not in [list, generator_cls]:
+        if type(self.object) is not list:
             return aBuilder.empty()
         return aBuilder.list()\
             .title("Items")\
