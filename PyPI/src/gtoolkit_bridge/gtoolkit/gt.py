@@ -119,7 +119,7 @@ class GtViewedObject:
 
     @gtView
     def gtViewList(self, aBuilder):
-        if type(self.object) is not in [list, generator_cls]:
+        if type(self.object) not in [list, generator_cls]:
             return aBuilder.empty()
         return aBuilder.list()\
             .title("Items")\
