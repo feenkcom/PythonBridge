@@ -123,7 +123,7 @@ PBObject >> newCommandFactory [
 { #category : #'instance creation' }
 PBObject >> newCommandStringFactory [
 
-	^ self application newCommandFactory
+	^ self application newCommandStringFactory
 ]
 
 { #category : #'instance creation' }
