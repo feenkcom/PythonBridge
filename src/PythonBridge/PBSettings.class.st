@@ -47,7 +47,7 @@ PBSettings >> gtDeleteActionFor: anAction [
 
 { #category : #accessing }
 PBSettings >> manualCommand [
-	^ 'python start_bridge.py --port {1} --pharo {2} --method {3}{4}' 
+	^ 'pipenv run python -m gtoolkit_bridge --port {1} --pharo {2} --method {3}{4}' 
 		format: { 
 			self serverSocketAddress port . 
 			self clientSocketAddress port .
