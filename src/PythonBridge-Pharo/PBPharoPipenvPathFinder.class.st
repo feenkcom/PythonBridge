@@ -39,16 +39,14 @@ PBPharoPipenvPathFinder class >> extraPathNonWindows [
 PBPharoPipenvPathFinder class >> macOSSearchPath [
 	"Try starting a login shell to pick up a wider PATH"
 
-	| shell envOutput env pathValue |
+	| shell envOutput pathValue |
 	shell := Smalltalk os environment at: 'SHELL' ifAbsent: [ ^ #() ].
 	envOutput := (GtExternalProcessBuilder new
 			command: shell;
-			args: #('-l' '-c' 'env');
+			args: #('-l' '-c' 'env | grep -E ''^PATH=''');
 			output) stdoutString.
-	env := (envOutput lines
-			collect: [ :line | ($= split: line) in: [ :parts | parts first -> parts second ] ])
-			asDictionary.
-	pathValue := env at: #PATH ifAbsent: [ ^ #() ].
+	envOutput isEmpty ifTrue: [ ^ #() ].
+	pathValue := ($= split: envOutput lines first) second.
 	^ $: split: pathValue
 ]
 
