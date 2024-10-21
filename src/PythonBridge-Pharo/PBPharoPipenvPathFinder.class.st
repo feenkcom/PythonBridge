@@ -36,6 +36,23 @@ PBPharoPipenvPathFinder class >> extraPathNonWindows [
 ]
 
 { #category : #accessing }
+PBPharoPipenvPathFinder class >> macOSSearchPath [
+	"Try starting a login shell to pick up a wider PATH"
+
+	| shell envOutput env pathValue |
+	shell := Smalltalk os environment at: 'SHELL' ifAbsent: [ ^ #() ].
+	envOutput := (GtExternalProcessBuilder new
+			command: shell;
+			args: #('-l' '-c' 'env');
+			output) stdoutString.
+	env := (envOutput lines
+			collect: [ :line | ($= split: line) in: [ :parts | parts first -> parts second ] ])
+			asDictionary.
+	pathValue := env at: #PATH ifAbsent: [ ^ #() ].
+	^ $: split: pathValue
+]
+
+{ #category : #accessing }
 PBPharoPipenvPathFinder class >> pipenvPath [
 	^ PipenvPath
 		ifNil: [ PipenvPath := self resolvePipenvPath ]
@@ -59,24 +76,25 @@ PBPharoPipenvPathFinder class >> resolvePipenvPath [
 			command: (Smalltalk os isWindows ifTrue: [ 'where' ] ifFalse: [ 'which' ]);
 			arg: 'pipenv'.
 	Smalltalk os isWindows
-		ifFalse: [ | originalPath extendedPath |
+		ifFalse: [ | originalPath extendedPath newPath |
 			originalPath := $: split: (Smalltalk os environment at: 'PATH').
-			extendedPath := $: join: self extraPathNonWindows , originalPath.
-			builder env: 'PATH' value: extendedPath ].
+			extendedPath := self extraPathNonWindows , originalPath.
+			Smalltalk os isMacOS
+				ifTrue: [ extendedPath := self macOSSearchPath , extendedPath ].
+			newPath := $: join: extendedPath.
+			builder env: 'PATH' value: newPath ].
 	output := builder output.
-	output status isSuccess
-		ifFalse: [ ^ self signalPipenvNotFound ].
+	output status isSuccess ifFalse: [ ^ self signalPipenvNotFound ].
 	path := output stdout trimBoth.
 	^ Smalltalk os isWindows
-		ifTrue: [ | lines | 
+		ifTrue: [ | lines |
 			lines := path lines
 					collect: [ :line | line trimBoth asFileReference ]
 					thenSelect: [ :each | #(bat exe) includes: each extension asLowercase ].
 			lines
 				ifEmpty: [ self signalPipenvNotFound ]
 				ifNotEmpty: [ :anArray | anArray first ] ]
-		ifFalse: [
-			path 
+		ifFalse: [ path
 				ifEmpty: [ self signalPipenvNotFound ]
 				ifNotEmpty: [ path asFileReference ] ]
 ]
