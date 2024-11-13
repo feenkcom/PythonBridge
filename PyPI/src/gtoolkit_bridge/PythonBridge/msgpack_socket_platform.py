@@ -25,12 +25,16 @@ class MsgPackSocketPlatform:
         self.packer = msgpack.Packer(use_bin_type=True)
         self.sync_table = {}
         self.async_handlers = {}
-    
+        self.bind_interface = 'localhost'
+
     def addMapping(self, key_type, mapping_function):
         msgpack_serializer_addMapping(key_type, mapping_function)
 
     def set_handler(self, msg_type, async_handler):
         self.async_handlers[msg_type] = async_handler
+
+    def bind_any_interface(self):
+        self.bind_interface = ''
 
     def prim_handle(self):
         try:
@@ -55,7 +59,7 @@ class MsgPackSocketPlatform:
 
     def setup_func(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind(('localhost', self.port))
+        self.server.bind((self.bind_interface, self.port))
         self.server.listen()
         
     def getConnection(self):
