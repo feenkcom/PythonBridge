@@ -149,11 +149,13 @@ def parse_bridge_cmd_line_args():
                     help="identifier for communication protocol strategy http or msgpack")
     ap.add_argument("--log", required=False, const=True, nargs="?",
                     help="enable logging")
+    ap.add_argument("--bind-any-interface", required=False, const=True, nargs="?",
+                    help="bind socket server to any interface instead of just localhost")
     return vars(ap.parse_args())
 
 
 def bridge_args():
-    return {'port': 9099, 'pharo': 0, 'method': 'msgpack', 'log': True}
+    return {'port': 9099, 'pharo': 0, 'method': 'msgpack', 'log': True, 'bind_any_interface': False}
 
 
 def setup_bridge(args):
@@ -177,6 +179,8 @@ def setup_bridge(args):
     elif args["method"] == 'msgpack':
         from .msgpack_socket_platform import build_service
         msg_service = build_service(int(args["port"]), int(args["pharo"]), enqueue_command)
+        if args["bind_any_interface"]:
+            msg_service.bind_any_interface()
     else:
         raise Exception("Invalid communication strategy.")
     bridge_globals()['msg_service'] = msg_service
