@@ -14,7 +14,7 @@ PBPharoPlatform class >> httpMessageBrokerClass [
 
 { #category : #hooks }
 PBPharoPlatform class >> manualProcessClass [
-	^ LanguageLinkManualProcess
+	^ PBPharoManualProcess
 ]
 
 { #category : #hooks }
