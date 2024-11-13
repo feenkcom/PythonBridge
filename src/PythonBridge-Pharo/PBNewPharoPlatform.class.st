@@ -19,7 +19,7 @@ PBNewPharoPlatform class >> httpMessageBrokerClass [
 
 { #category : #hooks }
 PBNewPharoPlatform class >> manualProcessClass [
-	^ LanguageLinkManualProcess
+	^ PBPharoManualProcess
 ]
 
 { #category : #hooks }
