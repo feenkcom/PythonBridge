@@ -8,6 +8,7 @@ from .object_registry import registry
 from .bridge_utils import log_msg
 from .bridge_hooks import notify, notify_observer, notify_error
 from .bridge_hooks import serialize, deserialize, observer
+from .stoppable_thread import StoppableThread
 
 
 def pbbreak():
@@ -72,7 +73,7 @@ class PythonCommandList:
     listLock = threading.Lock()
     consumeSemaphore = threading.Semaphore(value=0)
 
-    # This method locks the thread until the command has been succesfully appended to the list. Even though that it
+    # This method locks the thread until the command has been successfully appended to the list. Even though that it
     # has a lock inside, we do not expect long waiting time.
     def push_command(self, aCommand):
         self.listLock.acquire()
@@ -95,6 +96,7 @@ class PythonCommandList:
         self.currentCommandIndex = len(self.commandList)
         self.listLock.release()
 
+    # wait/block until a command becomes available
     def consume_command(self):
         repeatMonitorFlag = True
         while repeatMonitorFlag:
@@ -108,6 +110,19 @@ class PythonCommandList:
         self.currentCommandIndex += 1
         self.listLock.release()
         return command
+
+    # wait at most 5s for a command to become available, can return None
+    def consume_command_1(self):
+        self.consumeSemaphore.acquire(timeout=5)
+        self.listLock.acquire()
+        if self.currentCommandIndex < len(self.commandList):
+            command = self.commandList[self.currentCommandIndex]
+            self.currentCommandIndex += 1
+            self.listLock.release()
+            return command
+        else:
+            self.listLock.release()
+            return None
 
     def get_current_command(self):
         if self.currentCommandIndex == 0:
@@ -186,6 +201,44 @@ def setup_bridge(args):
     bridge_globals()['msg_service'] = msg_service
 
 
+def spawned_bridge_setup_func():
+    bridge_globals()['msg_service'].start()
+    bridge_globals()['cmd_list'] = PythonCommandList()
+    log_stderr_flush("PythonBridge ready")
+
+
+def spawned_bridge_loop_func():
+    globalCommandList = bridge_globals()['cmd_list']
+    env = dict(globals())
+    command = globalCommandList.consume_command_1()
+    if command is not None:
+        log_msg("PYTHON: Executing command " + command.command_id())
+        log_msg("PYTHON: bindings: " + str(command.bindings))
+        log_msg("PYTHON: " + command.statements)
+        command.execute_using_env(env)
+        log_msg("PYTHON: Finished command execution")
+
+
+# stop a spawned bridge
+def stop_spawned_bridge():
+    bridge_globals()['msg_service'].stop()
+    thread = bridge_globals()['spawned_bridge_thread']
+    thread.stop()
+
+
+# run the bridge as set up before
+# this spawns a new thread and returns
+def spawn_bridge():
+    thread = StoppableThread(
+        loop_func=spawned_bridge_loop_func,
+        setup_func=spawned_bridge_setup_func)
+    thread.start()
+    bridge_globals()['spawned_bridge_thread'] = thread
+    return thread
+
+
+# run the bridge as set up before
+# this blocks as it starts
 def run_bridge():
     bridge_globals()['msg_service'].start()
 
@@ -205,6 +258,7 @@ def run_bridge():
         log_msg("PYTHON: Finished command execution")
 
 
+# run the default config
 def run_bridge_default():
     log_stderr_flush("PythonBridge starting")
 
@@ -217,6 +271,7 @@ def run_bridge_default():
     run_bridge()
 
 
+# parse command line args and run the gtoolkit_bridge, the default main
 def run_bridge_main():
     log_stderr_flush("PythonBridge starting")
 
