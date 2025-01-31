@@ -49,11 +49,9 @@ class MsgPackSocketPlatform:
                 for msg in self.unpacker:
                     log_msg("HANDLER (MsgPackSocketPlatform): prim handle message")
                     self.prim_handle_msg(msg)
-        except OSError:
+        except OSError as err:
             log_msg("HANDLER (MsgPackSocketPlatform): OSError " + str(err))
             self.stop()
-            sys.exit()
-            exit(-1)
         except Exception as err:
             log_msg("HANDLER (MsgPackSocketPlatform): ERROR " + str(err))
 

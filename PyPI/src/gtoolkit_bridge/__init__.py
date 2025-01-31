@@ -3,7 +3,9 @@ from .PythonBridge.python_bridge import (
 	setup_bridge, 
 	run_bridge, 
 	run_bridge_default, 
-	run_bridge_main
+	run_bridge_main,
+	spawn_bridge,
+	stop_spawned_bridge
 )
 
 from .gtoolkit.gt import (
