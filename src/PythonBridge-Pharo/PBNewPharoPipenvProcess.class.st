@@ -176,7 +176,7 @@ PBNewPharoPipenvProcess >> gtViewInstalledModulesIn: composite [
 		column: #name text: [ :each | each at: #package_name ];
 		column: #version text: [ :each | each at: #installed_version ];
 		actionStencil: [ :aTab | | aptitude |
-			aptitude := BrGlamorousWithDropdownAptitude
+			aptitude := BrGlamorousWithExplicitDropdownAptitude
 				handle: [
 					BrButton new
 						aptitude: BrGlamorousButtonWithIconAptitude;
