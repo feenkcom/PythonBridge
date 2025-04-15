@@ -9,6 +9,18 @@ PBMethodObject class >> pythonClass [
 	^'method'
 ]
 
+{ #category : #ui }
+PBMethodObject >> asBrMenuWithSelfObjectHolder: aSelfObjectHolder [
+	^ BrMenuExplicit new
+		stencil: [ :aMenuModel | 
+			| aCoderElement |
+			aCoderElement := (self gtSourceFor: GtPhlowView empty)
+				asElementDo: [ :e | e ].
+			aCoderElement addAptitude: (BrGlamorousPopoverDefiningMethodAptitude new
+		menuModel: aMenuModel).
+			aCoderElement ]
+]
+
 { #category : #accessing }
 PBMethodObject >> file [
 	| filename model |
@@ -22,7 +34,7 @@ PBMethodObject >> file [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #ui }
 PBMethodObject >> gtPhlowIncludesCompiledMethod: aCompiledMethod [ 
 	^ false
 ]
