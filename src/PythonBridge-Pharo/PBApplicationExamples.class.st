@@ -48,12 +48,11 @@ PBApplicationExamples class >> stopPBApplication [
 PBApplicationExamples >> additionInPython [
 	<gtExample>
 	<after: #stopServer>
-
+	<return: #PBApplicationExamples>
 	| x y pythonSum |
-	
 	x := 100 atRandom.
 	y := 100 atRandom.
-	
+
 	pythonSum := self runningServer newCommandFactory
 			<< (P3GBinaryOperator new
 					left: x;
@@ -61,7 +60,7 @@ PBApplicationExamples >> additionInPython [
 					operator: $+;
 					yourself);
 			sendAndWait.
-	
+
 	self assert: pythonSum equals: x + y
 ]
 
@@ -69,15 +68,15 @@ PBApplicationExamples >> additionInPython [
 PBApplicationExamples >> runningServer [
 	<gtExample>
 	<after: #stopServer>
-	
+	<return: #PBApplication>
 	server ifNotNil: [ ^ server ].
-	
+
 	server := PBApplication new.
-	
+
 	server start.
-	
+
 	self assert: server isRunning.
-	
+
 	^ server
 ]
 
@@ -85,15 +84,14 @@ PBApplicationExamples >> runningServer [
 PBApplicationExamples >> sortingInPython [
 	<gtExample>
 	<after: #stopServer>
-
+	<return: #PBApplicationExamples>
 	| numbers pythonSorted |
-	
 	numbers := (1 to: 10) collect: [ :_ | 100 atRandom ].
-	
+
 	pythonSorted := self runningServer newCommandFactory
-			<< (#sorted callWith: { numbers });
+			<< (#sorted callWith: {numbers});
 			sendAndWait.
-	
+
 	self assert: pythonSorted equals: numbers sorted
 ]
 
