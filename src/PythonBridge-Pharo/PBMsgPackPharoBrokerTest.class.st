@@ -28,9 +28,7 @@ PBMsgPackPharoBrokerTest >> assertCommunicationError: aBlock [
 { #category : #running }
 PBMsgPackPharoBrokerTest >> buildAndStartStubServer [
 	serverSocket := LanguageLinkMsgPackUtils serverSocketOn: broker port.
-	stubThread := [ bindSocket := serverSocket
-				waitForAcceptFor: 10000
-				ifTimedOut: [ nil ].
+	stubThread := [ bindSocket := serverSocket waitForAcceptFor: 10000.
 		stubStream := SocketStream on: bindSocket.
 		stubStream := LanguageLinkMsgPackSocketStream on: stubStream.
 		[ true ] whileTrue: [ self stubPrimHandle: stubStream next ] ]
