@@ -435,13 +435,15 @@ PBNewPharoPipenvProcess >> startServerDebugger [
 	"Start the debugger, tell the server to run and set up inspection on halt"
 
 	"Give the server some time to start"
+
 	1 second wait.
-	serverDebugger := DAPPythonDebugger new 
-		localRoot: self workingDirectory;
-		connectTo: #[127 0 0 1] port: self settings debugSocketAddress port.
-	serverDebugger announcer 
-		when: DAPThreadStateChanged 
+	serverDebugger := DAPPythonDebugger new
+			localRoot: self workingDirectory;
+			connectTo: #[127 0 0 1] port: self settings debugSocketAddress port.
+	serverDebugger announcer
+		when: DAPThreadStateChanged
 		do: [ :announcement | self debuggerStateChangedAction: announcement ]
+		for: self
 ]
 
 { #category : #accessing }
