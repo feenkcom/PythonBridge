@@ -9,6 +9,7 @@ from .bridge_utils import log_msg
 from .bridge_hooks import notify, notify_observer, notify_error
 from .bridge_hooks import serialize, deserialize, observer
 from .stoppable_thread import StoppableThread
+from .gt_python_exception import GtPythonException
 
 
 def pbbreak():
@@ -32,7 +33,8 @@ class EvalCommand:
             env.update(self.bindings)
             exec(self.statements, env)
         except Exception as err:
-            self.perform_proceed_action(notify_error(err, self))
+            gterr = GtPythonException(*sys.exc_info())
+            self.perform_proceed_action(notify_error(err, self, gterr.as_dict()))
 
     def perform_proceed_action(self, actionDict):
         actionSymbol = actionDict['action']
