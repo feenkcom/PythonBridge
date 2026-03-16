@@ -34,7 +34,7 @@ class EvalCommand:
             exec(self.statements, env)
         except Exception as err:
             gterr = GtPythonException(*sys.exc_info())
-            self.perform_proceed_action(notify_error(err, self, gterr.as_dict()))
+            self.perform_proceed_action(notify_error(err, self, gterr.as_dict(), self.statements))
 
     def perform_proceed_action(self, actionDict):
         actionSymbol = actionDict['action']

@@ -30,7 +30,7 @@ def notify_observer(obj, commandId, observerId):
 	rawValue = bridge_globals()['msg_service'].send_sync_message(data)['value']
 	return deserialize(rawValue)
 
-def notify_error(ex, command, exception_dict):
+def notify_error(ex, command, exception_dict, script):
 	bridge_globals()['logger'].log("Error on command: " + str(command.command_id()))
 	bridge_globals()['logger'].log("Exception: " + str(ex))
 	data = {}
@@ -39,6 +39,7 @@ def notify_error(ex, command, exception_dict):
 	data["trace"] = traceback.format_exc(100)
 	data["commandId"] = command.command_id()
 	data["exceptionData"] = exception_dict
+	data["script"] = str(script)
 	return bridge_globals()['msg_service'].send_sync_message(data)
 
 def bridge_inspect(obj):
