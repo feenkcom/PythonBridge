@@ -73,7 +73,7 @@ def gtTrace(func):
         funcName = func.__name__
         funcArgNames = inspect.getfullargspec(func).args
         funcArgs = [(name, copy(value)) for name, value in zip(funcArgNames, args)]
-        if (funcArgNames[0] == 'self'):
+        if (len(funcArgNames) > 0 and funcArgNames[0] == 'self'):
             receiver = args[0]
             funcArgs = funcArgs[1:]
         else:
