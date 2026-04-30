@@ -45,13 +45,12 @@ PBBridgeBootstrap >> create [
 	self createFiles.
 ]
 
-{ #category : #'create classes' }
+{ #category : #creation }
 PBBridgeBootstrap >> createApplication [
 	| cls |
-	cls := PBApplication subclass: self applicationName
-				instanceVariableNames: ''
-				classVariableNames: ''
-				package: packageName.
+	cls := ((PBApplication << self applicationName)
+		slots: {};
+		package: packageName) install.
 	cls compile: 
 'commandFactory
 	^ ' , self commandFactoryName.
@@ -61,13 +60,12 @@ PBBridgeBootstrap >> createApplication [
 	'
 ]
 
-{ #category : #'create classes' }
+{ #category : #creation }
 PBBridgeBootstrap >> createCF [
 	| cls |
-	cls := PBCF subclass: self commandFactoryName
-				instanceVariableNames: ''
-				classVariableNames: ''
-				package: packageName.
+	cls := ((PBCF << self commandFactoryName)
+		slots: {};
+		package: packageName) install.
 	cls class compile: 
 'applicationClass
 	^ ' , self applicationName
@@ -91,13 +89,12 @@ PBBridgeBootstrap >> createFiles [
 	PBApplication repositoryFileReference / 'install_env.sh' copyTo: folder / 'install_env.sh'.
 ]
 
-{ #category : #'create classes' }
+{ #category : #creation }
 PBBridgeBootstrap >> createObject [
 	| cls |
-	cls := PBObject subclass: self objectName
-				instanceVariableNames: ''
-				classVariableNames: ''
-				package: packageName.
+	cls := ((PBObject << self objectName)
+		slots: {};
+		package: packageName) install.
 	cls compile: 
 'applicationClass
 	^ ' , self applicationName
@@ -114,13 +111,12 @@ PBBridgeBootstrap >> createRepository [
 	repo workingCopy addPackageNamed: self packageName
 ]
 
-{ #category : #'create classes' }
+{ #category : #creation }
 PBBridgeBootstrap >> createTestCase [
 	| cls |
-	cls := PBTestCase subclass: self testCaseName
-				instanceVariableNames: ''
-				classVariableNames: ''
-				package: packageName.
+	cls := ((PBTestCase << self testCaseName)
+		slots: {};
+		package: packageName) install.
 	cls compile: 
 'applicationClass
 	^ ' , self applicationName.
@@ -129,13 +125,12 @@ PBBridgeBootstrap >> createTestCase [
 	^ ' , self testResourceName
 ]
 
-{ #category : #'create classes' }
+{ #category : #creation }
 PBBridgeBootstrap >> createTestResource [
 	| cls |
-	cls := PBApplicationTestResource subclass: self testResourceName
-				instanceVariableNames: ''
-				classVariableNames: ''
-				package: packageName.
+	cls := ((PBApplicationTestResource << self testResourceName)
+		slots: {};
+		package: packageName) install.
 	cls compile: 
 'applicationClass
 	^ ' , self applicationName
