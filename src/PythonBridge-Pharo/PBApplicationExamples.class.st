@@ -22,7 +22,7 @@ PBApplicationExamples class >> approximatePiInPython [
 				yourself);
 		sendAndWait.
 		
-	self assert: (approximatedPi closeTo: Float pi).
+	self assert: (approximatedPi closeTo: Float pi precision: 0.0001).
 	
 	^ approximatedPi
 ]
